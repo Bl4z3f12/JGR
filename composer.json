@@ -1,0 +1,13 @@
+{
+    "name": "akram/project",
+    "autoload": {
+        "psr-4": {
+            "Akram\\Project\\": "src/"
+        }
+    },
+    "require": {
+        "picqer/php-barcode-generator": "^3.2",
+        "tecnickcom/tcpdf": "^6.9",
+        "setasign/fpdf": "^1.8"
+    }
+}
