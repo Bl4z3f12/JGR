@@ -2,7 +2,7 @@
 require_once __DIR__ . '/vendor/autoload.php'; // For FPDF and Barcode Generator
 
 use Picqer\Barcode\BarcodeGeneratorPNG;
-use FPDF;
+$pdf = new FPDF();
 
 // Initialize variables
 $current_view = $_GET['view'] ?? 'dashboard';
@@ -138,6 +138,16 @@ function getRandomButtonScript() {
     SCRIPT;
 }
 
+// Helper function to format barcode name with optional category
+function formatBarcodeString($of_number, $size, $category, $piece_name, $number) {
+    // If category is empty, don't include it in the barcode string
+    if (empty($category)) {
+        return "$of_number-$size-$piece_name-$number";
+    } else {
+        return "$of_number-$size-$category-$piece_name-$number";
+    }
+}
+
 // Handle barcode creation and PDF generation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'create_barcode') {
     $of_number = $_POST['barcode_prefix'] ?? '';
@@ -154,7 +164,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
 
     if (!$of_number) $errors[] = "OF number is required";
     if ($size <= 0) $errors[] = "Size must be positive";
-    if (!$category) $errors[] = "Category is required";
     
     // Only validate piece name if not generating multiple pieces
     if (!$generate_costume_2pcs && !$generate_costume_3pcs && !$piece_name) {
@@ -211,7 +220,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
                 for ($i = 0; $i < $lost_barcode_count; $i++) {
                     // Add "X" before the number for lost barcodes
                     $formatted_number = "X" . $lost_barcode_number;
-                    $full_barcode_name = "$of_number-$size-$category-$piece_name-$formatted_number";
+                    $full_barcode_name = formatBarcodeString($of_number, $size, $category, $piece_name, $formatted_number);
                     
                     // Insert into database
                     if (!$generate_pdf_only) {
@@ -246,7 +255,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
                 foreach ($pieces as $current_piece) {
                     // For each number in the range
                     for ($i = $range_from; $i <= $range_to; $i++) {
-                        $full_barcode_name = "$of_number-$size-$category-$current_piece-$i";
+                        $full_barcode_name = formatBarcodeString($of_number, $size, $category, $current_piece, $i);
                         
                         // Insert into database only if not PDF-only mode
                         if (!$generate_pdf_only) {
@@ -275,7 +284,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
                 $range_to = (int)$_POST['range_to'];
                 
                 for ($i = $range_from; $i <= $range_to; $i++) {
-                    $full_barcode_name = "$of_number-$size-$category-$piece_name-$i";
+                    $full_barcode_name = formatBarcodeString($of_number, $size, $category, $piece_name, $i);
                     
                     // Insert into database only if not PDF-only mode
                     if (!$generate_pdf_only) {
@@ -396,7 +405,7 @@ $random_button_script = getRandomButtonScript();
                     <a href="?view=<?php echo $current_view; ?>&modal=create" class="btn-create">
                         <span><i class="fa-solid fa-gears"></i></span> Create New Barcodes
                     </a>
-                    <a href="barcodes/" class="btn-create" id="open-path-btn">
+                    <a href="pdf.php" class="btn-create" id="open-path-btn">
                             <span><i class="fa-solid fa-folder-open"></i></span> Open Path
                     </a>
                 </div>
