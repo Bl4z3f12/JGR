@@ -70,6 +70,74 @@ function getViewTitle($view) {
     };
 }
 
+// Helper function to place a barcode in the PDF
+function placeBarcodeInPdf($generator, $pdf, $full_barcode_name, $col, $row, $cellWidth, $cellHeight, 
+                         $barcodeWidth, $barcodeHeight, $topSpacing, $fontSize, $pageWidth, $colsPerPage, $rowsPerPage) {
+    // Generate barcode image
+    $barcodeImage = $generator->getBarcode($full_barcode_name, $generator::TYPE_CODE_128);
+    $barcodePath = __DIR__ . "/barcodes/tmp_$full_barcode_name.png";
+    file_put_contents($barcodePath, $barcodeImage);
+    
+    // Calculate positions
+    $x = $col * $cellWidth;
+    $y = $row * $cellHeight;
+    
+    // Center the barcode in the cell and add the top spacing
+    $barcodeX = $x + (($cellWidth - $barcodeWidth) / 2);
+    $barcodeY = $y + $topSpacing + ($cellHeight / 2) - ($barcodeHeight / 2) - 5;
+    
+    // Add barcode image
+    $pdf->Image($barcodePath, $barcodeX, $barcodeY, $barcodeWidth, $barcodeHeight);
+    
+    // Add barcode text below the image
+    $pdf->SetFont('Arial', '', $fontSize);
+    $textY = $barcodeY + $barcodeHeight + 2;
+    $pdf->SetXY($x, $textY);
+    $pdf->Cell($cellWidth, 5, $full_barcode_name, 0, 0, 'C');
+    
+    // Draw vertical lines (except after the last column)
+    if ($col < $colsPerPage - 1) { 
+        $lineX = $x + $cellWidth;
+        $pdf->Line($lineX, $y, $lineX, $y + $cellHeight);
+    }
+    
+    // Draw horizontal lines (except after the last row)
+    if ($row < $rowsPerPage - 1) {
+        $lineY = $y + $cellHeight;
+        $pdf->Line(0, $lineY, $pageWidth, $lineY);
+    }
+    
+    // Clean up temporary file
+    unlink($barcodePath);
+    
+    // Move to next position and return updated column
+    $col++;
+    if ($col >= $colsPerPage) {
+        $col = 0;
+    }
+    
+    return $col;
+}
+
+// Add JavaScript for handling the "Random" functionality
+function getRandomButtonScript() {
+    return <<<SCRIPT
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Find the Random icon and make it clickable
+        const randomIcon = document.querySelector('.fa-arrows-rotate');
+        if (randomIcon) {
+            randomIcon.parentElement.style.cursor = 'pointer';
+            randomIcon.parentElement.addEventListener('click', function() {
+                // Since we removed the field, just show a small notification that a random number will be generated
+                alert('A random number will be generated for the lost barcode when you submit the form.');
+            });
+        }
+    });
+    </script>
+    SCRIPT;
+}
+
 // Handle barcode creation and PDF generation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'create_barcode') {
     $of_number = $_POST['barcode_prefix'] ?? '';
@@ -78,15 +146,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
     $piece_name = $_POST['barcode_piece_name'] ?? '';
     $form_view = $_POST['view'] ?? 'dashboard';
     $is_lost_barcode = isset($_POST['lost_barcode']);
+    $generate_costume_2pcs = isset($_POST['generate_costume_2pcs']);
+    $generate_costume_3pcs = isset($_POST['generate_costume_3pcs']);
+    $generate_pdf_only = isset($_POST['generate_pdf_only']);
 
     $errors = [];
 
     if (!$of_number) $errors[] = "OF number is required";
     if ($size <= 0) $errors[] = "Size must be positive";
     if (!$category) $errors[] = "Category is required";
-    if (!$piece_name) $errors[] = "Piece name is required";
     
-    // Different validation based on lost barcode mode
+    // Only validate piece name if not generating multiple pieces
+    if (!$generate_costume_2pcs && !$generate_costume_3pcs && !$piece_name) {
+        $errors[] = "Piece name is required";
+    }
+    
+    // Different validation based on modes
     if ($is_lost_barcode) {
         $lost_barcode_count = (int)($_POST['lost_barcode_count'] ?? 1);
         
@@ -124,7 +199,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
             $col = 0;
             $row = 0;
             
-            // Process differently based on lost barcode mode
+            // Process differently based on mode
             if ($is_lost_barcode) {
                 // Generate user-specified quantity of lost barcodes with 'X' prefix
                 $lost_barcode_count = (int)($_POST['lost_barcode_count'] ?? 1);
@@ -138,52 +213,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
                     $formatted_number = "X" . $lost_barcode_number;
                     $full_barcode_name = "$of_number-$size-$category-$piece_name-$formatted_number";
                     
-                    // Insert into database - removed status and stage fields
-                    $stmt = $conn->prepare("INSERT INTO barcodes (of_number, size, category, piece_name, order_str, full_barcode_name) VALUES (?, ?, ?, ?, ?, ?)");
-                    $stmt->bind_param("sissss", $of_number, $size, $category, $piece_name, $formatted_number, $full_barcode_name);
-                    $stmt->execute();
-                    
-                    // Generate barcode image
-                    $barcodeImage = $generator->getBarcode($full_barcode_name, $generator::TYPE_CODE_128);
-                    $barcodePath = __DIR__ . "/barcodes/tmp_$full_barcode_name.png";
-                    file_put_contents($barcodePath, $barcodeImage);
-                    
-                    // Calculate positions
-                    $x = $col * $cellWidth;
-                    $y = $row * $cellHeight;
-                    
-                    // Center the barcode in the cell and add the top spacing
-                    $barcodeX = $x + (($cellWidth - $barcodeWidth) / 2);
-                    $barcodeY = $y + $topSpacing + ($cellHeight / 2) - ($barcodeHeight / 2) - 5;
-                    
-                    // Add barcode image
-                    $pdf->Image($barcodePath, $barcodeX, $barcodeY, $barcodeWidth, $barcodeHeight);
-                    
-                    // Add barcode text below the image
-                    $pdf->SetFont('Arial', '', $fontSize);
-                    $textY = $barcodeY + $barcodeHeight + 2;
-                    $pdf->SetXY($x, $textY);
-                    $pdf->Cell($cellWidth, 5, $full_barcode_name, 0, 0, 'C');
-                    
-                    // Draw vertical lines (except after the last column)
-                    if ($col < $colsPerPage - 1) { 
-                        $lineX = $x + $cellWidth;
-                        $pdf->Line($lineX, $y, $lineX, $y + $cellHeight);
+                    // Insert into database
+                    if (!$generate_pdf_only) {
+                        $stmt = $conn->prepare("INSERT INTO barcodes (of_number, size, category, piece_name, order_str, full_barcode_name, status, stage) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL)");
+                        $stmt->bind_param("sissss", $of_number, $size, $category, $piece_name, $formatted_number, $full_barcode_name);
+                        $stmt->execute();
                     }
                     
-                    // Draw horizontal lines (except after the last row)
-                    if ($row < $rowsPerPage - 1) {
-                        $lineY = $y + $cellHeight;
-                        $pdf->Line(0, $lineY, $pageWidth, $lineY);
-                    }
+                    // Generate and place barcode in PDF
+                    $col = placeBarcodeInPdf($generator, $pdf, $full_barcode_name, $col, $row, $cellWidth, $cellHeight, 
+                                            $barcodeWidth, $barcodeHeight, $topSpacing, $fontSize, $pageWidth, $colsPerPage, $rowsPerPage);
                     
-                    // Clean up temporary file
-                    unlink($barcodePath);
-                    
-                    // Move to next position
-                    $col++;
-                    if ($col >= $colsPerPage) {
-                        $col = 0;
+                    // Update row and page if needed
+                    if ($col == 0) {
                         $row++;
                         if ($row >= $rowsPerPage) {
                             $row = 0;
@@ -194,57 +236,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
                     // Increment the lost barcode number for each barcode
                     $lost_barcode_number++;
                 }
+            } else if ($generate_costume_2pcs || $generate_costume_3pcs) {
+                // Define which piece types to generate
+                $pieces = $generate_costume_2pcs ? ['P', 'V'] : ['P', 'V', 'G'];
+                $range_from = (int)$_POST['range_from'];
+                $range_to = (int)$_POST['range_to'];
+                
+                // For each piece type
+                foreach ($pieces as $current_piece) {
+                    // For each number in the range
+                    for ($i = $range_from; $i <= $range_to; $i++) {
+                        $full_barcode_name = "$of_number-$size-$category-$current_piece-$i";
+                        
+                        // Insert into database only if not PDF-only mode
+                        if (!$generate_pdf_only) {
+                            $stmt = $conn->prepare("INSERT INTO barcodes (of_number, size, category, piece_name, order_str, full_barcode_name, status, stage) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL)");
+                            $stmt->bind_param("sissss", $of_number, $size, $category, $current_piece, $i, $full_barcode_name);
+                            $stmt->execute();
+                        }
+                        
+                        // Generate and place barcode in PDF
+                        $col = placeBarcodeInPdf($generator, $pdf, $full_barcode_name, $col, $row, $cellWidth, $cellHeight, 
+                                                $barcodeWidth, $barcodeHeight, $topSpacing, $fontSize, $pageWidth, $colsPerPage, $rowsPerPage);
+                        
+                        // Update row and page if needed
+                        if ($col == 0) {
+                            $row++;
+                            if ($row >= $rowsPerPage) {
+                                $row = 0;
+                                $pdf->AddPage();
+                            }
+                        }
+                    }
+                }
             } else {
-                // Original code for processing a range of barcodes
+                // Original code for processing a range of barcodes for a single piece type
+                $range_from = (int)$_POST['range_from'];
+                $range_to = (int)$_POST['range_to'];
+                
                 for ($i = $range_from; $i <= $range_to; $i++) {
                     $full_barcode_name = "$of_number-$size-$category-$piece_name-$i";
                     
-                    // Insert into database - removed status and stage fields
-                    $stmt = $conn->prepare("INSERT INTO barcodes (of_number, size, category, piece_name, order_str, full_barcode_name) VALUES (?, ?, ?, ?, ?, ?)");
-                    $stmt->bind_param("sissss", $of_number, $size, $category, $piece_name, $i, $full_barcode_name);
-                    $stmt->execute();
-                    
-                    // Generate barcode image
-                    $barcodeImage = $generator->getBarcode($full_barcode_name, $generator::TYPE_CODE_128);
-                    $barcodePath = __DIR__ . "/barcodes/tmp_$full_barcode_name.png";
-                    file_put_contents($barcodePath, $barcodeImage);
-                    
-                    // Calculate positions
-                    $x = $col * $cellWidth;
-                    $y = $row * $cellHeight;
-                    
-                    // Center the barcode in the cell and add the top spacing
-                    $barcodeX = $x + (($cellWidth - $barcodeWidth) / 2);
-                    $barcodeY = $y + $topSpacing + ($cellHeight / 2) - ($barcodeHeight / 2) - 5;
-                    
-                    // Add barcode image
-                    $pdf->Image($barcodePath, $barcodeX, $barcodeY, $barcodeWidth, $barcodeHeight);
-                    
-                    // Add barcode text below the image
-                    $pdf->SetFont('Arial', '', $fontSize);
-                    $textY = $barcodeY + $barcodeHeight + 2;
-                    $pdf->SetXY($x, $textY);
-                    $pdf->Cell($cellWidth, 5, $full_barcode_name, 0, 0, 'C');
-                    
-                    // Draw vertical lines (except after the last column)
-                    if ($col < $colsPerPage - 1) { 
-                        $lineX = $x + $cellWidth;
-                        $pdf->Line($lineX, $y, $lineX, $y + $cellHeight);
+                    // Insert into database only if not PDF-only mode
+                    if (!$generate_pdf_only) {
+                        $stmt = $conn->prepare("INSERT INTO barcodes (of_number, size, category, piece_name, order_str, full_barcode_name, status, stage) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL)");
+                        $stmt->bind_param("sissss", $of_number, $size, $category, $piece_name, $i, $full_barcode_name);
+                        $stmt->execute();
                     }
                     
-                    // Draw horizontal lines (except after the last row)
-                    if ($row < $rowsPerPage - 1) {
-                        $lineY = $y + $cellHeight;
-                        $pdf->Line(0, $lineY, $pageWidth, $lineY);
-                    }
+                    // Generate and place barcode in PDF
+                    $col = placeBarcodeInPdf($generator, $pdf, $full_barcode_name, $col, $row, $cellWidth, $cellHeight, 
+                                            $barcodeWidth, $barcodeHeight, $topSpacing, $fontSize, $pageWidth, $colsPerPage, $rowsPerPage);
                     
-                    // Clean up temporary file
-                    unlink($barcodePath);
-                    
-                    // Move to next position
-                    $col++;
-                    if ($col >= $colsPerPage) {
-                        $col = 0;
+                    // Update row and page if needed
+                    if ($col == 0) {
                         $row++;
                         if ($row >= $rowsPerPage) {
                             $row = 0;
@@ -269,25 +314,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
     }
 }
 
-// Add JavaScript for handling the "Random" functionality - Modified to work without the field
-function getRandomButtonScript() {
-    return <<<SCRIPT
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Find the Random icon and make it clickable
-        const randomIcon = document.querySelector('.fa-arrows-rotate');
-        if (randomIcon) {
-            randomIcon.parentElement.style.cursor = 'pointer';
-            randomIcon.parentElement.addEventListener('click', function() {
-                // Since we removed the field, just show a small notification that a random number will be generated
-                alert('A random number will be generated for the lost barcode when you submit the form.');
-            });
-        }
-    });
-    </script>
-    SCRIPT;
-}
-
 // Load barcodes for current view
 $barcodes = getBarcodes($current_view, $page, $items_per_page);
 $total_barcodes = getTotalBarcodes($current_view);
@@ -296,10 +322,9 @@ $show_success = isset($_GET['success']) && $_GET['success'] == 1;
 $error_message = $_GET['error'] ?? '';
 $show_modal = isset($_GET['modal']) && $_GET['modal'] === 'create';
 
-// Include the random button script in your page header or appropriate location
-echo getRandomButtonScript();
+// Add the random button script to be included in the page
+$random_button_script = getRandomButtonScript();
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -371,8 +396,8 @@ echo getRandomButtonScript();
                     <a href="?view=<?php echo $current_view; ?>&modal=create" class="btn-create">
                         <span><i class="fa-solid fa-gears"></i></span> Create New Barcodes
                     </a>
-                    <a href="#" class="btn-create" id="open-path-btn">
-                        <span><i class="fa-solid fa-folder-open"></i></span> Open Path
+                    <a href="barcodes/" class="btn-create" id="open-path-btn">
+                            <span><i class="fa-solid fa-folder-open"></i></span> Open Path
                     </a>
                 </div>
             </div>            
@@ -455,7 +480,7 @@ echo getRandomButtonScript();
                     <i class="fa-solid fa-circle-xmark"></i>
                 </a>
             </div>
-            <form action="main.php" method="POST">
+            <form action="index.php" method="POST">
                 <input type="hidden" name="action" value="create_barcode">
                 <input type="hidden" name="view" value="<?php echo $current_view; ?>">
                 
@@ -497,23 +522,23 @@ echo getRandomButtonScript();
                     </select>
                 </div>
                                 
-<div class="checkall">
-    <div class="form-group checkbox-group">
-        <input type="checkbox" id="lost-barcode" name="lost_barcode" style="margin-right: 5px;"
-            onclick="this.form.lost_barcode_count.disabled = !this.checked;
-                    this.form.generate_costume_2pcs.disabled = this.checked;
-                    this.form.generate_costume_3pcs.disabled = this.checked;
-                    this.form.range_from.disabled = this.checked;
-                    this.form.range_to.disabled = this.checked;">
-        <label for="lost-barcode" style="margin-right: 10px;">Lost Barcode [C prefix]</label>
-        <label style="margin-right: 5px;"></label>
-        <input type="number" id="lost-barcode-count" name="lost_barcode_count"
-             style="margin-right: 20px; width: 60px;"
-             value="1" min="1" max="100"
-             disabled>
-        <label style="margin-right: 10px;">Random <i class="fa-solid fa-arrows-rotate"></i></label>
-    </div>
-</div>
+                <div class="checkall">
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="lost-barcode" name="lost_barcode" style="margin-right: 5px;"
+                            onclick="this.form.lost_barcode_count.disabled = !this.checked;
+                                    this.form.generate_costume_2pcs.disabled = this.checked;
+                                    this.form.generate_costume_3pcs.disabled = this.checked;
+                                    this.form.range_from.disabled = this.checked;
+                                    this.form.range_to.disabled = this.checked;">
+                        <label for="lost-barcode" style="margin-right: 10px;">Lost Barcode [C prefix]</label>
+                        <label style="margin-right: 5px;"></label>
+                        <input type="number" id="lost-barcode-count" name="lost_barcode_count"
+                            style="margin-right: 20px; width: 60px;"
+                            value="1" min="1" max="100"
+                            disabled>
+                        <label style="margin-right: 10px;">Random <i class="fa-solid fa-arrows-rotate"></i></label>
+                    </div>
+                </div>
 
                 <div class="form-group">
                     <label>Piece Order</label>
@@ -530,35 +555,25 @@ echo getRandomButtonScript();
                 </div>
 
                 <div class="checkall2">
-                    <div class="form-group checkbox-group">
-                        <input type="checkbox" id="generate-costume-2pcs" name="generate_costume_2pcs" 
-                            onclick="if(this.checked || document.getElementById('generate-costume-3pcs').checked) { 
-                                        document.getElementById('lost-barcode').disabled = true; 
-                                        } else { 
-                                        document.getElementById('lost-barcode').disabled = false; 
-                                        }">
-                        <label for="generate-costume-2pcs">Generate for P _ and V _ (Costume 2pcs)</label>
-                    </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="generate-costume-2pcs" name="generate_costume_2pcs">
+                    <label for="generate-costume-2pcs">Generate for P and V (Costume 2pcs)</label>
+                </div>
+
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="generate-costume-3pcs" name="generate_costume_3pcs">
+                    <label for="generate-costume-3pcs">Generate for P, V, and G (Costume 3pcs)</label>
+                </div>
                     
-                    <div class="form-group checkbox-group">
-                        <input type="checkbox" id="generate-costume-3pcs" name="generate_costume_3pcs" 
-                            onclick="if(this.checked || document.getElementById('generate-costume-2pcs').checked) { 
-                                        document.getElementById('lost-barcode').disabled = true; 
-                                        } else { 
-                                        document.getElementById('lost-barcode').disabled = false; 
-                                        }">
-                        <label for="generate-costume-3pcs">Generate for P - V - G (Costume 3pcs)</label>
-                    </div>
-                    
-                    <div class="form-group checkbox-group indented">
-                        <input type="checkbox" id="generate-pdf-only" name="generate_pdf_only">
-                        <label for="generate-pdf-only">Generate only PDF</label>
-                    </div>    
+                <div class="form-group checkbox-group indented">
+                    <input type="checkbox" id="generate_pdf_only" name="generate_pdf_only">
+                    <label for="generate_pdf_only">Generate only PDF</label>
+                </div>
                 </div>
 
                 <div class="barcode-actions">
-                    <button type="submit" class="btn btn-submit">Generate Barcodes</button>
-                    <a href="?view=<?php echo $current_view; ?>" class="btn btn-cancel">Cancel Generating</a>
+                    <button type="submit" class="btn btn-secondary">Generate Barcodes</button>
+                    <a href="?view=<?php echo $current_view; ?>" class="btn btn-danger">Cancel Generating</a>
                 </div>
                 
                 <div class="barcode-range-indicators">
