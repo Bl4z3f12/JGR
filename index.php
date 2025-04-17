@@ -411,46 +411,46 @@ $random_button_script = getRandomButtonScript();
                 </div>
             </div>            
             <table class="dashboard-table">
-    <thead>
+            <thead>
+    <tr>
+        <th>OF_Number</th>
+        <th>Size</th>
+        <th>Category</th>
+        <th>Piece Name</th>
+        <th>Order</th>
+        <th>Status</th>
+        <th>Stage</th>
+        <th>Chef</th>
+        <th>Full Barcode Name</th>
+        <th>Last Update</th>
+    </tr>
+</thead>
+<tbody>
+    <?php if (empty($barcodes)): ?>
+    <tr>
+        <td colspan="12" style="text-align: center;">No barcodes found</td>
+    </tr>
+    <?php else: ?>
+        <?php foreach ($barcodes as $barcode): ?>
         <tr>
-            <th>OF_Number</th>
-            <th>Size</th>
-            <th>Category</th>
-            <th>Piece Name</th>
-            <th>Order</th>
-            <th>Status</th>
-            <th>Stage</th>
-            <th>Full Barcode Name</th>
-            <th>Last Update</th>
+            <td><?php echo htmlspecialchars($barcode['of_number']); ?></td>
+            <td><?php echo htmlspecialchars($barcode['size']); ?></td>
+            <td><?php echo htmlspecialchars($barcode['category']); ?></td>
+            <td><?php echo htmlspecialchars($barcode['piece_name']); ?></td>
+            <td><?php echo htmlspecialchars($barcode['order_str']); ?></td>
+            <td>
+                <span class="status-badge status-<?php echo strtolower($barcode['status']); ?>">
+                    <?php echo htmlspecialchars($barcode['status']); ?>
+                </span>
+            </td>
+            <td><?php echo htmlspecialchars($barcode['stage']); ?></td>
+            <td><?php echo htmlspecialchars($barcode['chef']); ?></td>
+            <td><?php echo htmlspecialchars($barcode['full_barcode_name']); ?></td>
+            <td><?php echo htmlspecialchars($barcode['last_update']); ?></td>
         </tr>
-    </thead>
-    <tbody>
-        <?php if (empty($barcodes)): ?>
-        <tr>
-            <td colspan="11" style="text-align: center;">No barcodes found</td>
-        </tr>
-        <?php else: ?>
-            <?php foreach ($barcodes as $barcode): ?>
-            <tr>
-                <td><?php echo htmlspecialchars($barcode['of_number']); ?></td>
-                <td><?php echo htmlspecialchars($barcode['size']); ?></td>
-                <td><?php echo htmlspecialchars($barcode['category']); ?></td>
-                <td><?php echo htmlspecialchars($barcode['piece_name']); ?></td>
-                <td><?php echo htmlspecialchars($barcode['order_str']); ?></td>
-                <td>
-                    <span class="status-badge status-<?php echo strtolower($barcode['status']); ?>">
-                        <?php echo htmlspecialchars($barcode['status']); ?>
-                    </span>
-                </td>
-                <td><?php echo htmlspecialchars($barcode['stage']); ?></td>
-                <td><?php echo htmlspecialchars($barcode['full_barcode_name']); ?></td>
-                <td><?php echo htmlspecialchars($barcode['last_update']); ?></td>
-            </tr>
-            <?php endforeach; ?>
-        <?php endif; ?>
-    </tbody>
-</table>
-            
+        <?php endforeach; ?>
+    <?php endif; ?>
+</tbody>
             <div class="pagination">
                 <?php if ($page > 1): ?>
                 <a href="?view=<?php echo $current_view; ?>&page=<?php echo ($page - 1); ?>" class="pagination-btn">
