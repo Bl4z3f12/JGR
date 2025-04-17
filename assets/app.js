@@ -469,3 +469,6 @@ window.addEventListener('DOMContentLoaded', function() {
     handleLostBarcodeChange();
     handleGenerateCheckboxesChange();
 });
+
+
+

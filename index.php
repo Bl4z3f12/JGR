@@ -337,52 +337,13 @@ $random_button_script = getRandomButtonScript();
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BarcodeHub</title>
-    <link rel="stylesheet" href="assets/index.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
+    <?php include 'includes/head.php'; ?>
 </head>
 <body>
-    <div class="sidebar">
-        <a href="?view=dashboard" class="sidebar-item <?php echo $current_view === 'dashboard' ? 'active' : ''; ?>">
-            <div class="sidebar-item-icon"><i class="fa-solid fa-qrcode"></i></div>
-            Dashboard
-        </a>
-        <a href="?view=today" class="sidebar-item <?php echo $current_view === 'today' ? 'active' : ''; ?>">
-            <div class="sidebar-item-icon"><i class="fa-solid fa-calendar-days"></i></div>
-            Scanned Today
-        </a>
-        <a href="?view=production" class="sidebar-item <?php echo $current_view === 'production' ? 'active' : ''; ?>">
-            <div class="sidebar-item-icon"><i class="fa-solid fa-chart-line"></i></div>
-            Production
-        </a>
-        <a href="?view=export" class="sidebar-item <?php echo $current_view === 'export' ? 'active' : ''; ?>">
-            <div class="sidebar-item-icon"><i class="fa-solid fa-file-export"></i></div>
-            Export
-        </a>
-        <a href="?view=Settings" class="sidebar-item <?php echo $current_view === 'Settings' ? 'active' : ''; ?>">
-            <div class="sidebar-item-icon"><i class="fa-solid fa-wrench"></i></div>
-            Barcodes Settings
-        </a>
-    </div>
-    
+    <?php include 'includes/sidebar.php'; ?>
 
     <div class="main-content">
-        <div class="header">
-            <div class="logo">
-                <div class="logo-icon"><i class="fa-solid fa-qrcode"></i></div>
-                BarcodeHub
-            </div>
-            <div class="date" id="current-date">
-                <?php echo $current_date; ?>
-            </div>
-        </div>
+        <?php include 'includes/header.php'; ?>
         
         <div class="content">
             <?php if ($show_success): ?>
@@ -412,45 +373,46 @@ $random_button_script = getRandomButtonScript();
             </div>            
             <table class="dashboard-table">
             <thead>
-    <tr>
-        <th>OF_Number</th>
-        <th>Size</th>
-        <th>Category</th>
-        <th>Piece Name</th>
-        <th>Order</th>
-        <th>Status</th>
-        <th>Stage</th>
-        <th>Chef</th>
-        <th>Full Barcode Name</th>
-        <th>Last Update</th>
-    </tr>
-</thead>
-<tbody>
-    <?php if (empty($barcodes)): ?>
-    <tr>
-        <td colspan="12" style="text-align: center;">No barcodes found</td>
-    </tr>
-    <?php else: ?>
-        <?php foreach ($barcodes as $barcode): ?>
-        <tr>
-            <td><?php echo htmlspecialchars($barcode['of_number']); ?></td>
-            <td><?php echo htmlspecialchars($barcode['size']); ?></td>
-            <td><?php echo htmlspecialchars($barcode['category']); ?></td>
-            <td><?php echo htmlspecialchars($barcode['piece_name']); ?></td>
-            <td><?php echo htmlspecialchars($barcode['order_str']); ?></td>
-            <td>
-                <span class="status-badge status-<?php echo strtolower($barcode['status']); ?>">
-                    <?php echo htmlspecialchars($barcode['status']); ?>
-                </span>
-            </td>
-            <td><?php echo htmlspecialchars($barcode['stage']); ?></td>
-            <td><?php echo htmlspecialchars($barcode['chef']); ?></td>
-            <td><?php echo htmlspecialchars($barcode['full_barcode_name']); ?></td>
-            <td><?php echo htmlspecialchars($barcode['last_update']); ?></td>
-        </tr>
-        <?php endforeach; ?>
-    <?php endif; ?>
-</tbody>
+                <tr>
+                    <th>OF_Number</th>
+                    <th>Size</th>
+                    <th>Category</th>
+                    <th>Piece Name</th>
+                    <th>Order</th>
+                    <th>Status</th>
+                    <th>Stage</th>
+                    <th>Chef</th>
+                    <th>Full Barcode Name</th>
+                    <th>Last Update</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (empty($barcodes)): ?>
+                <tr>
+                    <td colspan="12" style="text-align: center;">No barcodes found</td>
+                </tr>
+                <?php else: ?>
+                    <?php foreach ($barcodes as $barcode): ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($barcode['of_number']); ?></td>
+                        <td><?php echo htmlspecialchars($barcode['size']); ?></td>
+                        <td><?php echo htmlspecialchars($barcode['category']); ?></td>
+                        <td><?php echo htmlspecialchars($barcode['piece_name']); ?></td>
+                        <td><?php echo htmlspecialchars($barcode['order_str']); ?></td>
+                        <td>
+                            <span class="status-badge status-<?php echo strtolower($barcode['status']); ?>">
+                                <?php echo htmlspecialchars($barcode['status']); ?>
+                            </span>
+                        </td>
+                        <td><?php echo htmlspecialchars($barcode['stage']); ?></td>
+                        <td><?php echo htmlspecialchars($barcode['chef']); ?></td>
+                        <td><?php echo htmlspecialchars($barcode['full_barcode_name']); ?></td>
+                        <td><?php echo htmlspecialchars($barcode['last_update']); ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+            </table>
             <div class="pagination">
                 <?php if ($page > 1): ?>
                 <a href="?view=<?php echo $current_view; ?>&page=<?php echo ($page - 1); ?>" class="pagination-btn">
@@ -607,38 +569,7 @@ $random_button_script = getRandomButtonScript();
             </form>
         </div>
     </div>
-        
-    <!-- Network Status Indicator -->
-    <div class="network-status <?php echo function_exists('fsockopen') && @fsockopen('www.google.com', 80) ? 'online' : 'offline'; ?>" id="network-status">
-        <?php echo function_exists('fsockopen') && @fsockopen('www.google.com', 80) ? 'Online' : 'Offline'; ?>
-    </div>
-
-<?php
-// Function to generate a simple barcode (this is a mock function)
-function generateBarcode($code) {
-    // In a real app, you would use a barcode generation library
-    // This is just a placeholder that creates a simple image
-    $image = imagecreate(200, 80);
-    $background = imagecolorallocate($image, 255, 255, 255);
-    $text_color = imagecolorallocate($image, 0, 0, 0);
     
-    // Draw some lines to represent a barcode
-    for ($i = 0; $i < 15; $i++) {
-        $x = 20 + ($i * 10);
-        $h = rand(20, 60);
-        imagefilledrectangle($image, $x, 10, $x + 5, 10 + $h, $text_color);
-    }
-    
-    // Add the text
-    imagestring($image, 5, 50, 65, $code, $text_color);
-    
-    // Capture the image data
-    ob_start();
-    imagepng($image);
-    $data = ob_get_clean();
-    
-    imagedestroy($image);
-    
-    return $data;
-}
-?>
+    <?php include 'includes/footer.php'; ?>
+</body>
+</html>
