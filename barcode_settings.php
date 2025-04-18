@@ -106,7 +106,11 @@ require_once 'settings.php';
                                             </div>
                                             <select class="form-select" id="bulk_status" name="bulk_status" disabled>
                                                 <option value="">Select Status</option>
-                                                <?php foreach ($status_options as $option): ?>
+                                                <?php 
+                                                // Updated status options array with new values
+                                                $status_options = ['Completed', 'In Progress', 'Pending',]; 
+                                                foreach ($status_options as $option): 
+                                                ?>
                                                     <option value="<?php echo htmlspecialchars($option); ?>"><?php echo htmlspecialchars($option); ?></option>
                                                 <?php endforeach; ?>
                                             </select>
@@ -118,7 +122,9 @@ require_once 'settings.php';
                                             </div>
                                             <select class="form-select" id="bulk_stage" name="bulk_stage" disabled>
                                                 <option value="">Select Stage</option>
-                                                <?php foreach ($stage_options as $option): ?>
+                                                <?php
+                                                  $stage_options = ['Coupe', 'V1', 'V2', 'V3', 'Pantalon', 'Repassage', 'P_fini'];
+                                                 foreach ($stage_options as $option): ?>
                                                     <option value="<?php echo htmlspecialchars($option); ?>"><?php echo htmlspecialchars($option); ?></option>
                                                 <?php endforeach; ?>
                                             </select>
@@ -130,7 +136,11 @@ require_once 'settings.php';
                                             </div>
                                             <select class="form-select" id="bulk_chef" name="bulk_chef" disabled>
                                                 <option value="">Select Chef</option>
-                                                <?php foreach ($chef_options as $option): ?>
+                                                <?php 
+                                                // Updated chef options array with new values
+                                                $chef_options = ['Habib', 'Youssef' , 'Farah', 'Aziz', 'Abdelkarim', 'Miloud' , 'Abderazaq', 'pfi,i' , 'repa']; 
+                                                foreach ($chef_options as $option): 
+                                                ?>
                                                     <option value="<?php echo htmlspecialchars($option); ?>"><?php echo htmlspecialchars($option); ?></option>
                                                 <?php endforeach; ?>
                                             </select>
@@ -184,10 +194,12 @@ require_once 'settings.php';
                                         <th>Category</th>
                                         <th>Piece</th>
                                         <th>Order</th>
-                                        <th>Status</th>
+                                       
                                         <th>Stage</th>
                                         <th>Chef</th>
+                                        <th>Status</th>
                                         <th>Last Update</th>
+                                        
                                         <th width="80px">Actions</th>
                                     </tr>
                                 </thead>
@@ -208,6 +220,8 @@ require_once 'settings.php';
                                                 <td><?php echo htmlspecialchars($barcode['category']); ?></td>
                                                 <td><?php echo htmlspecialchars($barcode['piece_name']); ?></td>
                                                 <td><?php echo htmlspecialchars($barcode['order_str']); ?></td>
+                                                <td><?php echo htmlspecialchars($barcode['stage']); ?></td>
+                                                <td><?php echo htmlspecialchars($barcode['chef']); ?></td>
                                                 <td>
                                                     <?php if (!empty($barcode['status'])): ?>
                                                         <span class="badge bg-<?php echo strtolower($barcode['status']) === 'completed' ? 'success' : 'warning'; ?>">
@@ -215,9 +229,8 @@ require_once 'settings.php';
                                                         </span>
                                                     <?php endif; ?>
                                                 </td>
-                                                <td><?php echo htmlspecialchars($barcode['stage']); ?></td>
-                                                <td><?php echo htmlspecialchars($barcode['chef']); ?></td>
                                                 <td><?php echo htmlspecialchars($barcode['last_update']); ?></td>
+                                               
                                                 <td>
                                                     <a href="<?php echo buildSearchUrl(['edit' => $barcode['id']]); ?>" class="btn btn-sm btn-primary">
                                                         <i class="fas fa-edit"></i>
@@ -327,7 +340,11 @@ require_once 'settings.php';
                                 <label for="edit_status" class="form-label">Status</label>
                                 <select class="form-select" id="edit_status" name="status">
                                     <option value="">None</option>
-                                    <?php foreach ($status_options as $option): ?>
+                                    <?php 
+                                    // Updated status options array with new values
+                                    $status_options = ['Completed', 'In Progress', 'Pending',]; 
+                                    foreach ($status_options as $option): 
+                                    ?>
                                         <option value="<?php echo htmlspecialchars($option); ?>" <?php echo $edit_barcode['status'] === $option ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($option); ?>
                                         </option>
@@ -341,7 +358,9 @@ require_once 'settings.php';
                                 <label for="edit_stage" class="form-label">Stage</label>
                                 <select class="form-select" id="edit_stage" name="stage">
                                     <option value="">None</option>
-                                    <?php foreach ($stage_options as $option): ?>
+                                    <?php 
+                                      $stage_options = ['Coupe v1', 'Pantalon v2', 'Pantalon v3', 'Repassage', 'P_fini'];
+                                    foreach ($stage_options as $option): ?>
                                         <option value="<?php echo htmlspecialchars($option); ?>" <?php echo $edit_barcode['stage'] === $option ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($option); ?>
                                         </option>
@@ -352,7 +371,11 @@ require_once 'settings.php';
                                 <label for="edit_chef" class="form-label">Chef</label>
                                 <select class="form-select" id="edit_chef" name="chef">
                                     <option value="">None</option>
-                                    <?php foreach ($chef_options as $option): ?>
+                                    <?php 
+                                    // Updated chef options array with new values
+                                    $chef_options = ['Akram', 'Hamza', 'Ahmed'];
+                                    foreach ($chef_options as $option): 
+                                    ?>
                                         <option value="<?php echo htmlspecialchars($option); ?>" <?php echo $edit_barcode['chef'] === $option ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($option); ?>
                                         </option>
@@ -402,5 +425,6 @@ require_once 'settings.php';
     <script src="assets/index.js"></script>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

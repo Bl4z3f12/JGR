@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:html="http://www.w3.org/TR/REC-html40">
+<Worksheet ss:Name="Barcodes">
+<Table>
+<Row>
+<Cell><Data ss:Type="String">OF Number</Data></Cell>
+<Cell><Data ss:Type="String">Size</Data></Cell>
+<Cell><Data ss:Type="String">Category</Data></Cell>
+<Cell><Data ss:Type="String">Piece Name</Data></Cell>
+<Cell><Data ss:Type="String">Order String</Data></Cell>
+<Cell><Data ss:Type="String">Full Barcode</Data></Cell>
+<Cell><Data ss:Type="String">Status</Data></Cell>
+<Cell><Data ss:Type="String">Stage</Data></Cell>
+<Cell><Data ss:Type="String">Last Update</Data></Cell>
+</Row>
+<Row>
+<Cell><Data ss:Type="String">15000</Data></Cell>
+<Cell><Data ss:Type="Number">5</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">V</Data></Cell>
+<Cell><Data ss:Type="String">5</Data></Cell>
+<Cell><Data ss:Type="String">15000-5-V-5</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">2025-04-18 09:26:44</Data></Cell>
+</Row>
+<Row>
+<Cell><Data ss:Type="String">15000</Data></Cell>
+<Cell><Data ss:Type="Number">5</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">V</Data></Cell>
+<Cell><Data ss:Type="String">4</Data></Cell>
+<Cell><Data ss:Type="String">15000-5-V-4</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">2025-04-18 09:26:44</Data></Cell>
+</Row>
+<Row>
+<Cell><Data ss:Type="String">15000</Data></Cell>
+<Cell><Data ss:Type="Number">5</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">V</Data></Cell>
+<Cell><Data ss:Type="String">3</Data></Cell>
+<Cell><Data ss:Type="String">15000-5-V-3</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">2025-04-18 09:26:44</Data></Cell>
+</Row>
+<Row>
+<Cell><Data ss:Type="String">15000</Data></Cell>
+<Cell><Data ss:Type="Number">5</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">V</Data></Cell>
+<Cell><Data ss:Type="String">2</Data></Cell>
+<Cell><Data ss:Type="String">15000-5-V-2</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">2025-04-18 09:26:44</Data></Cell>
+</Row>
+<Row>
+<Cell><Data ss:Type="String">15000</Data></Cell>
+<Cell><Data ss:Type="Number">5</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">V</Data></Cell>
+<Cell><Data ss:Type="String">1</Data></Cell>
+<Cell><Data ss:Type="String">15000-5-V-1</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">2025-04-18 09:26:44</Data></Cell>
+</Row>
+<Row>
+<Cell><Data ss:Type="String">15000</Data></Cell>
+<Cell><Data ss:Type="Number">5</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">P</Data></Cell>
+<Cell><Data ss:Type="String">5</Data></Cell>
+<Cell><Data ss:Type="String">15000-5-P-5</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">2025-04-18 09:26:44</Data></Cell>
+</Row>
+<Row>
+<Cell><Data ss:Type="String">15000</Data></Cell>
+<Cell><Data ss:Type="Number">5</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">P</Data></Cell>
+<Cell><Data ss:Type="String">4</Data></Cell>
+<Cell><Data ss:Type="String">15000-5-P-4</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">2025-04-18 09:26:44</Data></Cell>
+</Row>
+<Row>
+<Cell><Data ss:Type="String">15000</Data></Cell>
+<Cell><Data ss:Type="Number">5</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">P</Data></Cell>
+<Cell><Data ss:Type="String">3</Data></Cell>
+<Cell><Data ss:Type="String">15000-5-P-3</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">2025-04-18 09:26:44</Data></Cell>
+</Row>
+<Row>
+<Cell><Data ss:Type="String">15000</Data></Cell>
+<Cell><Data ss:Type="Number">5</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">P</Data></Cell>
+<Cell><Data ss:Type="String">2</Data></Cell>
+<Cell><Data ss:Type="String">15000-5-P-2</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">2025-04-18 09:26:44</Data></Cell>
+</Row>
+<Row>
+<Cell><Data ss:Type="String">15000</Data></Cell>
+<Cell><Data ss:Type="Number">5</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">P</Data></Cell>
+<Cell><Data ss:Type="String">1</Data></Cell>
+<Cell><Data ss:Type="String">15000-5-P-1</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">2025-04-18 09:26:44</Data></Cell>
+</Row>
+<Row>
+<Cell><Data ss:Type="String">15600</Data></Cell>
+<Cell><Data ss:Type="Number">3</Data></Cell>
+<Cell><Data ss:Type="String">C</Data></Cell>
+<Cell><Data ss:Type="String">V</Data></Cell>
+<Cell><Data ss:Type="String">5</Data></Cell>
+<Cell><Data ss:Type="String">15600-3-C-V-5</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">2025-04-18 00:20:40</Data></Cell>
+</Row>
+<Row>
+<Cell><Data ss:Type="String">15600</Data></Cell>
+<Cell><Data ss:Type="Number">3</Data></Cell>
+<Cell><Data ss:Type="String">C</Data></Cell>
+<Cell><Data ss:Type="String">V</Data></Cell>
+<Cell><Data ss:Type="String">4</Data></Cell>
+<Cell><Data ss:Type="String">15600-3-C-V-4</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">2025-04-18 00:20:40</Data></Cell>
+</Row>
+<Row>
+<Cell><Data ss:Type="String">15600</Data></Cell>
+<Cell><Data ss:Type="Number">3</Data></Cell>
+<Cell><Data ss:Type="String">C</Data></Cell>
+<Cell><Data ss:Type="String">V</Data></Cell>
+<Cell><Data ss:Type="String">3</Data></Cell>
+<Cell><Data ss:Type="String">15600-3-C-V-3</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">2025-04-18 00:20:40</Data></Cell>
+</Row>
+<Row>
+<Cell><Data ss:Type="String">15600</Data></Cell>
+<Cell><Data ss:Type="Number">3</Data></Cell>
+<Cell><Data ss:Type="String">C</Data></Cell>
+<Cell><Data ss:Type="String">V</Data></Cell>
+<Cell><Data ss:Type="String">2</Data></Cell>
+<Cell><Data ss:Type="String">15600-3-C-V-2</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">2025-04-18 00:20:40</Data></Cell>
+</Row>
+<Row>
+<Cell><Data ss:Type="String">15600</Data></Cell>
+<Cell><Data ss:Type="Number">3</Data></Cell>
+<Cell><Data ss:Type="String">C</Data></Cell>
+<Cell><Data ss:Type="String">V</Data></Cell>
+<Cell><Data ss:Type="String">1</Data></Cell>
+<Cell><Data ss:Type="String">15600-3-C-V-1</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">2025-04-18 00:20:40</Data></Cell>
+</Row>
+<Row>
+<Cell><Data ss:Type="String">15600</Data></Cell>
+<Cell><Data ss:Type="Number">3</Data></Cell>
+<Cell><Data ss:Type="String">C</Data></Cell>
+<Cell><Data ss:Type="String">P</Data></Cell>
+<Cell><Data ss:Type="String">10</Data></Cell>
+<Cell><Data ss:Type="String">15600-3-C-P-10</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">2025-04-18 00:20:40</Data></Cell>
+</Row>
+<Row>
+<Cell><Data ss:Type="String">15600</Data></Cell>
+<Cell><Data ss:Type="Number">3</Data></Cell>
+<Cell><Data ss:Type="String">C</Data></Cell>
+<Cell><Data ss:Type="String">P</Data></Cell>
+<Cell><Data ss:Type="String">9</Data></Cell>
+<Cell><Data ss:Type="String">15600-3-C-P-9</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">2025-04-18 00:20:40</Data></Cell>
+</Row>
+<Row>
+<Cell><Data ss:Type="String">15600</Data></Cell>
+<Cell><Data ss:Type="Number">3</Data></Cell>
+<Cell><Data ss:Type="String">C</Data></Cell>
+<Cell><Data ss:Type="String">P</Data></Cell>
+<Cell><Data ss:Type="String">8</Data></Cell>
+<Cell><Data ss:Type="String">15600-3-C-P-8</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">2025-04-18 00:20:40</Data></Cell>
+</Row>
+<Row>
+<Cell><Data ss:Type="String">15600</Data></Cell>
+<Cell><Data ss:Type="Number">3</Data></Cell>
+<Cell><Data ss:Type="String">C</Data></Cell>
+<Cell><Data ss:Type="String">P</Data></Cell>
+<Cell><Data ss:Type="String">7</Data></Cell>
+<Cell><Data ss:Type="String">15600-3-C-P-7</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">2025-04-18 00:20:40</Data></Cell>
+</Row>
+<Row>
+<Cell><Data ss:Type="String">15600</Data></Cell>
+<Cell><Data ss:Type="Number">3</Data></Cell>
+<Cell><Data ss:Type="String">C</Data></Cell>
+<Cell><Data ss:Type="String">P</Data></Cell>
+<Cell><Data ss:Type="String">6</Data></Cell>
+<Cell><Data ss:Type="String">15600-3-C-P-6</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">2025-04-18 00:20:40</Data></Cell>
+</Row>
+<Row>
+<Cell><Data ss:Type="String">15600</Data></Cell>
+<Cell><Data ss:Type="Number">3</Data></Cell>
+<Cell><Data ss:Type="String">C</Data></Cell>
+<Cell><Data ss:Type="String">P</Data></Cell>
+<Cell><Data ss:Type="String">5</Data></Cell>
+<Cell><Data ss:Type="String">15600-3-C-P-5</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">2025-04-18 00:20:40</Data></Cell>
+</Row>
+<Row>
+<Cell><Data ss:Type="String">15600</Data></Cell>
+<Cell><Data ss:Type="Number">3</Data></Cell>
+<Cell><Data ss:Type="String">C</Data></Cell>
+<Cell><Data ss:Type="String">P</Data></Cell>
+<Cell><Data ss:Type="String">4</Data></Cell>
+<Cell><Data ss:Type="String">15600-3-C-P-4</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">2025-04-18 00:20:40</Data></Cell>
+</Row>
+<Row>
+<Cell><Data ss:Type="String">15600</Data></Cell>
+<Cell><Data ss:Type="Number">3</Data></Cell>
+<Cell><Data ss:Type="String">C</Data></Cell>
+<Cell><Data ss:Type="String">P</Data></Cell>
+<Cell><Data ss:Type="String">3</Data></Cell>
+<Cell><Data ss:Type="String">15600-3-C-P-3</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">2025-04-18 00:20:40</Data></Cell>
+</Row>
+<Row>
+<Cell><Data ss:Type="String">15600</Data></Cell>
+<Cell><Data ss:Type="Number">3</Data></Cell>
+<Cell><Data ss:Type="String">C</Data></Cell>
+<Cell><Data ss:Type="String">P</Data></Cell>
+<Cell><Data ss:Type="String">2</Data></Cell>
+<Cell><Data ss:Type="String">15600-3-C-P-2</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">2025-04-18 00:20:40</Data></Cell>
+</Row>
+<Row>
+<Cell><Data ss:Type="String">15600</Data></Cell>
+<Cell><Data ss:Type="Number">3</Data></Cell>
+<Cell><Data ss:Type="String">C</Data></Cell>
+<Cell><Data ss:Type="String">P</Data></Cell>
+<Cell><Data ss:Type="String">1</Data></Cell>
+<Cell><Data ss:Type="String">15600-3-C-P-1</Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String"></Data></Cell>
+<Cell><Data ss:Type="String">2025-04-18 00:20:40</Data></Cell>
+</Row>
+</Table>
+</Worksheet>
+</Workbook>
