@@ -110,6 +110,21 @@ function getOFSummaryData($of_number, $stage, $date) {
 
 // Function to get list of stages for dropdown
 function getStages() {
+    // Define static stage options
+    $stage_options = [
+        "Coupe",
+        "V1",
+        "V2",
+        "V3",
+        "Pantalon",
+        "Repassage",
+        "P_fini"
+    ];
+    
+    // Return the static array of stage options
+    return $stage_options;
+    
+    /* Original database query code - commented out
     $conn = connectDB();
     if (!$conn) return [];
     
@@ -123,6 +138,7 @@ function getStages() {
     
     $conn->close();
     return $stages;
+    */
 }
 
 // Export to Excel (Tab-delimited TXT)
@@ -245,8 +261,9 @@ $title = "Inside P_fini for " . ($filter_stage ?: "All Stages") . " - " . date('
             border: 1px solid #dee2e6;
         }
         .table thead th {
-            background-color: #f0f0f0;
+            background-color: #007bff;
             text-align: center;
+            color: white;
         }
         .total-row {
             background-color: #d1e7dd !important;
@@ -255,6 +272,17 @@ $title = "Inside P_fini for " . ($filter_stage ?: "All Stages") . " - " . date('
         .grand-total-row {
             background-color: #a3cfbb !important;
             font-weight: bold;
+        }
+        .show-more-btn {
+            margin-left: 10px;
+            background-color: #007bff; /* Bootstrap primary color */
+            color: white;
+            cursor: pointer; /* Added cursor style for better UX */
+        }
+        .show-more-btn:hover {
+            color: white;
+
+            background-color: #0056b3; /* Darker shade on hover */
         }
     </style>
 </head>
@@ -312,11 +340,16 @@ $title = "Inside P_fini for " . ($filter_stage ?: "All Stages") . " - " . date('
 
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0 text-center"><?php echo htmlspecialchars($title); ?></h5>
+                <h5 class="mb-0 text-center">
+                    <?php echo htmlspecialchars($title); ?>                    
+                    <button id="showMoreBtn" class="btn btn-sm show-more-btn">
+                        Show details <i class="fa-solid fa-circle-info"></i>
+                    </button>
+                </h5>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-bordered">
+                    <table class="table table-bordered" >
                         <thead>
                             <tr class="text-center">
                                 <th>OF</th>

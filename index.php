@@ -1,6 +1,10 @@
 <?php
 // Import the PHP logic file
 require_once 'barcode_system.php';
+
+// Add this line right after including barcode_system.php
+// This will override the default items per page (likely defined in barcode_system.php)
+$items_per_page = 2000;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -42,7 +46,7 @@ require_once 'barcode_system.php';
             <form id="filter-form" class="filter-form card p-3 shadow-sm" action="" method="GET">
   <input type="hidden" name="view" value="<?php echo $current_view; ?>">
   
-  <h5 class="mb-3">Filter Options</h5>
+  <h5 class="mb-3"><i class="fa-solid fa-arrow-up-wide-short"></i> Filter Options</h5>
   
   <div class="row mb-3">
     <div class="col-md-6">
@@ -65,7 +69,7 @@ require_once 'barcode_system.php';
       <i class="fa-solid fa-filter me-1"></i> Apply Filters
     </button>
     <button type="button" id="clear-filters" class="btn btn-outline-secondary">
-      <i class="fa-solid fa-xmark me-1"></i> Clear
+        <i class="fa-solid fa-broom"></i> Clear
     </button>
   </div>
 </form>
@@ -77,9 +81,9 @@ require_once 'barcode_system.php';
                     <th>Category</th>
                     <th>Piece Name</th>
                     <th>Order</th>
-                    <th>Status</th>
                     <th>Stage</th>
                     <th>Chef</th>
+                    <th>Status</th>
                     <th>Full Barcode Name</th>
                     <th>Last Update</th>
                 </tr>
@@ -97,13 +101,14 @@ require_once 'barcode_system.php';
                         <td><?php echo htmlspecialchars($barcode['category']); ?></td>
                         <td><?php echo htmlspecialchars($barcode['piece_name']); ?></td>
                         <td><?php echo htmlspecialchars($barcode['order_str']); ?></td>
+                     
+                        <td><?php echo htmlspecialchars($barcode['stage']); ?></td>
+                        <td><?php echo htmlspecialchars($barcode['chef']); ?></td>
                         <td>
                             <span class="status-badge status-<?php echo strtolower($barcode['status']); ?>">
                                 <?php echo htmlspecialchars($barcode['status']); ?>
                             </span>
                         </td>
-                        <td><?php echo htmlspecialchars($barcode['stage']); ?></td>
-                        <td><?php echo htmlspecialchars($barcode['chef']); ?></td>
                         <td><?php echo htmlspecialchars($barcode['full_barcode_name']); ?></td>
                         <td><?php echo htmlspecialchars($barcode['last_update']); ?></td>
                     </tr>
@@ -113,7 +118,7 @@ require_once 'barcode_system.php';
             </table>
             <div class="pagination">
                 <?php if ($page > 1): ?>
-                <a href="?view=<?php echo $current_view; ?>&page=<?php echo ($page - 1); ?>" class="pagination-btn">
+                <a href="?view=<?php echo $current_view; ?>&page=<?php echo ($page - 1); ?><?php echo !empty($filter_of_number) ? '&filter_of=' . urlencode($filter_of_number) : ''; ?><?php echo !empty($filter_size) ? '&filter_size=' . urlencode($filter_size) : ''; ?>" class="pagination-btn">
                     <i class="fa-solid fa-angle-left"></i>
                 </a>
                 <?php endif; ?>
@@ -125,17 +130,18 @@ require_once 'barcode_system.php';
                 
                 for ($i = $start_page; $i <= $end_page; $i++):
                 ?>
-                <a href="?view=<?php echo $current_view; ?>&page=<?php echo $i; ?>" 
+                <a href="?view=<?php echo $current_view; ?>&page=<?php echo $i; ?><?php echo !empty($filter_of_number) ? '&filter_of=' . urlencode($filter_of_number) : ''; ?><?php echo !empty($filter_size) ? '&filter_size=' . urlencode($filter_size) : ''; ?>" 
                    class="pagination-btn <?php echo $i === $page ? 'active' : ''; ?>">
                     <?php echo $i; ?>
                 </a>
                 <?php endfor; ?>
                 
                 <?php if ($page < $total_pages): ?>
-                <a href="?view=<?php echo $current_view; ?>&page=<?php echo ($page + 1); ?>" class="pagination-btn">
+                <a href="?view=<?php echo $current_view; ?>&page=<?php echo ($page + 1); ?><?php echo !empty($filter_of_number) ? '&filter_of=' . urlencode($filter_of_number) : ''; ?><?php echo !empty($filter_size) ? '&filter_size=' . urlencode($filter_size) : ''; ?>" class="pagination-btn">
                     <i class="fa-solid fa-angle-right"></i>
                 </a>
                 <?php endif; ?>
+                
             </div>
         </div>
     </div>
@@ -203,7 +209,7 @@ require_once 'barcode_system.php';
                         <label style="margin-right: 5px;"></label>
                         <input type="number" id="lost-barcode-count" name="lost_barcode_count"
                             style="margin-right: 20px; width: 60px;"
-                            value="1" min="1" max="100"
+                            value="1" min="1" max="100" 
                             disabled>
                         <label style="margin-right: 10px;">Random <i class="fa-solid fa-arrows-rotate"></i></label>
                     </div>

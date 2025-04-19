@@ -294,7 +294,7 @@ require_once 'settings.php';
             </div>
         </div>
     </div>
-    
+
     <!-- Edit Barcode Modal -->
     <?php if ($edit_barcode): ?>
     <div class="modal fade show" style="display: block; background-color: rgba(0,0,0,0.5);" tabindex="-1" aria-labelledby="editModalLabel">
@@ -309,33 +309,63 @@ require_once 'settings.php';
                         <input type="hidden" name="action" value="edit">
                         <input type="hidden" name="barcode_id" value="<?php echo $edit_barcode['id']; ?>">
                         
+                        <!-- Barcode Identification Fields (Read-only) -->
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="edit_of_number" class="form-label">OF Number</label>
-                                <input type="text" class="form-control" id="edit_of_number" name="of_number" value="<?php echo htmlspecialchars($edit_barcode['of_number']); ?>" required>
+                                <input type="text" class="form-control" id="edit_of_number" value="<?php echo htmlspecialchars($edit_barcode['of_number']); ?>" readonly>
+                                <input type="hidden" name="of_number" value="<?php echo htmlspecialchars($edit_barcode['of_number']); ?>">
                             </div>
                             <div class="col-md-6">
                                 <label for="edit_size" class="form-label">Size</label>
-                                <input type="number" class="form-control" id="edit_size" name="size" value="<?php echo htmlspecialchars($edit_barcode['size']); ?>" required>
+                                <input type="number" class="form-control" id="edit_size" value="<?php echo htmlspecialchars($edit_barcode['size']); ?>" readonly>
+                                <input type="hidden" name="size" value="<?php echo htmlspecialchars($edit_barcode['size']); ?>">
                             </div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="edit_category" class="form-label">Category</label>
-                                <input type="text" class="form-control" id="edit_category" name="category" value="<?php echo htmlspecialchars($edit_barcode['category']); ?>">
+                                <input type="text" class="form-control" id="edit_category" value="<?php echo htmlspecialchars($edit_barcode['category']); ?>" readonly>
+                                <input type="hidden" name="category" value="<?php echo htmlspecialchars($edit_barcode['category']); ?>">
                             </div>
                             <div class="col-md-6">
                                 <label for="edit_piece_name" class="form-label">Piece Name</label>
-                                <input type="text" class="form-control" id="edit_piece_name" name="piece_name" value="<?php echo htmlspecialchars($edit_barcode['piece_name']); ?>" required>
+                                <input type="text" class="form-control" id="edit_piece_name" value="<?php echo htmlspecialchars($edit_barcode['piece_name']); ?>" readonly>
+                                <input type="hidden" name="piece_name" value="<?php echo htmlspecialchars($edit_barcode['piece_name']); ?>">
                             </div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="edit_order_str" class="form-label">Order</label>
-                                <input type="text" class="form-control" id="edit_order_str" name="order_str" value="<?php echo htmlspecialchars($edit_barcode['order_str']); ?>" required>
+                                <input type="text" class="form-control" id="edit_order_str" value="<?php echo htmlspecialchars($edit_barcode['order_str']); ?>" readonly>
+                                <input type="hidden" name="order_str" value="<?php echo htmlspecialchars($edit_barcode['order_str']); ?>">
                             </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Full Barcode Preview</label>
+                                <div class="form-control" style="background-color: #f8f9fa;">
+                                    <span id="barcode_preview">
+                                    <?php 
+                                    // Updated format to match requested format: "19200-40R-P-10"
+                                    $preview = $edit_barcode['of_number'] . '-' . $edit_barcode['size'];
+                                    if (!empty($edit_barcode['category'])) {
+                                        $preview .= $edit_barcode['category'];
+                                    }
+                                    $preview .= '-' . $edit_barcode['piece_name'] . '-' . $edit_barcode['order_str'];
+                                    echo htmlspecialchars($preview);
+                                    ?>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Separation Line -->
+                        <hr class="my-4 border-2">
+                        <h6 class="mb-3 text-secondary">Editable Fields</h6>
+                        
+                        <!-- Editable Fields -->
+                        <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="edit_status" class="form-label">Status</label>
                                 <select class="form-select" id="edit_status" name="status">
@@ -351,15 +381,21 @@ require_once 'settings.php';
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                        </div>
-                        
-                        <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="edit_stage" class="form-label">Stage</label>
                                 <select class="form-select" id="edit_stage" name="stage">
                                     <option value="">None</option>
                                     <?php 
-                                      $stage_options = ['Coupe v1', 'Pantalon v2', 'Pantalon v3', 'Repassage', 'P_fini'];
+                                    $stage_options = 
+                                    [
+                                        "Coupe",
+                                        "V1",
+                                        "V2",
+                                        "V3",
+                                        "Pantalon",
+                                        "Repassage",
+                                        "P_fini"
+                                    ];
                                     foreach ($stage_options as $option): ?>
                                         <option value="<?php echo htmlspecialchars($option); ?>" <?php echo $edit_barcode['stage'] === $option ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($option); ?>
@@ -367,13 +403,43 @@ require_once 'settings.php';
                                     <?php endforeach; ?>
                                 </select>
                             </div>
+                        </div>
+                        
+                        <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="edit_chef" class="form-label">Chef</label>
                                 <select class="form-select" id="edit_chef" name="chef">
                                     <option value="">None</option>
                                     <?php 
                                     // Updated chef options array with new values
-                                    $chef_options = ['Akram', 'Hamza', 'Ahmed'];
+                                    $chef_options = 
+                                    [
+                                        "Abdelkarim",
+                                        "Abderazaq",
+                                        "Aziz Berdigue",
+                                        "Bouchra",
+                                        "Driss Khairani",
+                                        "Fadwa",
+                                        "Farah",
+                                        "Fouad",
+                                        "Fouad Laakawi",
+                                        "Habib Douiba",
+                                        "Hada",
+                                        "Hana Hajouji",
+                                        "Hanan Khomassi",
+                                        "Hassan Nassiri",
+                                        "Miloud",
+                                        "Mohamed",
+                                        "Naaima Elakiwi",
+                                        "Rahma Belmokhtar",
+                                        "Rakiya",
+                                        "Saaid Kahlaoui",
+                                        "Saadi Zhiliga",
+                                        "Souad",
+                                        "Yassin",
+                                        "Youssef",
+                                        "Ztouti"
+                                    ];
                                     foreach ($chef_options as $option): 
                                     ?>
                                         <option value="<?php echo htmlspecialchars($option); ?>" <?php echo $edit_barcode['chef'] === $option ? 'selected' : ''; ?>>
@@ -382,37 +448,16 @@ require_once 'settings.php';
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                        </div>
-                        
-                        <div class="row mb-3">
-                            <div class="col-md-12">
-                                <label class="form-label">Full Barcode Preview</label>
-                                <div class="form-control" style="background-color: #f8f9fa;">
-                                    <span id="barcode_preview">
-                                    <?php 
-                                    $preview = $edit_barcode['of_number'] . '-' . $edit_barcode['size'] . '-';
-                                    if (!empty($edit_barcode['category'])) {
-                                        $preview .= $edit_barcode['category'] . '-';
-                                    }
-                                    $preview .= $edit_barcode['piece_name'] . '-' . $edit_barcode['order_str'];
-                                    echo htmlspecialchars($preview);
-                                    ?>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="last_update" class="form-label">Last Update</label>
                                 <input type="datetime-local" class="form-control" id="last_update" name="last_update" 
-                                       value="<?php echo formatDatetimeForInput($edit_barcode['last_update']); ?>">
+                                    value="<?php echo formatDatetimeForInput($edit_barcode['last_update']); ?>">
                             </div>
                         </div>
                         
                         <div class="d-flex justify-content-end gap-2 mt-4">
                             <a href="<?php echo buildSearchUrl(); ?>" class="btn btn-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <button type="submit" class="btn btn-primary">Save Changes <i class="fa-solid fa-floppy-disk"></i></button>
                         </div>
                     </form>
                 </div>
@@ -420,7 +465,7 @@ require_once 'settings.php';
         </div>
     </div>
     <?php endif; ?>
-    
+
     <?php include 'includes/footer.php'; ?>
     <script src="assets/index.js"></script>
     
