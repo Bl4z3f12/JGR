@@ -41,6 +41,11 @@ $active_tab = $_GET['tab'] ?? 'summary';
 $grouped_results = [];
 $stage_summary = [];
 
+// Define category and piece name options
+$category_options = ['R', 'C', 'L', 'LL', 'CC', 'N'];
+$p_name_options = ['P', 'V', 'G', 'M'];
+$stage_options = ['Coupe', 'V1', 'V2', 'V3', 'Pantalon', 'Repassage', 'P_fini'];
+
 // Function to check if barcode exists
 function checkBarcodeExists($pdo, $of_number, $size, $category, $piece_name) {
     $query = "SELECT COUNT(*) as count FROM barcodes 
@@ -340,9 +345,10 @@ if (isset($_GET['search']) || $active_tab == 'summary') {
     }
 }
 
-// Function to get stages
+// Function to get stages - replaced with the stage_options array
 function getStages() {
-    return ["Coupe", "V1", "V2", "V3", "Pantalon", "Repassage", "P_fini"];
+    global $stage_options;
+    return $stage_options;
 }
 
 // Get quantity coupe data if needed
@@ -379,17 +385,17 @@ function getQuantityCoupeData($pdo, $of_number = '') {
     return $stmt->fetchAll();
 }
 
-// Get distinct categories for dropdown
+// Get distinct categories for dropdown - We'll keep these queries but prioritize our predefined options
 $cat_query = "SELECT DISTINCT category FROM barcodes ORDER BY category";
 $cat_stmt = $pdo->prepare($cat_query);
 $cat_stmt->execute();
-$categories = $cat_stmt->fetchAll();
+$db_categories = $cat_stmt->fetchAll();
 
 // Get distinct piece names for dropdown
 $piece_query = "SELECT DISTINCT piece_name FROM barcodes ORDER BY piece_name";
 $piece_stmt = $pdo->prepare($piece_query);
 $piece_stmt->execute();
-$piece_names = $piece_stmt->fetchAll();
+$db_piece_names = $piece_stmt->fetchAll();
 
 // Get distinct sizes for dropdown
 $size_query = "SELECT DISTINCT size FROM barcodes ORDER BY size";
