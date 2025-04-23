@@ -1,237 +1,5 @@
 <?php
-require_once __DIR__ . '/vendor/autoload.php'; // For FPDF
-
-// Initialize variables
-$current_date = date("Y-m-d");
-$filter_of_number = $_GET['of_number'] ?? '';
-$filter_stage = $_GET['stage'] ?? '';
-$filter_date = $_GET['date'] ?? $current_date;
-$view_mode = 'summary'; // Always use summary view
-$group_by_of = true; // Always group by OF number
-
-// Establish database connection
-function connectDB() {
-    $conn = new mysqli("localhost", "root", "", "jgr2");
-    return $conn->connect_error ? false : $conn;
-}
-
-// Function to get OF summary data with totals
-function getOFSummaryData($of_number, $stage, $date) {
-    $conn = connectDB();
-    if (!$conn) return [];
-
-    // Build WHERE clause based on filters
-    $where_clauses = ["DATE(last_update) = ?"];
-    $param_types = "s";
-    $params = [$date];
-    
-    if (!empty($of_number)) {
-        $where_clauses[] = "of_number LIKE ?";
-        $param_types .= "s";
-        $params[] = "%$of_number%";
-    }
-    
-    if (!empty($stage)) {
-        $where_clauses[] = "stage = ?";
-        $param_types .= "s";
-        $params[] = $stage;
-    }
-    
-    $where = "WHERE " . implode(" AND ", $where_clauses);
-    
-    // Query to get individual barcodes grouped by OF number, size, category, and piece_name
-    $sql = "SELECT 
-                of_number,
-                size,
-                category,
-                piece_name,
-                COUNT(*) as count
-            FROM barcodes 
-            $where 
-            GROUP BY of_number, size, category, piece_name
-            ORDER BY of_number ASC, size ASC";
-    
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param($param_types, ...$params);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    $summary_data = [];
-    $current_of = '';
-    $of_total = 0;
-    $grand_total = 0;
-    
-    while ($row = $result->fetch_assoc()) {
-        // If we've moved to a new OF number, add the total for the previous one
-        if ($current_of !== '' && $current_of !== $row['of_number']) {
-            $summary_data[] = [
-                'of_number' => $current_of,
-                'is_total' => true,
-                'count' => $of_total
-            ];
-            $of_total = 0;
-        }
-        
-        $current_of = $row['of_number'];
-        $of_total += $row['count'];
-        $grand_total += $row['count'];
-        
-        $summary_data[] = [
-            'of_number' => $row['of_number'],
-            'size' => $row['size'],
-            'category' => $row['category'],
-            'piece_name' => $row['piece_name'],
-            'count' => $row['count'],
-            'is_total' => false
-        ];
-    }
-    
-    // Add the total for the last OF number
-    if ($current_of !== '') {
-        $summary_data[] = [
-            'of_number' => $current_of,
-            'is_total' => true,
-            'count' => $of_total
-        ];
-    }
-    
-    // Add the grand total
-    $summary_data[] = [
-        'of_number' => 'GRAND TOTAL',
-        'is_total' => true,
-        'is_grand_total' => true,
-        'count' => $grand_total
-    ];
-    
-    $stmt->close();
-    $conn->close();
-    return $summary_data;
-}
-
-// Function to get list of stages for dropdown
-function getStages() {
-    // Define static stage options
-    $stage_options = [
-        "Coupe",
-        "V1",
-        "V2",
-        "V3",
-        "Pantalon",
-        "Repassage",
-        "P_fini"
-    ];
-    
-    // Return the static array of stage options
-    return $stage_options;
-    
-    /* Original database query code - commented out
-    $conn = connectDB();
-    if (!$conn) return [];
-    
-    $sql = "SELECT DISTINCT stage FROM barcodes WHERE stage IS NOT NULL ORDER BY stage";
-    $result = $conn->query($sql);
-    
-    $stages = [];
-    while ($row = $result->fetch_assoc()) {
-        $stages[] = $row['stage'];
-    }
-    
-    $conn->close();
-    return $stages;
-    */
-}
-
-// Export to Excel (Tab-delimited TXT)
-if (isset($_GET['export'])) {
-    $conn = connectDB();
-    if (!$conn) {
-        echo "Database connection failed";
-        exit;
-    }
-    
-    $summary_data = getOFSummaryData($filter_of_number, $filter_stage, $filter_date);
-    
-    // Create excel directory if it doesn't exist
-    $exelDir = __DIR__ . '/exel';
-    if (!file_exists($exelDir)) {
-        mkdir($exelDir, 0755, true);
-    }
-    
-    // Generate filename
-    $filename = 'barcodes_summary_' . date('Y-m-d_H-i-s') . '.xls';
-    $filepath = $exelDir . '/' . $filename;
-    
-    // Open file for writing
-    $file = fopen($filepath, 'w');
-    
-    // Excel XML header
-    fwrite($file, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-    fwrite($file, "<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\" xmlns:x=\"urn:schemas-microsoft-com:office:excel\" xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\" xmlns:html=\"http://www.w3.org/TR/REC-html40\">\n");
-    fwrite($file, "<Worksheet ss:Name=\"Barcodes\">\n");
-    fwrite($file, "<Table>\n");
-    
-    // Header row
-    fwrite($file, "<Row>\n");
-    fwrite($file, "<Cell><Data ss:Type=\"String\">OF</Data></Cell>\n");
-    fwrite($file, "<Cell><Data ss:Type=\"String\">Size</Data></Cell>\n");
-    fwrite($file, "<Cell><Data ss:Type=\"String\">Category</Data></Cell>\n");
-    fwrite($file, "<Cell><Data ss:Type=\"String\">P_Name</Data></Cell>\n");
-    fwrite($file, "<Cell><Data ss:Type=\"String\">" . htmlspecialchars("Inside P_fini Sum") . "</Data></Cell>\n");
-    fwrite($file, "</Row>\n");
-    
-    // Data rows
-    foreach ($summary_data as $row) {
-        fwrite($file, "<Row>\n");
-        
-        if (isset($row['is_total']) && $row['is_total']) {
-            if (isset($row['is_grand_total']) && $row['is_grand_total']) {
-                fwrite($file, "<Cell><Data ss:Type=\"String\">GRAND TOTAL</Data></Cell>\n");
-            } else {
-                fwrite($file, "<Cell><Data ss:Type=\"String\">OF_TOTAL</Data></Cell>\n");
-            }
-            fwrite($file, "<Cell><Data ss:Type=\"String\"></Data></Cell>\n");
-            fwrite($file, "<Cell><Data ss:Type=\"String\"></Data></Cell>\n");
-            fwrite($file, "<Cell><Data ss:Type=\"String\"></Data></Cell>\n");
-            fwrite($file, "<Cell><Data ss:Type=\"Number\">" . htmlspecialchars($row['count']) . "</Data></Cell>\n");
-        } else {
-            fwrite($file, "<Cell><Data ss:Type=\"String\">" . htmlspecialchars($row['of_number']) . "</Data></Cell>\n");
-            fwrite($file, "<Cell><Data ss:Type=\"Number\">" . htmlspecialchars($row['size']) . "</Data></Cell>\n");
-            fwrite($file, "<Cell><Data ss:Type=\"String\">" . htmlspecialchars($row['category'] ?: '') . "</Data></Cell>\n");
-            fwrite($file, "<Cell><Data ss:Type=\"String\">" . htmlspecialchars($row['piece_name']) . "</Data></Cell>\n");
-            fwrite($file, "<Cell><Data ss:Type=\"Number\">" . htmlspecialchars($row['count']) . "</Data></Cell>\n");
-        }
-        
-        fwrite($file, "</Row>\n");
-    }
-    
-    // Close XML tags
-    fwrite($file, "</Table>\n");
-    fwrite($file, "</Worksheet>\n");
-    fwrite($file, "</Workbook>\n");
-    
-    fclose($file);
-    $conn->close();
-    
-    // Redirect back to the page with success message
-    header("Location: scantoday.php?export_success=1&filename=" . urlencode($filename) . 
-           "&of_number=" . urlencode($filter_of_number) . 
-           "&stage=" . urlencode($filter_stage) . 
-           "&date=" . urlencode($filter_date));
-    exit;
-}
-
-// Get stages for dropdown
-$stages = getStages();
-
-// Get OF summary data
-$summary_data = getOFSummaryData($filter_of_number, $filter_stage, $filter_date);
-
-// Success messages
-$export_success = isset($_GET['export_success']) && $_GET['export_success'] == 1;
-$exported_filename = $_GET['filename'] ?? '';
-
-// Get the title based on stage
-$title = "Inside P_fini for " . ($filter_stage ?: "All Stages") . " - " . date('d/m/Y', strtotime($filter_date));
+require "scantoday_settings.php";
 ?>
 
 <!DOCTYPE html>
@@ -239,187 +7,476 @@ $title = "Inside P_fini for " . ($filter_stage ?: "All Stages") . " - " . date('
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OF Summary - Barcode System</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
+    <title>Inventory Management System</title>
+    <!-- Bootstrap for styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .filter-section {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
+        .tab-content {
+            padding: 20px 0;
+        }
+        .card {
             margin-bottom: 20px;
         }
-        .alert-dismissible {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1050;
+        .alert {
+            margin-top: 15px;
         }
-        .table th, .table td {
-            vertical-align: middle;
-            border: 1px solid #dee2e6;
+        .stage-badge {
+            margin-right: 5px;
         }
-        .table thead th {
-            background-color: #007bff;
-            text-align: center;
-            color: white;
-        }
-        .total-row {
-            background-color: #d1e7dd !important;
-            font-weight: bold;
-        }
-        .grand-total-row {
-            background-color: #a3cfbb !important;
-            font-weight: bold;
-        }
-        .show-more-btn {
-            margin-left: 10px;
-            background-color: #007bff; /* Bootstrap primary color */
-            color: white;
-            cursor: pointer; /* Added cursor style for better UX */
-        }
-        .show-more-btn:hover {
-            color: white;
-
-            background-color: #0056b3; /* Darker shade on hover */
+        .table-responsive {
+            overflow-x: auto;
         }
     </style>
+  
+    <?php include 'includes/head.php'; ?>
 </head>
 <body>
+<?php include 'includes/sidebar.php'; ?>
+
+
+
     <div class="container mt-4">
-        <?php if ($export_success): ?>
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <strong>Success!</strong> Data exported to exel/<?php echo htmlspecialchars($exported_filename); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        <?php endif; ?>
-
-        <h1 class="mb-4">
-            <i class="fas fa-barcode me-2"></i>
-            OF Summary
-        </h1>
+        <h1 class="mb-4">Inventory Management System</h1>
         
-        <div class="filter-section">
-            <form action="scantoday.php" method="GET" class="row g-3">
-                <div class="col-md-3">
-                    <label for="of_number" class="form-label">OF Number</label>
-                    <input type="text" class="form-control" id="of_number" name="of_number" 
-                           value="<?php echo htmlspecialchars($filter_of_number); ?>" placeholder="Enter OF Number">
+        <!-- Display success/error messages if any -->
+        <?php if(isset($success_message)): ?>
+            <div class="alert alert-success"><?php echo $success_message; ?></div>
+        <?php endif; ?>
+        
+        <?php if(isset($error_message)): ?>
+            <div class="alert alert-danger"><?php echo $error_message; ?></div>
+        <?php endif; ?>
+        
+        <!-- FIX: Initialize $active_tab at the beginning of the PHP file if not already set -->
+        <?php 
+        // Make sure $active_tab is initialized
+        $active_tab = $_GET['tab'] ?? 'summary';
+        ?>
+        
+        <!-- Tab navigation -->
+        <ul class="nav nav-tabs mb-3" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link <?php echo $active_tab == 'summary' ? 'active' : ''; ?>" 
+                   href="?tab=summary" role="tab">Summary</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link <?php echo $active_tab == 'quantity_coupe' ? 'active' : ''; ?>" 
+                   href="?tab=quantity_coupe" role="tab">Quantity Coupe</a>
+            </li>
+        </ul>
+        
+        <div class="tab-content">
+            <!-- Summary Tab -->
+            <?php if($active_tab == 'summary'): ?>
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Search Inventory</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="GET" action="" class="row g-3">
+                            <input type="hidden" name="tab" value="summary">
+                            
+                            <div class="col-md-2">
+                                <label for="of_number" class="form-label">OF Number</label>
+                                <input type="text" class="form-control" id="of_number" name="of_number" 
+                                       value="<?php echo htmlspecialchars($of_number); ?>">
+                            </div>
+                            
+                            <div class="col-md-2">
+                                <label for="size" class="form-label">Size</label>
+                                <select class="form-select" id="size" name="size">
+                                    <option value="">All Sizes</option>
+                                    <?php foreach($sizes as $s): ?>
+                                        <option value="<?php echo htmlspecialchars($s['size']); ?>" 
+                                            <?php echo $size == $s['size'] ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($s['size']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-2">
+                                <label for="category" class="form-label">Category</label>
+                                <select class="form-select" id="category" name="category">
+                                    <option value="select">All Categories</option>
+                                    <?php foreach($categories as $cat): ?>
+                                        <option value="<?php echo htmlspecialchars($cat['category']); ?>" 
+                                            <?php echo $category == $cat['category'] ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($cat['category']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-2">
+                                <label for="p_name" class="form-label">Piece Name</label>
+                                <select class="form-select" id="p_name" name="p_name">
+                                    <option value="select">All Pieces</option>
+                                    <?php foreach($piece_names as $pn): ?>
+                                        <option value="<?php echo htmlspecialchars($pn['piece_name']); ?>" 
+                                            <?php echo $p_name == $pn['piece_name'] ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($pn['piece_name']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-2">
+                                <label for="stage" class="form-label">Stage</label>
+                                <select class="form-select" id="stage" name="stage">
+                                    <option value="select">All Stages</option>
+                                    <?php foreach(getStages() as $s): ?>
+                                        <option value="<?php echo htmlspecialchars($s); ?>" 
+                                            <?php echo $stage == $s ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($s); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-2">
+                                <label for="date" class="form-label">Date</label>
+                                <input type="date" class="form-control" id="date" name="date" 
+                                       value="<?php echo htmlspecialchars($date); ?>">
+                            </div>
+                            
+                            <div class="col-12">
+                                <button type="submit" name="search" class="btn btn-primary">Search</button>
+                                <a href="?tab=summary" class="btn btn-secondary">Reset</a>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <label for="stage" class="form-label">Stage</label>
-                    <select class="form-select" id="stage" name="stage">
-                        <option value="">All Stages</option>
-                        <?php foreach ($stages as $stage): ?>
-                        <option value="<?php echo htmlspecialchars($stage); ?>" <?php echo $filter_stage === $stage ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($stage); ?>
-                        </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label for="date" class="form-label">Date</label>
-                    <input type="text" class="form-control datepicker" id="date" name="date" 
-                           value="<?php echo htmlspecialchars($filter_date); ?>" placeholder="YYYY-MM-DD">
-                </div>
-                <div class="col-md-3 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary me-2">
-                        <i class="fas fa-search me-1"></i> Filter
-                    </button>
-                    <a href="scantoday.php" class="btn btn-secondary me-2">
-                        <i class="fas fa-undo me-1"></i> Reset
-                    </a>
-                    <a href="scantoday.php?export=1&of_number=<?php echo urlencode($filter_of_number); ?>&stage=<?php echo urlencode($filter_stage); ?>&date=<?php echo urlencode($filter_date); ?>" 
-                       class="btn btn-success">
-                        <i class="fas fa-file-excel me-1"></i> Export
-                    </a>
-                </div>
-            </form>
-        </div>
 
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0 text-center">
-                    <?php echo htmlspecialchars($title); ?>                    
-                    <button id="showMoreBtn" class="btn btn-sm show-more-btn">
-                        Show details <i class="fa-solid fa-circle-info"></i>
-                    </button>
-                </h5>
-            </div>
-            <div class="card-body">
+                <!-- Stage Summary -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Stage Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <?php foreach(getStages() as $s): ?>
+                                <div class="col-md-2 mb-2">
+                                    <div class="card">
+                                        <div class="card-body text-center">
+                                            <h5><?php echo htmlspecialchars($s); ?></h5>
+                                            <span class="badge bg-primary fs-5">
+                                                <?php echo $stage_summary[$s] ?? 0; ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Table -->
                 <div class="table-responsive">
-                    <table class="table table-bordered" >
+                    <table class="table table-striped table-hover">
                         <thead>
-                            <tr class="text-center">
-                                <th>OF</th>
+                            <tr>
+                                <th>OF Number</th>
                                 <th>Size</th>
                                 <th>Category</th>
-                                <th>P_Name</th>
-                                <th>P_Sum</th>
+                                <th>Piece Name</th>
+                                <th>Total Count</th>
+                                <th>Chef</th>
+                                <th>Total Stage Quantity</th>
+                                <th>Total Main Quantity</th>
+                                <th>Stages</th>
+                                <th>Solped Client</th>
+                                <th>Pedido Client</th>
+                                <th>Color Tissus</th>
+                                <th>Main Qty</th>
+                                <th>Qty Coupe</th>
+                                <th>Manque</th>
+                                <th>Suv Plus</th>
+                                <th>Latest Update</th>
+                               
                             </tr>
                         </thead>
                         <tbody>
-                            <?php if (empty($summary_data)): ?>
-                            <tr>
-                                <td colspan="5" class="text-center">No data found for the selected filters</td>
-                            </tr>
-                            <?php else: ?>
-                            <?php foreach ($summary_data as $row): ?>
-                                <?php if (isset($row['is_total']) && $row['is_total']): ?>
-                                    <?php if (isset($row['is_grand_total']) && $row['is_grand_total']): ?>
-                                    <tr class="grand-total-row">
-                                        <td>GRAND TOTAL</td>
-                                        <td colspan="3"></td>
-                                        <td class="text-center"><?php echo htmlspecialchars($row['count']); ?></td>
-                                    </tr>
-                                    <?php else: ?>
-                                    <tr class="total-row">
-                                        <td>OF_TOTAL</td>
-                                        <td colspan="3"></td>
-                                        <td class="text-center"><?php echo htmlspecialchars($row['count']); ?></td>
-                                    </tr>
-                                    <?php endif; ?>
-                                <?php else: ?>
+                            <?php if(empty($grouped_results)): ?>
                                 <tr>
-                                    <td><?php echo htmlspecialchars($row['of_number']); ?></td>
-                                    <td class="text-center"><?php echo htmlspecialchars($row['size']); ?></td>
-                                    <td class="text-center"><?php echo htmlspecialchars($row['category'] ?: ''); ?></td>
-                                    <td class="text-center"><?php echo htmlspecialchars($row['piece_name']); ?></td>
-                                    <td class="text-center"><?php echo htmlspecialchars($row['count']); ?></td>
+                                    <td colspan="11" class="text-center">No records found</td>
                                 </tr>
-                                <?php endif; ?>
-                            <?php endforeach; ?>
+                            <?php else: ?>
+                                <?php foreach($grouped_results as $row): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($row['of_number']); ?></td>
+                                        <td><?php echo htmlspecialchars($row['size']); ?></td>
+                                        <td><?php echo htmlspecialchars($row['category']); ?></td>
+                                        <td><?php echo htmlspecialchars($row['p_name']); ?></td>
+                                        <td><?php echo $row['total_count']; ?></td>
+                                        <td><?php echo htmlspecialchars($row['chef'] ?? ''); ?></td>
+                                        <td><?php echo $row['total_stage_quantity']; ?></td>
+                                        <td><?php echo $row['total_main_quantity']; ?></td>
+                                        <td>
+                                            <?php 
+                                            $stages = explode(', ', $row['stage']);
+                                            foreach($stages as $s): ?>
+                                                <span class="badge bg-secondary stage-badge">
+                                                    <?php echo htmlspecialchars($s); ?>
+                                                </span>
+                                            <?php endforeach; ?>
+                                        </td>
+                                        <td><?php echo htmlspecialchars($row['solped_client'] ?? ''); ?></td>
+                                        <td><?php echo htmlspecialchars($row['pedido_client'] ?? ''); ?></td>
+                                        <td><?php echo htmlspecialchars($row['color_tissus'] ?? ''); ?></td>
+                                        <td><?php echo $row['principale_quantity']; ?></td>
+                                        <td><?php echo $row['quantity_coupe']; ?></td>
+                                        <td><?php echo $row['manque']; ?></td>
+                                        <td><?php echo $row['suv_plus']; ?></td>
+                                        <td><?php echo $row['latest_update'] ? date('Y-m-d H:i', strtotime($row['latest_update'])) : ''; ?></td>
+                                        
+                                    </tr>
+                                <?php endforeach; ?>
                             <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
+            <?php endif; ?>
+            
+            <!-- Quantity Coupe Tab -->
+            <?php if($active_tab == 'quantity_coupe'): ?>
+                <div class="row">
+                    <!-- Barcode Check Form -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Check Barcode</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="POST" action="?tab=quantity_coupe" class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="of_number" class="form-label">OF Number</label>
+                                        <input type="text" class="form-control" id="of_number" name="of_number" 
+                                               value="<?php echo htmlspecialchars($barcode_data['of_number']); ?>" required>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <label for="size" class="form-label">Size</label>
+                                        <input type="text" class="form-control" id="size" name="size" 
+                                               value="<?php echo htmlspecialchars($barcode_data['size']); ?>" required>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <label for="category" class="form-label">Category</label>
+                                        <input type="text" class="form-control" id="category" name="category" 
+                                               value="<?php echo htmlspecialchars($barcode_data['category']); ?>" required>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <label for="piece_name" class="form-label">Piece Name</label>
+                                        <input type="text" class="form-control" id="piece_name" name="piece_name" 
+                                               value="<?php echo htmlspecialchars($barcode_data['piece_name']); ?>" required>
+                                    </div>
+                                    
+                                    <div class="col-12">
+                                        <button type="submit" name="check_barcode" class="btn btn-primary">Check Barcode</button>
+                                    </div>
+                                    
+                                    <?php if($barcode_checked): ?>
+                                        <div class="col-12">
+                                            <?php if($barcode_exists): ?>
+                                                <div class="alert alert-success">
+                                                    Barcode exists! You can now enter quantity data.
+                                                </div>
+                                            <?php else: ?>
+                                                <div class="alert alert-danger">
+                                                    Barcode does not exist. Please check your input.
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quantity Coupe Form -->
+                    <div class="col-md-6">
+                        <?php if($barcode_checked && $barcode_exists): ?>
+                            <div class="card">
+    <div class="card-header">
+        <h5>Enter Quantity Data</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="?tab=quantity_coupe" class="row g-3" id="quantityForm">
+            <input type="hidden" name="of_number" value="<?php echo htmlspecialchars($barcode_data['of_number']); ?>">
+            <input type="hidden" name="size" value="<?php echo htmlspecialchars($barcode_data['size']); ?>">
+            <input type="hidden" name="category" value="<?php echo htmlspecialchars($barcode_data['category']); ?>">
+            <input type="hidden" name="piece_name" value="<?php echo htmlspecialchars($barcode_data['piece_name']); ?>">
+            
+            <div class="col-md-6">
+                <label for="solped_client" class="form-label">Solped Client</label>
+                <input type="text" class="form-control" id="solped_client" name="solped_client">
             </div>
-        </div>
-        
-        <div class="d-flex justify-content-between mt-4">
-            <a href="index.php" class="btn btn-outline-primary">
-                <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
-            </a>
+            
+            <div class="col-md-6">
+                <label for="pedido_client" class="form-label">Pedido Client</label>
+                <input type="text" class="form-control" id="pedido_client" name="pedido_client">
+            </div>
+            
+            <div class="col-md-6">
+                <label for="color_tissus" class="form-label">Color Tissus</label>
+                <input type="text" class="form-control" id="color_tissus" name="color_tissus">
+            </div>
+            
+            <div class="col-md-6">
+                <label for="principale_quantity" class="form-label">Main Quantity</label>
+                <input type="number" class="form-control" id="principale_quantity" name="principale_quantity" value="0" min="0">
+            </div>
+            
+            <div class="col-md-6">
+                <label for="quantity_coupe" class="form-label">Quantity Coupe</label>
+                <input type="number" class="form-control" id="quantity_coupe" name="quantity_coupe" value="0" min="0">
+            </div>
+            
+            <div class="col-md-3">
+                <label for="manque" class="form-label">Manque</label>
+                <input type="number" class="form-control" id="manque" name="manque" value="0" min="0" readonly>
+            </div>
+            
+            <div class="col-md-3">
+                <label for="suv_plus" class="form-label">Suv Plus</label>
+                <input type="number" class="form-control" id="suv_plus" name="suv_plus" value="0" min="0" readonly>
+            </div>
+            
+            <div class="col-12">
+                <button type="submit" name="save_quantity" class="btn btn-success">Save Quantity Data</button>
+            </div>
+        </form>
+    </div>
+</div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                
+                <!-- Search Form for Quantity Coupe -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5>Search Quantity Coupe Records</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="GET" action="" class="row g-3">
+                            <input type="hidden" name="tab" value="quantity_coupe">
+                            
+                            <div class="col-md-4">
+                                <label for="of_number" class="form-label">OF Number</label>
+                                <input type="text" class="form-control" id="of_number" name="of_number" 
+                                       value="<?php echo htmlspecialchars($of_number); ?>">
+                            </div>
+                            
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">Search</button>
+                                <a href="?tab=quantity_coupe" class="btn btn-secondary">Reset</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Quantity Coupe Results Table -->
+                <div class="table-responsive mt-4">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>OF Number</th>
+                                <th>Size</th>
+                                <th>Category</th>
+                                <th>Piece Name</th>
+                                <th>Solped Client</th>
+                                <th>Pedido Client</th>
+                                <th>Color Tissus</th>
+                                <th>Main Qty</th>
+                                <th>Qty Coupe</th>
+                                <th>Manque</th>
+                                <th>Suv Plus</th>
+                                <th>Last Update</th>
+                         
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (isset($quantity_coupe_data) && !empty($quantity_coupe_data)): ?>
+                                <?php foreach($quantity_coupe_data as $row): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($row['of_number']); ?></td>
+                                        <td><?php echo htmlspecialchars($row['size']); ?></td>
+                                        <td><?php echo htmlspecialchars($row['category']); ?></td>
+                                        <td><?php echo htmlspecialchars($row['piece_name']); ?></td>
+                                        <td><?php echo htmlspecialchars($row['solped_client'] ?? ''); ?></td>
+                                        <td><?php echo htmlspecialchars($row['pedido_client'] ?? ''); ?></td>
+                                        <td><?php echo htmlspecialchars($row['color_tissus'] ?? ''); ?></td>
+                                        <td><?php echo $row['principale_quantity']; ?></td>
+                                        <td><?php echo $row['quantity_coupe']; ?></td>
+                                        <td><?php echo $row['manque']; ?></td>
+                                        <td><?php echo $row['suv_plus']; ?></td>
+                                        <td><?php echo $row['lastupdate'] ? date('Y-m-d H:i', strtotime($row['lastupdate'])) : ''; ?></td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+    
+                                                <a href="?tab=quantity_coupe&delete_qc=1&id=<?php echo $row['id']; ?>" 
+                                                   class="btn btn-sm btn-danger" 
+                                                   onclick="return confirm('Are you sure you want to delete this record?')">Delete</a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="13" class="text-center">No records found</td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Auto-Calculate Script -->
     <script>
-        $(document).ready(function(){
-            $('.datepicker').datepicker({
-                format: 'yyyy-mm-dd',
-                autoclose: true,
-                todayHighlight: true
-            });
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get references to the form elements
+        const form = document.getElementById('quantityForm');
+        if (!form) return; // Exit if the form doesn't exist on this page
+        
+        const mainQuantityInput = document.getElementById('principale_quantity');
+        const qtyCouperInput = document.getElementById('quantity_coupe');
+        const manqueInput = document.getElementById('manque');
+        const suvPlusInput = document.getElementById('suv_plus');
+        
+        // Function to calculate manque and suv_plus
+        function calculateDifferences() {
+            const mainQty = parseInt(mainQuantityInput.value) || 0;
+            const coupeQty = parseInt(qtyCouperInput.value) || 0;
             
-            // Auto-hide alert after 5 seconds
-            setTimeout(function(){
-                $('.alert-dismissible').fadeOut('slow');
-            }, 5000);
-        });
+            // If quantity_coupe is less than principale_quantity, there's a shortage (manque)
+            // If quantity_coupe is more than principale_quantity, there's an excess (suv_plus)
+            if (coupeQty < mainQty) {
+                manqueInput.value = mainQty - coupeQty;
+                suvPlusInput.value = 0;
+            } else if (coupeQty > mainQty) {
+                suvPlusInput.value = coupeQty - mainQty;
+                manqueInput.value = 0;
+            } else {
+                // If they're equal, both are zero
+                manqueInput.value = 0;
+                suvPlusInput.value = 0;
+            }
+        }
+        
+        // Add event listeners to recalculate when values change
+        mainQuantityInput.addEventListener('input', calculateDifferences);
+        qtyCouperInput.addEventListener('input', calculateDifferences);
+        
+        // Calculate initial values if the form is loaded with existing data
+        calculateDifferences();
+    });
     </script>
 </body>
 </html>

@@ -148,33 +148,38 @@ $items_per_page = 2000;
     
     <!-- Create Barcode Modal -->
     <div class="modal <?php echo $show_modal ? 'show' : ''; ?>" id="barcode-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Barcode Generator</h3>
-                <a href="?view=<?php echo $current_view; ?>" class="close">
-                    <i class="fa-solid fa-circle-xmark"></i>
-                </a>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Barcode Generator</h3>
+            <a href="?view=<?php echo $current_view; ?>" class="close">
+                <i class="fa-solid fa-circle-xmark"></i>
+            </a>
+        </div>
+        <form action="index.php" method="POST" class="container-fluid">
+            <input type="hidden" name="action" value="create_barcode">
+            <input type="hidden" name="view" value="<?php echo $current_view; ?>">
+            
+            <div class="alert alert-warning mb-3">
+                REMEMBER: You will not be able to change, barcode data after you confirm validity of data
             </div>
-            <form action="index.php" method="POST">
-                <input type="hidden" name="action" value="create_barcode">
-                <input type="hidden" name="view" value="<?php echo $current_view; ?>">
-                
-                <div class="warning-message">
-                    REMEMBER: You will not be able to change, barcode data after you confirm validity of data
+            
+            <div class="row mb-3">
+                <label for="barcode-prefix" class="col-sm-3 col-form-label">OF_ number *</label>
+                <div class="col-sm-9">
+                    <input class="form-control ofinput" type="text" id="barcode-prefix" name="barcode_prefix" required>
                 </div>
-                
-                <div class="form-group">
-                    <label for="barcode-prefix">OF_ number *</label>
-                    <input class="ofinput" type="text" id="barcode-prefix" name="barcode_prefix" required>
+            </div>
+            
+            <div class="row mb-3">
+                <label for="barcode-size" class="col-sm-3 col-form-label">Size *</label>
+                <div class="col-sm-9">
+                    <input type="number" id="barcode-size" name="barcode_size" min="1" step="1" class="form-control ofinput" placeholder="Enter size number">
                 </div>
-                
-                <div class="form-group">
-                    <label for="barcode-size">Size *</label>
-                    <input type="number" id="barcode-size" name="barcode_size" min="1" step="1" class="ofinput" placeholder="Enter size number">
-                </div>
+            </div>
 
-                <div class="form-group">
-                    <label for="barcode-category">OF_Category</label>
+            <div class="row mb-3">
+                <label for="barcode-category" class="col-sm-3 col-form-label">OF_Category</label>
+                <div class="col-sm-9">
                     <select id="barcode-category" name="barcode_category" class="form-select">
                         <option value="">Select Category</option>
                         <option value="R">R</option>
@@ -185,9 +190,11 @@ $items_per_page = 2000;
                         <option value="N">N</option>
                     </select>
                 </div>
-                
-                <div class="form-group">
-                    <label for="barcode-piece-name">Piece Name *</label>
+            </div>
+            
+            <div class="row mb-3">
+                <label for="barcode-piece-name" class="col-sm-3 col-form-label">Piece Name *</label>
+                <div class="col-sm-9">
                     <select id="barcode-piece-name" name="barcode_piece_name" class="form-select">
                         <option value="">Select Piece Name</option>
                         <option value="P">P</option>
@@ -196,89 +203,118 @@ $items_per_page = 2000;
                         <option value="M">M</option>
                     </select>
                 </div>
-                                
-                <div class="checkall">
-                    <div class="form-group checkbox-group">
-                        <input type="checkbox" id="lost-barcode" name="lost_barcode" style="margin-right: 5px;"
+            </div>
+                            
+            <div class="row mb-3">
+                <div class="col-12">
+                    <div class="form-check d-flex align-items-center">
+                        <input class="form-check-input me-2" type="checkbox" id="lost-barcode" name="lost_barcode"
                             onclick="this.form.lost_barcode_count.disabled = !this.checked;
                                     this.form.generate_costume_2pcs.disabled = this.checked;
                                     this.form.generate_costume_3pcs.disabled = this.checked;
                                     this.form.range_from.disabled = this.checked;
                                     this.form.range_to.disabled = this.checked;">
-                        <label for="lost-barcode" style="margin-right: 10px;">Lost Barcode [C prefix]</label>
-                        <label style="margin-right: 5px;"></label>
+                        <label class="form-check-label me-3" for="lost-barcode">Lost Barcode</label>
                         <input type="number" id="lost-barcode-count" name="lost_barcode_count"
-                            style="margin-right: 20px; width: 60px;"
+                            class="form-control form-control-sm me-3" 
+                            style="width: 60px;"
                             value="1" min="1" max="100" 
                             disabled>
-                        <label style="margin-right: 10px;">Random <i class="fa-solid fa-arrows-rotate"></i></label>
                     </div>
                 </div>
+            </div>
 
-                <div class="form-group">
-                    <label>Piece Order</label>
-                    <div class="range-inputs">
-                        <div>
-                            <label for="range-from">From</label>
-                            <input type="number" id="range-from" name="range_from" size="8">
+            <div class="row mb-3">
+                <label class="col-sm-3 col-form-label">Piece Order</label>
+                <div class="col-sm-9">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="input-group">
+                                <span class="input-group-text">From</span>
+                                <input type="number" id="range-from" name="range_from" class="form-control">
+                            </div>
                         </div>
-                        <div>
-                            <label for="range-to">To</label>
-                            <input type="number" id="range-to" name="range_to" size="8">
+                        <div class="col-6">
+                            <div class="input-group">
+                                <span class="input-group-text">To</span>
+                                <input type="number" id="range-to" name="range_to" class="form-control">
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="checkall2">
-                <div class="form-group checkbox-group">
-                    <input type="checkbox" id="generate-costume-2pcs" name="generate_costume_2pcs">
-                    <label for="generate-costume-2pcs">Generate for P and V (Costume 2pcs)</label>
-                </div>
+            <div class="row mb-3">
+                <div class="col-12">
+                 
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="generate-costume-2pcs" name="generate_costume_2pcs">
+                    <label class="form-check-label" for="generate-costume-2pcs">Generate for P and V (Costume 2pcs)</label>
+            </div>
 
-                <div class="form-group checkbox-group">
-                    <input type="checkbox" id="generate-costume-3pcs" name="generate_costume_3pcs">
-                    <label for="generate-costume-3pcs">Generate for P, V, and G (Costume 3pcs)</label>
-                </div>
-                    
-                <div class="form-group checkbox-group indented">
-                    <input type="checkbox" id="generate_pdf_only" name="generate_pdf_only">
-                    <label for="generate_pdf_only">Generate only PDF</label>
-                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="generate-costume-3pcs" name="generate_costume_3pcs">
+                    <label class="form-check-label" for="generate-costume-3pcs">Generate for P, V, and G (Costume 3pcs)</label>
                 </div>
 
-                <div class="barcode-actions">
-                    <button type="submit" class="btn btn-secondary">Generate Barcodes</button>
-                    <a href="?view=<?php echo $current_view; ?>" class="btn btn-danger">Cancel Generating</a>
-                </div>
-                
-                <div class="barcode-range-indicators">
-                    <div class="range-indicator">
-                        <div class="color-box white-box"></div>
-                        <span>1 ---> 1000</span>
-                    </div>
-                    <div class="range-indicator">
-                        <div class="color-box yellow-box"></div>
-                        <span>1001 ---> 2000</span>
-                    </div>
-                    <div class="range-indicator">
-                        <div class="color-box green-box"></div>
-                        <span>2001 ---> 3000</span>
+                        
+                    <div class="form-check mb-2 ms-4">
+                        <input class="form-check-input" type="checkbox" id="generate_pdf_only" name="generate_pdf_only">
+                        <label class="form-check-label" for="generate_pdf_only">Generate only PDF</label>
                     </div>
                 </div>
-                
-                <div class="barcode-legend">
-                    <span>1 --> CC / 2 --> C / 3 --> R / 4 --> L / 5 --> LL</span>
-                </div>
-                
-            </form>
-        </div>
+            </div>
+
+            <div class="row mb-3">
+    <div class="col-12 d-flex justify-content-center gap-2">
+        <button type="submit" class="btn btn-secondary">Generate Barcodes</button>
     </div>
-    
+</div>
+            
+            <div class="row mb-3">
+                <div class="col-12">
+                    <div class="d-flex flex-wrap gap-3">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-white border" style="width: 20px; height: 20px;"></div>
+                            <span class="ms-2">1 ---> 1000</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-warning" style="width: 20px; height: 20px;"></div>
+                            <span class="ms-2">1001 ---> 2000</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-success" style="width: 20px; height: 20px;"></div>
+                            <span class="ms-2">2001 ---> 3000</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-12">
+                    <p class="small text-muted">1 --> CC / 2 --> C / 3 --> R / 4 --> L / 5 --> LL</p>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
     <?php include 'includes/footer.php'; ?>
     
     <?php 
     // Output the random button JavaScript
     echo $random_button_script;
     ?>
+    <script>
+    const checkbox2pcs = document.getElementById('generate-costume-2pcs');
+    const checkbox3pcs = document.getElementById('generate-costume-3pcs');
+
+    checkbox2pcs.addEventListener('change', function () {
+        checkbox3pcs.disabled = this.checked;
+    });
+
+    checkbox3pcs.addEventListener('change', function () {
+        checkbox2pcs.disabled = this.checked;
+    });
+</script>
 </body>
 </html>

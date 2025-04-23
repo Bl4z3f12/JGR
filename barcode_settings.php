@@ -35,37 +35,51 @@ require_once 'settings.php';
                 
                 <!-- Search Form -->
                 <div class="card-body">
-                    <form method="GET" action="barcode_settings.php" class="mb-4">
-                        <div class="row g-3">
-                            <div class="col-md-2">
-                                <label for="of_number_search" class="form-label">OF Number</label>
-                                <input type="text" class="form-control" id="of_number_search" name="of_number_search" value="<?php echo htmlspecialchars($of_number_search); ?>">
-                            </div>
-                            <div class="col-md-1">
-                                <label for="size_search" class="form-label">Size</label>
-                                <input type="number" class="form-control" id="size_search" name="size_search" value="<?php echo htmlspecialchars($size_search); ?>">
-                            </div>
-                            <div class="col-md-2">
-                                <label for="category_search" class="form-label">Category</label>
-                                <input type="text" class="form-control" id="category_search" name="category_search" value="<?php echo htmlspecialchars($category_search); ?>">
-                            </div>
-                            <div class="col-md-2">
-                                <label for="piece_name_search" class="form-label">Piece Name</label>
-                                <input type="text" class="form-control" id="piece_name_search" name="piece_name_search" value="<?php echo htmlspecialchars($piece_name_search); ?>">
-                            </div>
-                            <div class="col-md-2">
-                                <label for="order_str_search" class="form-label">Order</label>
-                                <input type="text" class="form-control" id="order_str_search" name="order_str_search" value="<?php echo htmlspecialchars($order_str_search); ?>">
-                            </div>
-                            <div class="col-md-2 d-flex align-items-end">
-                                <button type="submit" class="btn btn-primary w-100">Search</button>
-                            </div>
-                            <div class="col-md-1 d-flex align-items-end">
-                                <a href="barcode_settings.php" class="btn btn-secondary w-100">Clear</a>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+    <form method="GET" action="barcode_settings.php" class="mb-4">
+        <div class="row g-3">
+            <div class="col-md-2">
+                <label for="of_number_search" class="form-label">OF Number</label>
+                <input type="text" class="form-control" id="of_number_search" name="of_number_search" value="<?php echo htmlspecialchars($of_number_search); ?>">
+            </div>
+            <div class="col-md-1">
+                <label for="size_search" class="form-label">Size</label>
+                <input type="number" class="form-control" id="size_search" name="size_search" value="<?php echo htmlspecialchars($size_search); ?>">
+            </div>
+            <div class="col-md-2">
+                <label for="category_search" class="form-label">Category</label>
+                <select class="form-select" id="category_search" name="category_search">
+                    <option value="">Select Category</option>
+                    <option value="R" <?php echo ($category_search == 'R') ? 'selected' : ''; ?>>R</option>
+                    <option value="C" <?php echo ($category_search == 'C') ? 'selected' : ''; ?>>C</option>
+                    <option value="L" <?php echo ($category_search == 'L') ? 'selected' : ''; ?>>L</option>
+                    <option value="LL" <?php echo ($category_search == 'LL') ? 'selected' : ''; ?>>LL</option>
+                    <option value="CC" <?php echo ($category_search == 'CC') ? 'selected' : ''; ?>>CC</option>
+                    <option value="N" <?php echo ($category_search == 'N') ? 'selected' : ''; ?>>N</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="piece_name_search" class="form-label">Piece Name</label>
+                <select class="form-select" id="piece_name_search" name="piece_name_search">
+                    <option value="">Select Piece Name</option>
+                    <option value="P" <?php echo ($piece_name_search == 'P') ? 'selected' : ''; ?>>P</option>
+                    <option value="V" <?php echo ($piece_name_search == 'V') ? 'selected' : ''; ?>>V</option>
+                    <option value="G" <?php echo ($piece_name_search == 'G') ? 'selected' : ''; ?>>G</option>
+                    <option value="M" <?php echo ($piece_name_search == 'M') ? 'selected' : ''; ?>>M</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="order_str_search" class="form-label">Order</label>
+                <input type="text" class="form-control" id="order_str_search" name="order_str_search" value="<?php echo htmlspecialchars($order_str_search); ?>">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Search</button>
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+                <a href="barcode_settings.php" class="btn btn-secondary w-100">Clear</a>
+            </div>
+        </div>
+    </form>
+</div>
                 <!-- Barcodes Table -->
                 <div class="card">
                     <div class="card-body">
@@ -185,64 +199,66 @@ require_once 'settings.php';
                         
                         <!-- Main Table -->
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                    <tr>
-                                        <th width="40px"><input type="checkbox" id="checkAll" class="form-check-input"></th>
-                                        <th>OF Number</th>
-                                        <th>Size</th>
-                                        <th>Category</th>
-                                        <th>Piece</th>
-                                        <th>Order</th>
-                                       
-                                        <th>Stage</th>
-                                        <th>Chef</th>
-                                        <th>Status</th>
-                                        <th>Last Update</th>
-                                        
-                                        <th width="80px">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php if (empty($barcodes)): ?>
-                                        <tr>
-                                            <td colspan="11" class="text-center">No barcodes found</td>
-                                        </tr>
-                                    <?php else: ?>
-                                        <?php foreach ($barcodes as $barcode): ?>
-                                            <tr>
-                                                <td>
-                                                    <input type="checkbox" value="<?php echo $barcode['id']; ?>" class="form-check-input barcode-checkbox" 
-                                                           data-of-number="<?php echo htmlspecialchars($barcode['of_number']); ?>">
-                                                </td>
-                                                <td><?php echo htmlspecialchars($barcode['of_number']); ?></td>
-                                                <td><?php echo htmlspecialchars($barcode['size']); ?></td>
-                                                <td><?php echo htmlspecialchars($barcode['category']); ?></td>
-                                                <td><?php echo htmlspecialchars($barcode['piece_name']); ?></td>
-                                                <td><?php echo htmlspecialchars($barcode['order_str']); ?></td>
-                                                <td><?php echo htmlspecialchars($barcode['stage']); ?></td>
-                                                <td><?php echo htmlspecialchars($barcode['chef']); ?></td>
-                                                <td>
-                                                    <?php if (!empty($barcode['status'])): ?>
-                                                        <span class="badge bg-<?php echo strtolower($barcode['status']) === 'completed' ? 'success' : 'warning'; ?>">
-                                                            <?php echo htmlspecialchars($barcode['status']); ?>
-                                                        </span>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td><?php echo htmlspecialchars($barcode['last_update']); ?></td>
-                                               
-                                                <td>
-                                                    <a href="<?php echo buildSearchUrl(['edit' => $barcode['id']]); ?>" class="btn btn-sm btn-primary">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                        
+    <table class="table table-striped table-hover">
+        <thead class="table-primary">
+            <tr>
+                <th width="40px"><input type="checkbox" id="checkAll" class="form-check-input"></th>
+                <th>OF Number</th>
+                <th>Size</th>
+                <th>Category</th>
+                <th>Piece</th>
+                <th>Order</th>
+                <th>Stage</th>
+                <th>Chef</th>
+                <th>Status</th>
+                <th>Last Update</th>
+                <th width="80px">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php if (!isset($_GET['of_number_search']) && !isset($_GET['size_search']) && !isset($_GET['category_search']) && !isset($_GET['piece_name_search']) && !isset($_GET['order_str_search'])): ?>
+                <tr>
+                    <td colspan="11" class="text-center">Please use the search form above to display results</td>
+                </tr>
+            <?php elseif (empty($barcodes)): ?>
+                <tr>
+                    <td colspan="11" class="text-center">No barcodes found for your search criteria</td>
+                </tr>
+            <?php else: ?>
+                <?php foreach ($barcodes as $barcode): ?>
+                    <tr>
+                        <td>
+                            <input type="checkbox" value="<?php echo $barcode['id']; ?>" class="form-check-input barcode-checkbox" 
+                                   data-of-number="<?php echo htmlspecialchars($barcode['of_number']); ?>">
+                        </td>
+                        <td><?php echo htmlspecialchars($barcode['of_number']); ?></td>
+                        <td><?php echo htmlspecialchars($barcode['size']); ?></td>
+                        <td><?php echo htmlspecialchars($barcode['category']); ?></td>
+                        <td><?php echo htmlspecialchars($barcode['piece_name']); ?></td>
+                        <td><?php echo htmlspecialchars($barcode['order_str']); ?></td>
+                        <td><?php echo htmlspecialchars($barcode['stage']); ?></td>
+                        <td><?php echo htmlspecialchars($barcode['chef']); ?></td>
+                        <td>
+                            <?php if (!empty($barcode['status'])): ?>
+                                <span class="badge bg-<?php echo strtolower($barcode['status']) === 'completed' ? 'success' : 'warning'; ?>">
+                                    <?php echo htmlspecialchars($barcode['status']); ?>
+                                </span>
+                            <?php endif; ?>
+                        </td>
+                        <td><?php echo htmlspecialchars($barcode['last_update']); ?></td>
+                        <td>
+                            <a href="<?php echo buildSearchUrl(['edit' => $barcode['id']]); ?>" class="btn btn-sm btn-primary">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </tbody>
+    </table>
+</div>
+    
+
                         <!-- Pagination -->
                         <?php if ($total_pages > 1): ?>
                             <nav aria-label="Page navigation">
@@ -468,7 +484,7 @@ require_once 'settings.php';
 
     <?php include 'includes/footer.php'; ?>
     <script src="assets/index.js"></script>
-    
+    <script src="assets/app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>

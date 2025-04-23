@@ -397,7 +397,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
             $conn->close();
         }
         
-        header("Location: index.php?view=$form_view&success=1");
+        header("Location: index.php?view=dashboard&modal=create&success=1&pdf=$pdfFilename");
         exit;
     } else {
         header("Location: index.php?view=$form_view&modal=create&error=" . urlencode(implode(", ", $errors)));
