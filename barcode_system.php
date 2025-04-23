@@ -16,7 +16,7 @@ $filter_size = $_GET['filter_size'] ?? '';
 
 // Establish database connection
 function connectDB() {
-    $conn = new mysqli("localhost", "root", "", "jgr2");
+    $conn = new mysqli("localhost", "root", "", "jgr3");
     return $conn->connect_error ? false : $conn;
 }
 
