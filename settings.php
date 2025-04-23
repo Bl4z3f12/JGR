@@ -14,7 +14,7 @@ $items_per_page = 15;
 
 // Database connection function
 function connectDB() {
-    $conn = new mysqli("localhost", "root", "", "jgr3");
+    $conn = new mysqli("localhost", "root", "", "jgr");
     return $conn->connect_error ? false : $conn;
 }
 
