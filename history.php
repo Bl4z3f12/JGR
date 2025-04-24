@@ -357,7 +357,7 @@ function displayBarcodeData($result) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventory History Records</title>
+    <title>History Records</title>
     <link rel="stylesheet" href="assets/index.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -443,12 +443,12 @@ function displayBarcodeData($result) {
         <!-- Scrollable content area -->
         <div class="content-area">
             <div class="container-fluid">
-                <h2>Inventory History Records</h2>
+                <h2 class="mb-4" style="font-size: 18px;">History Records</h2>
                 
                 <!-- Search Form -->
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5>Search Inventory History</h5>
+                        <h5>Search History</h5>
                     </div>
                     <div class="card-body">
                         <form method="GET" action="" class="row g-3">

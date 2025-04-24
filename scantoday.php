@@ -32,8 +32,8 @@ require "scantoday_settings.php";
     <div class="main-content">
         <?php include 'includes/header.php'; ?>
         
-        <div class="content container mt-4">
-            <h1 class="mb-4">Inventory Management System</h1>
+        <div class="content">
+            <h1 class="mb-4" style="font-size: 18px;">Scanned Today</h1>
             
             <!-- Display success/error messages if any -->
             <?php if(isset($success_message)): ?>
