@@ -34,7 +34,7 @@ require_once 'settings.php';
                 <?php endif; ?>
                 
                 <!-- Search Form -->
-                <div class="card-body">
+ <div class="card-body">
     <form method="GET" action="barcode_settings.php" class="mb-4">
         <div class="row g-3">
             <div class="col-md-2">
