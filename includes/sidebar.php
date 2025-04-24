@@ -1,4 +1,4 @@
-<div class="sidebar">
+<div class="sidebar" class="col-12 col-sm-4 col-md-3 col-lg-2">
     <a href="index.php" class="sidebar-item <?php echo $current_view === 'dashboard' ? 'active' : ''; ?>">
         <div class="sidebar-item-icon"><i class="fa-solid fa-qrcode"></i></div>
         Dashboard
