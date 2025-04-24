@@ -67,7 +67,7 @@ require "scantoday_settings.php";
                 <?php if($active_tab == 'summary'): ?>
     <div class="card">
         <div class="card-header">
-            <h5>Search Inventory</h5>
+            <h5>Search</h5>
         </div>
         <div class="card-body">
             <form method="GET" action="" class="row g-3">
@@ -127,8 +127,8 @@ require "scantoday_settings.php";
                 </div>
                 
                 <div class="col-12">
-                    <button type="submit" name="search" class="btn btn-primary">Search</button>
-                    <a href="?tab=summary" class="btn btn-secondary">Reset</a>
+                    <button type="submit" name="search" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+                    <a href="?tab=summary" class="btn btn-secondary"><i class="fa-solid fa-broom"></i> Reset</a>
                 </div>
             </form>
         </div>
@@ -147,7 +147,7 @@ require "scantoday_settings.php";
                             <div class="card-body text-center">
                                 <h5><?php echo htmlspecialchars($s); ?></h5>
                                 <span class="badge bg-primary fs-5">
-                                    <?php echo $stage_summary[$s] ?? 0; ?>
+                                    <?php echo $stage_summary[$s] ?? "#"; ?>
                                 </span>
                             </div>
                         </div>

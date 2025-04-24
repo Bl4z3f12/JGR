@@ -137,16 +137,13 @@ body {
     justify-content: space-between;
     margin-bottom: 10px;
 }
-
 .barcode-title {
     font-weight: bold;
     color: #2d3748;
 }
-
 .barcode-actions {
     display: flex;
 }
-
 .action-btn {
     background: none;
     border: none;
@@ -154,13 +151,10 @@ body {
     cursor: pointer;
     margin-left: 10px;
 }
-
 .barcode-date {
     color: #718096;
     font-size: 14px;
 }
-
-/* Modal styles */
 .modal {
     display: none;
     position: fixed;
@@ -171,14 +165,12 @@ body {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
 }
-
 .modal-content {
     background-color: white;
     margin: 1% auto;
     padding: 20px;
     border-radius: 5px;
 }
-
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -212,7 +204,6 @@ body {
     margin-bottom: 5px;
     color: #4a5568;
 }
-
 .form-group input, .form-group textarea, .form-group select {
     padding: 8px;
     border: 1px solid #e0e4e8;
@@ -235,7 +226,6 @@ body {
     justify-content: flex-end;
     margin-top: 20px;
 }
-
 .btn {
     padding: 8px 15px;
     border: none;
@@ -243,7 +233,6 @@ body {
     cursor: pointer;
     margin-left: 10px;
 }
-
 .btn-cancel {
     background-color: #e2e8f0;
     color: #4a5568;
@@ -263,7 +252,6 @@ body {
     text-align: center;
     padding: 20px;
 }
-
 .network-status {
     position: fixed;
     bottom: 20px;
@@ -275,16 +263,12 @@ body {
     z-index: 100;
     display: none;
 }
-
 .online {
     background-color: #48bb78;
 }
-
 .offline {
     background-color: #e53e3e;
 }
-
-/* Barcode Generator Modal Specific Styles */
 #modal-title {
     text-align: center;
     color: #00008B;
@@ -294,7 +278,6 @@ body {
 #barcode-form{
     text-align: center;
 }
-
 .warning-message {
     font-weight: bold;
     color: red;
@@ -302,40 +285,33 @@ body {
     margin-bottom: 15px;
     font-size: 14px;
 }
-
 .form-select {
     width: 100%;
     padding: 8px;
     border: 1px solid #e0e4e8;
     border-radius: 4px;
 }
-
 .checkbox-group {
     display: flex;
     align-items: center;
     margin-bottom: 10px;
 }
-
 .checkbox-group input[type="checkbox"] {
     margin-right: 5px;
 }
-
 .indented {
     margin-left: 20px;
 }
-
 .range-inputs {
     display: flex;
     gap: 10px;
     align-items: center;
     justify-content: center;
 }
-
 .range-inputs div {
     display: flex;
     align-items: center;
 }
-
 .range-inputs label {
     margin-right: 5px;
     margin-bottom: 0;
@@ -347,7 +323,6 @@ body {
 .range-inputs input {
     width: auto;
 }
-
 #barcode-modal .modal-content {
     text-align: center;
     width: 30%;
@@ -355,14 +330,11 @@ body {
     padding: 20px;
     box-sizing: border-box;
 }
-
 @media (max-width: 1322px) {
     #barcode-modal .modal-content {
         width: 50%; /* Adjust width for tablets */
     }
 }
-
-
 @media (max-width: 768px) {
     #barcode-modal .modal-content {
         width: 80%; /* Adjust width for tablets */
@@ -381,52 +353,40 @@ body {
     justify-content: space-around;
     margin-top: 20px;
 }
-
 .barcode-range-indicators {
     margin-top: 20px;
     display: flex;
     justify-content: space-evenly;
 }
-
 .range-indicator {
     display: flex;
     align-items: center;
 }
-
 .color-box {
     width: 15px;
     height: 15px;
     border: 1px solid #000;
     margin-right: 5px;
 }
-
 .white-box {
     background-color: white;
 }
-
 .yellow-box {
     background-color: yellow;
 }
-
 .green-box {
     background-color: green;
 }
-
 .barcode-legend {
     margin-top: 10px;
     text-align: center;
     color: #4a5568;
     font-size: 14px;
 }
-
 .btn-submit, .btn-cancel {
     padding: 11px 25px;
     text-decoration: none;
 }
-
-
-
-/* Add dashboard-specific styles */
 .dashboard-table {
     width: 100%;
     border-collapse: collapse;
@@ -435,7 +395,6 @@ body {
     border-radius: 5px;
     overflow: hidden;
 }
-
 .dashboard-table th {
     background-color: #6c7ae0;
     color: white;
@@ -443,24 +402,19 @@ body {
     padding: 12px 15px;
     font-weight: 600;
 }
-
 .dashboard-table tr:nth-child(even) {
     background-color: #f8f9fa;
 }
-
 .dashboard-table tr:nth-child(odd) {
     background-color: #ffffff;
 }
-
 .dashboard-table td {
     padding: 12px 15px;
     border-bottom: 1px solid #edf2f7;
 }
-
 .dashboard-table tr:hover {
     background-color: #e6edf7;
 }
-
 .status-indicator {
     width: 10px;
     height: 10px;
@@ -468,24 +422,19 @@ body {
     display: inline-block;
     margin-right: 5px;
 }
-
 .status-complete {
     background-color: #48bb78;
 }
-
 .status-pending {
     background-color: #ecc94b;
 }
-
 .status-processing {
     background-color: #3182ce;
 }
-
 .actions-cell {
     display: flex;
     gap: 10px;
 }
-
 .action-btn {
     background: none;
     border: none;
@@ -493,18 +442,15 @@ body {
     color: #4a5568;
     font-size: 16px;
 }
-
 .action-btn:hover {
     color: #3182ce;
 }
-
 .pagination {
     display: flex;
     justify-content: flex-end;
     margin-top: 20px;
     gap: 5px;
 }
-
 .pagination-btn {
     padding: 5px 10px;
     border: 1px solid #e0e4e8;
@@ -512,50 +458,36 @@ body {
     cursor: pointer;
     border-radius: 3px;
 }
-
 .pagination-btn.active {
     background-color: #3182ce;
     color: white;
     border-color: #3182ce;
 }
-
 .pagination-btn:hover:not(.active) {
     background-color: #f0f4f9;
 }
-
-
-/* Style for disabled inputs and labels */
 input[type="checkbox"]:disabled + label,
 input[type="number"]:disabled,
 input[type="text"]:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
-
-/* Style for the enabled lost barcode number input */
 #lost-barcode:checked ~ #lost-barcode-number {
     opacity: 1;
     background-color: #fff;
     cursor: text;
 }
-
-/* Visual indicator for disabled checkbox options */
 .checkbox-group input[type="checkbox"]:disabled ~ label {
     color: #a0aec0;
 }
-
-/* Visual indicator for disabled range inputs */
 input[type="text"]:disabled {
     background-color: #f5f5f5;
     border-color: #ddd;
 }
-
-/* Change cursor for disabled items */
 input:disabled,
 input:disabled + label {
     cursor: not-allowed;
 }
-  /* Additional styles for PHP-based functionality */
   .success-message {
     background-color: #4CAF50;
     color: white;
@@ -589,9 +521,6 @@ input:disabled + label {
 .network-status.offline {
     background-color: #f44336;
 }
-
-
-
 .table-responsive {
     overflow-x: auto;
 }
