@@ -284,7 +284,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
             // Barcode settings
             $barcodeWidth = 50;
             $barcodeHeight = 20;
-            $topSpacing = 15;
+            $topSpacing = 12;
             $fontSize = 14;
             
             $col = 0;
