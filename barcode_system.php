@@ -8,7 +8,7 @@ $pdf = new FPDF();
 $current_view = $_GET['view'] ?? 'dashboard';
 $current_date = date("F j, Y");
 $page = $_GET['page'] ?? 1;
-$items_per_page = 10;
+$items_per_page = 5000;
 
 // Initialize filter variables
 $filter_of_number = $_GET['filter_of'] ?? '';
