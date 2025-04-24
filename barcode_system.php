@@ -284,7 +284,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
             // Barcode settings
             $barcodeWidth = 50;
             $barcodeHeight = 20;
-            $topSpacing = 15;
+            $topSpacing = 12;
             $fontSize = 14;
             
             $col = 0;
@@ -390,10 +390,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
                 }
             }
             
-            $randomNumber = rand(10000, 99999);
-            $pdfFilename = "A$randomNumber.pdf";
-            $pdf->Output('F', __DIR__ . "/barcodes/$pdfFilename");
-            
+            // Create a filename using barcode information
+            if ($is_lost_barcode) {
+                // For lost barcodes, use the first barcode's information
+                $pdfFilename = "{$of_number}-{$size}{$category}-{$piece_name}.pdf";
+            } elseif ($generate_costume_2pcs || $generate_costume_3pcs) {
+                // For costume sets, use a more descriptive name that shows it's a set
+                $pieces_suffix = $generate_costume_2pcs ? "2pcs" : "3pcs";
+                $pdfFilename = "{$of_number}-{$size}{$category}-{$pieces_suffix}.pdf";
+            } else {
+                // For regular barcodes, use the format you requested
+                $pdfFilename = "{$of_number}-{$size}{$category}-{$piece_name}.pdf";
+            }
+
+            // Sanitize filename to remove any invalid characters
+            $pdfFilename = preg_replace('/[^a-zA-Z0-9\-_.]/', '', $pdfFilename);
+
+            // Make sure we have a valid filename
+            if (empty($pdfFilename) || $pdfFilename == ".pdf") {
+                $randomNumber = rand(10000, 99999);
+                $pdfFilename = "A{$randomNumber}.pdf";
+            }
+
+            $pdf->Output('F', __DIR__ . "/barcodes/$pdfFilename");  
+                      
             $conn->close();
         }
         
