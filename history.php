@@ -518,8 +518,8 @@ function displayBarcodeData($result) {
                             </div>
                             
                             <div class="col-12 mt-3">
-                                <button type="submit" name="search" class="btn btn-primary">Search</button>
-                                <a href="?tab=<?php echo $tab; ?>" class="btn btn-secondary">Reset</a>
+                                <button type="submit" name="search" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+                                <a href="?tab=<?php echo $tab; ?>" class="btn btn-secondary"><i class="fa-solid fa-broom"></i> Reset</a>
                             </div>
                         </form>
                     </div>
