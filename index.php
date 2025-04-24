@@ -4,7 +4,7 @@ require_once 'barcode_system.php';
 
 // Add this line right after including barcode_system.php
 // This will override the default items per page (likely defined in barcode_system.php)
-$items_per_page = 2000;
+$items_per_page = 5000;
 ?>
 <!DOCTYPE html>
 <html lang="en">

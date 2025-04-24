@@ -12,4 +12,8 @@
         <div class="sidebar-item-icon"><i class="fa-solid fa-wrench"></i></div>
         Barcodes Settings
     </a>
+    <a href="history.php" class="sidebar-item" data-view="history <?php echo $current_view === 'Settings' ? 'active' : ''; ?>">
+      <div class="sidebar-item-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+      History Records
+    </a>
 </div>

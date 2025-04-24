@@ -18,8 +18,8 @@ require_once 'settings.php';
         <?php include 'includes/header.php'; ?>
         
         <div class="content">
-            <div class="container-fluid py-4">
-                <h4 class="mb-4">Barcode Settings</h4>
+            <div class="container-fluid">
+                <h4 class="mb-4" style="font-size: 18px;">Barcode Settings</h4>
                 
                 <?php if (isset($success_message)): ?>
                     <div class="alert alert-success" role="alert">
@@ -71,11 +71,9 @@ require_once 'settings.php';
                 <label for="order_str_search" class="form-label">Order</label>
                 <input type="text" class="form-control" id="order_str_search" name="order_str_search" value="<?php echo htmlspecialchars($order_str_search); ?>">
             </div>
-            <div class="col-md-2 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100">Search</button>
-            </div>
-            <div class="col-md-1 d-flex align-items-end">
-                <a href="barcode_settings.php" class="btn btn-secondary w-100">Clear</a>
+            <div class="col-md-3 d-flex align-items-end justify-content-between">
+                <button type="submit" class="btn btn-primary w-50 me-2"><i class="fas fa-search"></i> Search</button>
+                <a href="barcode_settings.php" class="btn btn-secondary w-50"><i class="fa-solid fa-broom"></i> Clear</a>
             </div>
         </div>
     </form>
@@ -95,7 +93,7 @@ require_once 'settings.php';
                                 </div>
                                 <div>
                                     <button type="button" id="showBulkEditBtn" class="btn btn-primary me-2">
-                                        <i class="fas fa-edit"></i> Bulk Edit
+                                        <i class="fas fa-edit"></i> Edit Selected
                                     </button>
                                     <button type="button" id="showDeleteBtn" class="btn btn-danger">
                                         <i class="fas fa-trash-alt"></i> Delete Selected
@@ -107,7 +105,7 @@ require_once 'settings.php';
                         <!-- Bulk Edit Form (Initially Hidden) -->
                         <div id="bulkEditForm" class="card mb-3" style="display: none;">
                             <div class="card-body">
-                                <h5 class="card-title">Bulk Edit Selected Barcodes</h5>
+                                <h5 class="card-title">Edit Selected Barcodes</h5>
                                 <form action="barcode_settings.php" method="POST">
                                     <input type="hidden" name="action" value="bulk_edit">
                                     <div id="selected_barcodes_container"></div>

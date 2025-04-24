@@ -10,7 +10,7 @@ $category_search = $_GET['category_search'] ?? '';
 $order_str_search = $_GET['order_str_search'] ?? '';
 $size_search = $_GET['size_search'] ?? '';
 $page = $_GET['page'] ?? 1;
-$items_per_page = 15;
+$items_per_page = 5000; // Set the number of rows per page to 5000
 
 // Database connection function
 function connectDB() {
