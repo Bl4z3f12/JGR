@@ -43,7 +43,7 @@ $items_per_page = 2000;
                     </a>
                 </div>
             </div>            
-            <form id="filter-form" class="filter-form card p-3 shadow-sm" action="" method="GET">
+<form id="filter-form" class="filter-form card p-3 shadow-sm" action="" method="GET">
     <input type="hidden" name="view" value="<?php echo $current_view; ?>">
     <h5 class="mb-3"><i class="fa-solid fa-arrow-up-wide-short"></i> Filter Options</h5>
     <div class="row mb-3 align-items-end">
