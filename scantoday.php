@@ -1,4 +1,15 @@
 <?php
+require_once 'auth_functions.php';
+
+// Get the requested tab
+$requested_tab = $_GET['tab'] ?? 'summary';
+
+// Only require login for the quantity_coupe tab
+if ($requested_tab == 'quantity_coupe') {
+    requireLogin('login.php');
+}
+
+
 require "scantoday_settings.php";
 // Import any additional PHP logic files here
 ?>

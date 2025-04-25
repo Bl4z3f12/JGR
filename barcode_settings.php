@@ -1,4 +1,8 @@
 <?php
+require_once 'auth_functions.php';
+
+// Redirect to login page if not logged in
+requireLogin('login.php');
 // Include PHP logic file
 require_once 'settings.php';
 ?>

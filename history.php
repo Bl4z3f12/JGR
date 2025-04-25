@@ -3,7 +3,7 @@
 $db_host = "localhost";
 $db_user = "root";
 $db_password = "";
-$db_name = "jgr";
+$db_name = "jgr3";
 
 // Connect to database
 $conn = new mysqli($db_host, $db_user, $db_password, $db_name);

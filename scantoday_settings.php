@@ -2,7 +2,7 @@
 
 
 $host = 'localhost';
-$db_name = 'jgr';
+$db_name = 'jgr3';
 $username = 'root';
 $password = '';
 $charset = 'utf8mb4';
