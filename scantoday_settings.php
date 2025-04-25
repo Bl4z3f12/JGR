@@ -1,12 +1,12 @@
 <?php
-// Database connection configuration
+
+
 $host = 'localhost';
 $db_name = 'jgr';
 $username = 'root';
 $password = '';
 $charset = 'utf8mb4';
 
-// PDO connection options
 $options = [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
