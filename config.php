@@ -1,7 +1,7 @@
 <?php
 // config.php - Database connection configuration
 $db_host = "localhost";
-$db_name = "jgr3";
+$db_name = "jgr";
 $db_user = "root";
 $db_pass = "";
 
