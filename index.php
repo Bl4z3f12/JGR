@@ -145,29 +145,19 @@ $items_per_page = 5000;
     <!-- Create Barcode Modal -->
     <div class="modal <?php echo $show_modal ? 'show' : ''; ?>" id="barcode-modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3>Barcode Generator</h3>
-                <a href="?view=<?php echo $current_view; ?>" class="close">
-                    <i class="fa-solid fa-circle-xmark"></i>
-                </a>
-            </div>
             <form action="index.php" method="POST" class="container-fluid">
                 <input type="hidden" name="action" value="create_barcode">
                 <input type="hidden" name="view" value="<?php echo $current_view; ?>">
                 
-                <div class="alert alert-warning mb-3">
-                    REMEMBER: You will not be able to change, barcode data after you confirm validity of data
-                </div>
-                
                 <div class="row mb-3">
-                    <label for="barcode-prefix" class="col-sm-3 col-form-label">OF_ number *</label>
+                    <label for="barcode-prefix" class="col-sm-3 col-form-label">OF_ number</label>
                     <div class="col-sm-9">
                         <input class="form-control ofinput" type="text" id="barcode-prefix" name="barcode_prefix" required>
                     </div>
                 </div>
                 
                 <div class="row mb-3">
-                    <label for="barcode-size" class="col-sm-3 col-form-label">Size *</label>
+                    <label for="barcode-size" class="col-sm-3 col-form-label">Size</label>
                     <div class="col-sm-9">
                         <input type="number" id="barcode-size" name="barcode_size" min="1" step="1" class="form-control ofinput" placeholder="Enter size number" required>
                     </div>
@@ -189,7 +179,7 @@ $items_per_page = 5000;
                 </div>
                 
                 <div class="row mb-3">
-                    <label for="barcode-piece-name" class="col-sm-3 col-form-label">Piece Name *</label>
+                    <label for="barcode-piece-name" class="col-sm-3 col-form-label">Piece Name</label>
                     <div class="col-sm-9">
                         <select id="barcode-piece-name" name="barcode_piece_name" class="form-select" required>
                             <option value="">Select Piece Name</option>
@@ -237,29 +227,37 @@ $items_per_page = 5000;
 
                 <div class="row mb-3">
                     <div class="col-12">
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" id="generate-costume-2pcs" name="generate_costume_2pcs">
-                            <label class="form-check-label" for="generate-costume-2pcs">Generate for P and V (Costume 2pcs)</label>
+                        <div class="form-check mb-2 d-flex align-items-center">
+                            <input class="form-check-input me-2" type="checkbox" id="generate-costume-2pcs" name="generate_costume_2pcs">
+                            <label class="form-check-label d-flex align-items-center" for="generate-costume-2pcs">
+                                Generate for P and V (Costume 2pcs)
+                            </label>
                         </div>
 
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" id="generate-costume-3pcs" name="generate_costume_3pcs">
-                            <label class="form-check-label" for="generate-costume-3pcs">Generate for P, V, and G (Costume 3pcs)</label>
+                        <div class="form-check mb-2 d-flex align-items-center">
+                            <input class="form-check-input me-2" type="checkbox" id="generate-costume-3pcs" name="generate_costume_3pcs">
+                            <label class="form-check-label d-flex align-items-center" for="generate-costume-3pcs">
+                                Generate for P, V, and G (Costume 3pcs)
+                            </label>
                         </div>
                             
-                        <div class="form-check mb-2 ms-4">
-                            <input class="form-check-input" type="checkbox" id="generate_pdf_only" name="generate_pdf_only">
-                            <label class="form-check-label" for="generate_pdf_only">Generate only PDF</label>
+                        <div class="form-check mb-2 ms-4 d-flex align-items-center">
+                            <input class="form-check-input me-2" type="checkbox" id="generate_pdf_only" name="generate_pdf_only">
+                            <label class="form-check-label d-flex align-items-center" for="generate_pdf_only">
+                                Generate only PDF
+                            </label>
                         </div>
                     </div>
                 </div>
 
                 <div class="row mb-3">
                     <div class="col-12 d-flex justify-content-center gap-2">
-                        <button type="submit" class="btn btn-secondary">Generate Barcodes</button>
+                        <button type="submit" class="btn btn-primary">Generate Barcodes</button>
+                        <!-- Add the cancel button here -->
+                        <button type="button" class="btn btn-outline-danger" onclick="document.getElementById('barcode-modal').classList.remove('show')">Cancel</button>
                     </div>
-                </div>
-                
+                </div>    
+
                 <div class="row mb-3">
                     <div class="col-12">
                         <div class="d-flex flex-wrap gap-3">
@@ -296,50 +294,117 @@ $items_per_page = 5000;
     ?>
     
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Lost barcode checkbox functionality
-        const lostBarcodeCheckbox = document.getElementById('lost-barcode');
-        const lostBarcodeCount = document.getElementById('lost-barcode-count');
-        const checkbox2pcs = document.getElementById('generate-costume-2pcs');
-        const checkbox3pcs = document.getElementById('generate-costume-3pcs');
-        const rangeFrom = document.getElementById('range-from');
-        const rangeTo = document.getElementById('range-to');
-        
-        // Handle lost barcode checkbox
-        if (lostBarcodeCheckbox) {
-            lostBarcodeCheckbox.addEventListener('change', function() {
-                lostBarcodeCount.disabled = !this.checked;
-                checkbox2pcs.disabled = this.checked;
-                checkbox3pcs.disabled = this.checked;
-                rangeFrom.disabled = this.checked;
-                rangeTo.disabled = this.checked;
-            });
-        }
-        
-        // Handle costume checkbox interactions
-        if (checkbox2pcs && checkbox3pcs) {
-            checkbox2pcs.addEventListener('change', function() {
-                checkbox3pcs.disabled = this.checked;
-            });
+        document.addEventListener('DOMContentLoaded', function() {
+            // Lost barcode checkbox functionality
+            const lostBarcodeCheckbox = document.getElementById('lost-barcode');
+            const lostBarcodeCount = document.getElementById('lost-barcode-count');
+            const checkbox2pcs = document.getElementById('generate-costume-2pcs');
+            const checkbox3pcs = document.getElementById('generate-costume-3pcs');
+            const rangeFrom = document.getElementById('range-from');
+            const rangeTo = document.getElementById('range-to');
             
-            checkbox3pcs.addEventListener('change', function() {
-                checkbox2pcs.disabled = this.checked;
-            });
-        }
-        
-        // Handle clear filters button
-        const clearFiltersBtn = document.getElementById('clear-filters');
-        if (clearFiltersBtn) {
-            clearFiltersBtn.addEventListener('click', function() {
-                const filterForm = document.getElementById('filter-form');
-                const inputs = filterForm.querySelectorAll('input[type="text"], input[type="number"]');
-                inputs.forEach(input => {
-                    input.value = '';
+            // Handle lost barcode checkbox
+            if (lostBarcodeCheckbox) {
+                lostBarcodeCheckbox.addEventListener('change', function() {
+                    lostBarcodeCount.disabled = !this.checked;
+                    checkbox2pcs.disabled = this.checked;
+                    checkbox3pcs.disabled = this.checked;
+                    rangeFrom.disabled = this.checked;
+                    rangeTo.disabled = this.checked;
                 });
-                filterForm.submit();
+            }
+            
+            // Handle costume checkbox interactions
+            if (checkbox2pcs && checkbox3pcs) {
+                checkbox2pcs.addEventListener('change', function() {
+                    checkbox3pcs.disabled = this.checked;
+                });
+                
+                checkbox3pcs.addEventListener('change', function() {
+                    checkbox2pcs.disabled = this.checked;
+                });
+            }
+            
+            // Handle clear filters button
+            const clearFiltersBtn = document.getElementById('clear-filters');
+            if (clearFiltersBtn) {
+                clearFiltersBtn.addEventListener('click', function() {
+                    const filterForm = document.getElementById('filter-form');
+                    const inputs = filterForm.querySelectorAll('input[type="text"], input[type="number"]');
+                    inputs.forEach(input => {
+                        input.value = '';
+                    });
+                    filterForm.submit();
+                });
+            }
+            
+            // Get the form element
+            const barcodeForm = document.querySelector('#barcode-modal form');
+            
+            // Modify form submission to prevent default form clearing
+            if (barcodeForm) {
+                barcodeForm.addEventListener('submit', function(e) {
+                    // Store the current form values in session storage
+                    const formInputs = this.querySelectorAll('input:not([type="hidden"]), select');
+                    formInputs.forEach(input => {
+                        sessionStorage.setItem(input.name, input.value);
+                    });
+                    
+                    // The form will continue with normal submission
+                });
+                
+                // Check if there are stored values to restore
+                if (window.sessionStorage) {
+                    const formInputs = barcodeForm.querySelectorAll('input:not([type="hidden"]), select');
+                    formInputs.forEach(input => {
+                        const savedValue = sessionStorage.getItem(input.name);
+                        if (savedValue !== null) {
+                            input.value = savedValue;
+                        }
+                    });
+                }
+            }
+        });
+    </script>
+    
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get references to the modal and input field
+        const barcodeModal = document.getElementById('barcode-modal');
+        const barcodePrefix = document.getElementById('barcode-prefix');
+        
+        // Function to set focus when modal is shown
+        const setFocusOnModal = function() {
+            if (barcodeModal.classList.contains('show')) {
+                // Set timeout to ensure DOM is fully rendered
+                setTimeout(function() {
+                    barcodePrefix.focus();
+                }, 100);
+            }
+        };
+        
+        // Call when the page loads in case modal is shown by default
+        setFocusOnModal();
+        
+        // Set up a mutation observer to detect when modal gets 'show' class
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.attributeName === 'class') {
+                    if (barcodeModal.classList.contains('show')) {
+                        // Modal was just shown
+                        setTimeout(function() {
+                            barcodePrefix.focus();
+                        }, 100);
+                    }
+                }
             });
-        }
+        });
+        
+        // Start observing the modal for class changes
+        observer.observe(barcodeModal, { attributes: true });
     });
     </script>
+
 </body>
 </html>

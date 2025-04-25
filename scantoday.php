@@ -147,7 +147,7 @@ require "scantoday_settings.php";
                             <div class="card-body text-center">
                                 <h5><?php echo htmlspecialchars($s); ?></h5>
                                 <span class="badge bg-primary fs-5">
-                                    <?php echo $stage_summary[$s] ?? "#"; ?>
+                                    <?php echo $stage_summary[$s] ?? ""; ?>
                                 </span>
                             </div>
                         </div>
@@ -160,7 +160,7 @@ require "scantoday_settings.php";
     <!-- Results Table -->
     <div class="table-responsive">
         <table class="table table-striped table-hover">
-            <thead>
+            <thead class="table-primary">
                 <tr>
                     <th>OF Number</th>
                     <th>Size</th>

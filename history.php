@@ -3,7 +3,7 @@
 $db_host = "localhost";
 $db_user = "root";
 $db_password = "";
-$db_name = "jgr3";
+$db_name = "jgr";
 
 // Connect to database
 $conn = new mysqli($db_host, $db_user, $db_password, $db_name);
@@ -109,7 +109,7 @@ function displayBarcodeSummary($conn, $where_conditions, $params, $types, $stage
     echo "<th>OF Number</th>";
     echo "<th>Size</th>";
     echo "<th>Category</th>";
-    echo "<th>Piece Name</th>";
+    echo "<th>P Name</th>";
     echo "<th>Stage</th>";
     echo "<th>Barcode Count</th>";
     echo "<th>Statuses</th>";
@@ -133,9 +133,11 @@ function displayBarcodeSummary($conn, $where_conditions, $params, $types, $stage
             // Button to view detailed history for this specific combination
             $detailsId = md5($row['of_number'] . $row['size'] . $row['category'] . $row['piece_name'] . $row['stage']);
             echo "<td>";
-            echo "<button type='button' class='btn btn-sm btn-outline-info' data-bs-toggle='modal' data-bs-target='#detailsModal{$detailsId}'>History</button>";
+            echo "<button type='button' class='btn btn-sm btn-outline-info' data-bs-toggle='modal' data-bs-target='#detailsModal{$detailsId}'>";
+            echo "<i class='fa-solid fa-eye me-1'></i>"; // Changed to eye icon with margin
+            echo "</button>";
             echo "</td>";
-            echo "</tr>";
+            echo "</tr>";            
         }
     } else {
         echo "<tr><td colspan='9' class='text-center'>No records found</td></tr>";
@@ -153,7 +155,7 @@ function displayBarcodeSummary($conn, $where_conditions, $params, $types, $stage
             $detailsId = md5($row['of_number'] . $row['size'] . $row['category'] . $row['piece_name'] . $row['stage']);
             // Create modal for detailed history
             echo "<div class='modal fade' id='detailsModal{$detailsId}' tabindex='-1' aria-hidden='true'>";
-            echo "<div class='modal-dialog modal-lg'>";
+            echo "<div class='modal-dialog modal-xl'>";
             echo "<div class='modal-content'>";
             echo "<div class='modal-header'>";
             echo "<h5 class='modal-title'>Individual Barcode Details</h5>";
@@ -191,12 +193,12 @@ function displayBarcodeSummary($conn, $where_conditions, $params, $types, $stage
             
             echo "<div class='table-responsive'>";
             echo "<table class='table table-sm'>";
-            echo "<thead>";
+            echo "<thead class='table-dark'>"; // Added the table-dark class for dark background with white text
             echo "<tr>";
             echo "<th>OF</th>";
             echo "<th>Size</th>";
             echo "<th>Category</th>";
-            echo "<th>Piece Name</th>";
+            echo "<th>P Name</th>";
             echo "<th>Order</th>";
             echo "<th>Stage</th>";
             echo "<th>Status</th>";
@@ -205,8 +207,7 @@ function displayBarcodeSummary($conn, $where_conditions, $params, $types, $stage
             echo "<th>Action</th>";
             echo "</tr>";
             echo "</thead>";
-            echo "<tbody>";
-            
+                        
             $current_order = null;
             $row_class = '';
             
@@ -268,9 +269,9 @@ function displayQuantityData($result) {
     echo "<th>OF Number</th>";
     echo "<th>Size</th>";
     echo "<th>Category</th>";
-    echo "<th>Piece Name</th>";
-    echo "<th>Main Quantity</th>";
-    echo "<th>Cut Quantity</th>";
+    echo "<th>P Name</th>";
+    echo "<th>Main Quan</th>";
+    echo "<th>Cut Quan</th>";
     echo "<th>Missing</th>";
     echo "<th>Surplus</th>";
     echo "</tr>";
@@ -322,7 +323,7 @@ function displayBarcodeData($result) {
     echo "<th>OF Number</th>";
     echo "<th>Size</th>";
     echo "<th>Category</th>";
-    echo "<th>Piece Name</th>";
+    echo "<th>P Name</th>";
     echo "<th>Status</th>";
     echo "<th>Stage</th>";
     echo "<th>Chef</th>";
@@ -396,7 +397,7 @@ function displayBarcodeData($result) {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
         }
-        
+            
         /* Enhanced modals for mobile */
         .modal-dialog {
             max-width: 95%;
@@ -493,7 +494,7 @@ function displayBarcodeData($result) {
                             </div>
                             
                             <div class="col-md-2 col-sm-6">
-                                <label for="p_name" class="form-label">Piece Name</label>
+                                <label for="p_name" class="form-label">P Name</label>
                                 <select class="form-select" id="p_name" name="p_name">
                                     <option value="select" <?php echo ($p_name === 'select') ? 'selected' : ''; ?>>All Pieces</option>
                                     <?php
@@ -568,7 +569,7 @@ function displayBarcodeData($result) {
                         id="summary" role="tabpanel" aria-labelledby="summary-tab">
                         <?php
                         if (isset($_GET['search']) || isset($_GET['tab'])) {
-                            echo "<h4>Barcode Summary by OF Number, Size, Category, Piece Name and Stage</h4>";
+                            echo "<h4>Barcode Summary by OF Number, Size, Category, P Name and Stage</h4>";
                             echo "<p>Showing aggregated barcode counts and latest updates</p>";
                             
                             // Display aggregated barcode data

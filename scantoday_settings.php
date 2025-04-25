@@ -1,7 +1,7 @@
 <?php
 // Database connection configuration
 $host = 'localhost';
-$db_name = 'jgr3';
+$db_name = 'jgr';
 $username = 'root';
 $password = '';
 $charset = 'utf8mb4';

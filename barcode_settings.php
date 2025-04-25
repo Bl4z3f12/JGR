@@ -34,50 +34,50 @@ require_once 'settings.php';
                 <?php endif; ?>
                 
                 <!-- Search Form -->
- <div class="card-body">
-    <form method="GET" action="barcode_settings.php" class="mb-4">
-        <div class="row g-3">
-            <div class="col-md-2">
-                <label for="of_number_search" class="form-label">OF Number</label>
-                <input type="text" class="form-control" id="of_number_search" name="of_number_search" value="<?php echo htmlspecialchars($of_number_search); ?>">
-            </div>
-            <div class="col-md-1">
-                <label for="size_search" class="form-label">Size</label>
-                <input type="number" class="form-control" id="size_search" name="size_search" value="<?php echo htmlspecialchars($size_search); ?>">
-            </div>
-            <div class="col-md-2">
-                <label for="category_search" class="form-label">Category</label>
-                <select class="form-select" id="category_search" name="category_search">
-                    <option value="">Select Category</option>
-                    <option value="R" <?php echo ($category_search == 'R') ? 'selected' : ''; ?>>R</option>
-                    <option value="C" <?php echo ($category_search == 'C') ? 'selected' : ''; ?>>C</option>
-                    <option value="L" <?php echo ($category_search == 'L') ? 'selected' : ''; ?>>L</option>
-                    <option value="LL" <?php echo ($category_search == 'LL') ? 'selected' : ''; ?>>LL</option>
-                    <option value="CC" <?php echo ($category_search == 'CC') ? 'selected' : ''; ?>>CC</option>
-                    <option value="N" <?php echo ($category_search == 'N') ? 'selected' : ''; ?>>N</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label for="piece_name_search" class="form-label">Piece Name</label>
-                <select class="form-select" id="piece_name_search" name="piece_name_search">
-                    <option value="">Select Piece Name</option>
-                    <option value="P" <?php echo ($piece_name_search == 'P') ? 'selected' : ''; ?>>P</option>
-                    <option value="V" <?php echo ($piece_name_search == 'V') ? 'selected' : ''; ?>>V</option>
-                    <option value="G" <?php echo ($piece_name_search == 'G') ? 'selected' : ''; ?>>G</option>
-                    <option value="M" <?php echo ($piece_name_search == 'M') ? 'selected' : ''; ?>>M</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label for="order_str_search" class="form-label">Order</label>
-                <input type="text" class="form-control" id="order_str_search" name="order_str_search" value="<?php echo htmlspecialchars($order_str_search); ?>">
-            </div>
-            <div class="col-md-3 d-flex align-items-end justify-content-between">
-                <button type="submit" class="btn btn-primary w-50 me-2"><i class="fas fa-search"></i> Search</button>
-                <a href="barcode_settings.php" class="btn btn-secondary w-50"><i class="fa-solid fa-broom"></i> Clear</a>
-            </div>
-        </div>
-    </form>
-</div>
+                <div class="card-body">
+                    <form method="GET" action="barcode_settings.php" class="mb-4">
+                        <div class="row g-3">
+                            <div class="col-md-2">
+                                <label for="of_number_search" class="form-label">OF Number</label>
+                                <input type="text" class="form-control" id="of_number_search" name="of_number_search" value="<?php echo htmlspecialchars($of_number_search); ?>">
+                            </div>
+                            <div class="col-md-1">
+                                <label for="size_search" class="form-label">Size</label>
+                                <input type="number" class="form-control" id="size_search" name="size_search" value="<?php echo htmlspecialchars($size_search); ?>">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="category_search" class="form-label">Category</label>
+                                <select class="form-select" id="category_search" name="category_search">
+                                    <option value="">Select Category</option>
+                                    <option value="R" <?php echo ($category_search == 'R') ? 'selected' : ''; ?>>R</option>
+                                    <option value="C" <?php echo ($category_search == 'C') ? 'selected' : ''; ?>>C</option>
+                                    <option value="L" <?php echo ($category_search == 'L') ? 'selected' : ''; ?>>L</option>
+                                    <option value="LL" <?php echo ($category_search == 'LL') ? 'selected' : ''; ?>>LL</option>
+                                    <option value="CC" <?php echo ($category_search == 'CC') ? 'selected' : ''; ?>>CC</option>
+                                    <option value="N" <?php echo ($category_search == 'N') ? 'selected' : ''; ?>>N</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="piece_name_search" class="form-label">Piece Name</label>
+                                <select class="form-select" id="piece_name_search" name="piece_name_search">
+                                    <option value="">Select Piece Name</option>
+                                    <option value="P" <?php echo ($piece_name_search == 'P') ? 'selected' : ''; ?>>P</option>
+                                    <option value="V" <?php echo ($piece_name_search == 'V') ? 'selected' : ''; ?>>V</option>
+                                    <option value="G" <?php echo ($piece_name_search == 'G') ? 'selected' : ''; ?>>G</option>
+                                    <option value="M" <?php echo ($piece_name_search == 'M') ? 'selected' : ''; ?>>M</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="order_str_search" class="form-label">Order</label>
+                                <input type="text" class="form-control" id="order_str_search" name="order_str_search" value="<?php echo htmlspecialchars($order_str_search); ?>">
+                            </div>
+                            <div class="col-md-3 d-flex align-items-end justify-content-between">
+                                <button type="submit" class="btn btn-primary w-50 me-2"><i class="fas fa-search"></i> Search</button>
+                                <a href="barcode_settings.php" class="btn btn-secondary w-50"><i class="fa-solid fa-broom"></i> Clear</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
                 <!-- Barcodes Table -->
                 <div class="card">
                     <div class="card-body">
@@ -150,7 +150,14 @@ require_once 'settings.php';
                                                 <option value="">Select Chef</option>
                                                 <?php 
                                                 // Updated chef options array with new values
-                                                $chef_options = ['Habib', 'Youssef' , 'Farah', 'Aziz', 'Abdelkarim', 'Miloud' , 'Abderazaq', 'pfi,i' , 'repa']; 
+                                                $chef_options = ['Abdelkarim', 'Abderazaq', 'Aziz Berdigue', 'Bouchra',
+                                                                    'Driss Khairani', 'Fadwa', 'Farah', 'Fouad',
+                                                                    'Fouad Laakawi', 'Habib Douiba', 'Hada', 'Hana Hajouji',
+                                                                    'Hanan Khomassi', 'Hassan Nassiri', 'Khadija', 'Miloud',
+                                                                    'Mohamed', 'Naaima Elakiwi', 'Rahma Belmokhtar', 'Rakiya',
+                                                                    'Saaid Kahlaoui', 'Saadi Zhiliga', 'Souad', 'Yassin',
+                                                                    'Youssef', 'Ztouti', 'Zouhair'
+                                                                ]; 
                                                 foreach ($chef_options as $option): 
                                                 ?>
                                                     <option value="<?php echo htmlspecialchars($option); ?>"><?php echo htmlspecialchars($option); ?></option>
