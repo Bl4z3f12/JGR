@@ -432,7 +432,47 @@ $total_pages = ceil($total_barcodes / $items_per_page);
 $show_success = isset($_GET['success']) && $_GET['success'] == 1;
 $error_message = $_GET['error'] ?? '';
 $show_modal = isset($_GET['modal']) && $_GET['modal'] === 'create';
-
+//made by Akram Fouzi
 // Add the random button script to be included in the page
 $random_button_script = getRandomButtonScript();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//made by Akram Fouzi
 ?>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
