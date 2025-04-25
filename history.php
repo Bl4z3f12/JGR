@@ -12,7 +12,6 @@ $conn = new mysqli($db_host, $db_user, $db_password, $db_name);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
-
 // Default values for form inputs
 $of_number = isset($_GET['of_number']) ? $_GET['of_number'] : '';
 $size = isset($_GET['size']) ? $_GET['size'] : '';
@@ -21,37 +20,31 @@ $p_name = isset($_GET['p_name']) ? $_GET['p_name'] : 'select';
 $stage = isset($_GET['stage']) ? $_GET['stage'] : 'select';
 $date = isset($_GET['date']) ? $_GET['date'] : '';
 $tab = isset($_GET['tab']) ? $_GET['tab'] : 'summary';
-
 // Handle search form submission
 $where_conditions = [];
 $params = [];
 $types = '';
-
 // Build query conditions based on search parameters
 if (!empty($of_number)) {
     $where_conditions[] = "of_number LIKE ?";
     $params[] = "%$of_number%";
     $types .= 's';
 }
-
 if (!empty($size)) {
     $where_conditions[] = "size = ?";
     $params[] = $size;
     $types .= 's';
 }
-
 if ($category !== 'select') {
     $where_conditions[] = "category = ?";
     $params[] = $category;
     $types .= 's';
 }
-
 if ($p_name !== 'select') {
     $where_conditions[] = "piece_name LIKE ?";
     $params[] = "%$p_name%";
     $types .= 's';
 }
-
 // Add date filter - convert to both date start and end to capture full day
 if (!empty($date)) {
     $date_start = $date . ' 00:00:00';
@@ -61,14 +54,12 @@ if (!empty($date)) {
     $params[] = $date_end;
     $types .= 'ss';
 }
-
 // Handle stage filter specifically for barcodes table
 $barcode_specific_conditions = [];
 if ($stage !== 'select') {
     $barcode_specific_conditions[] = "stage = ?";
     // We'll add this parameter separately when querying the barcode table
 }
-
 // Function to display aggregated barcode data
 function displayBarcodeSummary($conn, $where_conditions, $params, $types, $stage) {
     $barcode_query = "SELECT 
@@ -77,6 +68,7 @@ function displayBarcodeSummary($conn, $where_conditions, $params, $types, $stage
                         category, 
                         piece_name, 
                         stage,
+                        order_str,
                         COUNT(*) as barcode_count,
                         GROUP_CONCAT(DISTINCT status) as statuses,
                         MAX(action_time) as latest_update
@@ -125,7 +117,6 @@ function displayBarcodeSummary($conn, $where_conditions, $params, $types, $stage
     echo "</tr>";
     echo "</thead>";
     echo "<tbody>";
-    
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
             echo "<tr>";
@@ -134,6 +125,7 @@ function displayBarcodeSummary($conn, $where_conditions, $params, $types, $stage
             echo "<td>" . htmlspecialchars($row['size']) . "</td>";
             echo "<td>" . htmlspecialchars($row['category']) . "</td>";
             echo "<td>" . htmlspecialchars($row['piece_name']) . "</td>";
+            
             echo "<td><span class='badge bg-secondary'>" . htmlspecialchars($row['stage']) . "</span></td>";
             echo "<td><span class='badge bg-primary'>" . htmlspecialchars($row['barcode_count']) . "</span></td>";
             echo "<td>" . htmlspecialchars($row['statuses']) . "</td>";
@@ -148,7 +140,6 @@ function displayBarcodeSummary($conn, $where_conditions, $params, $types, $stage
     } else {
         echo "<tr><td colspan='9' class='text-center'>No records found</td></tr>";
     }
-    
     echo "</tbody>";
     echo "</table>";
     echo "</div>";
@@ -160,32 +151,33 @@ function displayBarcodeSummary($conn, $where_conditions, $params, $types, $stage
         
         while ($row = $result->fetch_assoc()) {
             $detailsId = md5($row['of_number'] . $row['size'] . $row['category'] . $row['piece_name'] . $row['stage']);
-            
             // Create modal for detailed history
             echo "<div class='modal fade' id='detailsModal{$detailsId}' tabindex='-1' aria-hidden='true'>";
             echo "<div class='modal-dialog modal-lg'>";
             echo "<div class='modal-content'>";
             echo "<div class='modal-header'>";
-            echo "<h5 class='modal-title'>Barcode History Details</h5>";
+            echo "<h5 class='modal-title'>Individual Barcode Details</h5>";
             echo "<button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>";
             echo "</div>";
             echo "<div class='modal-body'>";
             
-            // Fetch detailed history for this specific combination
+            // Modified query to get individual barcode data
+            // Using a combination of fields to identify unique barcodes
             $detail_query = "SELECT 
+                                id, 
                                 action_time, 
                                 action_type, 
                                 status, 
-                                chef 
+                                chef,
+                                order_str 
                             FROM jgr3_barcodes_history 
                             WHERE of_number = ? 
                             AND size = ? 
                             AND category = ? 
                             AND piece_name = ? 
                             AND stage = ?
-                            ORDER BY action_time DESC 
-                            LIMIT 50";
-            
+                            ORDER BY order_str, action_time DESC";
+                            
             $detail_stmt = $conn->prepare($detail_query);
             $detail_stmt->bind_param("sssss", 
                 $row['of_number'], 
@@ -194,7 +186,6 @@ function displayBarcodeSummary($conn, $where_conditions, $params, $types, $stage
                 $row['piece_name'], 
                 $row['stage']
             );
-            
             $detail_stmt->execute();
             $detail_result = $detail_stmt->get_result();
             
@@ -202,15 +193,30 @@ function displayBarcodeSummary($conn, $where_conditions, $params, $types, $stage
             echo "<table class='table table-sm'>";
             echo "<thead>";
             echo "<tr>";
-            echo "<th>Date/Time</th>";
-            echo "<th>Action</th>";
+            echo "<th>OF</th>";
+            echo "<th>Size</th>";
+            echo "<th>Category</th>";
+            echo "<th>Piece Name</th>";
+            echo "<th>Order</th>";
+            echo "<th>Stage</th>";
             echo "<th>Status</th>";
             echo "<th>Chef</th>";
+            echo "<th>Date/Time</th>";
+            echo "<th>Action</th>";
             echo "</tr>";
             echo "</thead>";
             echo "<tbody>";
             
+            $current_order = null;
+            $row_class = '';
+            
             while ($detail = $detail_result->fetch_assoc()) {
+                // Add alternating background for different orders for better readability
+                if ($current_order !== $detail['order_str']) {
+                    $current_order = $detail['order_str'];
+                    $row_class = ($row_class === 'table-light') ? '' : 'table-light';
+                }
+                
                 $action_class = '';
                 switch ($detail['action_type']) {
                     case 'INSERT': $action_class = 'text-success'; break;
@@ -218,11 +224,17 @@ function displayBarcodeSummary($conn, $where_conditions, $params, $types, $stage
                     case 'DELETE': $action_class = 'text-danger'; break;
                 }
                 
-                echo "<tr>";
-                echo "<td>" . htmlspecialchars($detail['action_time']) . "</td>";
-                echo "<td><span class='{$action_class}'>" . htmlspecialchars($detail['action_type']) . "</span></td>";
+                echo "<tr class='{$row_class}'>";
+                echo "<td>" . htmlspecialchars($row['of_number']) . "</td>";
+                echo "<td>" . htmlspecialchars($row['size']) . "</td>";
+                echo "<td>" . htmlspecialchars($row['category']) . "</td>";
+                echo "<td>" . htmlspecialchars($row['piece_name']) . "</td>";
+                echo "<td><strong>" . htmlspecialchars($detail['order_str']) . "</strong></td>";
+                echo "<td><span class='badge bg-secondary'>" . htmlspecialchars($row['stage']) . "</span></td>";
                 echo "<td>" . htmlspecialchars($detail['status']) . "</td>";
                 echo "<td>" . htmlspecialchars($detail['chef']) . "</td>";
+                echo "<td>" . htmlspecialchars($detail['action_time']) . "</td>";
+                echo "<td><span class='{$action_class}'>" . htmlspecialchars($detail['action_type']) . "</span></td>";
                 echo "</tr>";
             }
             
@@ -351,7 +363,6 @@ function displayBarcodeData($result) {
 }
 
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
