@@ -72,7 +72,7 @@ function displayBarcodeSummary($conn, $where_conditions, $params, $types, $stage
                         COUNT(*) as barcode_count,
                         GROUP_CONCAT(DISTINCT status) as statuses,
                         MAX(action_time) as latest_update
-                    FROM jgr3_barcodes_history 
+                    FROM jgr_barcodes_history 
                     WHERE 1=1";
     
     if (!empty($where_conditions)) {
@@ -172,7 +172,7 @@ function displayBarcodeSummary($conn, $where_conditions, $params, $types, $stage
                                 status, 
                                 chef,
                                 order_str 
-                            FROM jgr3_barcodes_history 
+                            FROM jgr_barcodes_history 
                             WHERE of_number = ? 
                             AND size = ? 
                             AND category = ? 
@@ -585,7 +585,7 @@ function displayBarcodeData($result) {
                         id="quantity" role="tabpanel" aria-labelledby="quantity-tab">
                         <?php
                         if (isset($_GET['search']) || isset($_GET['tab'])) {
-                            $sql_quantity = "SELECT * FROM jgr3_quantity_coupe_history WHERE 1=1";
+                            $sql_quantity = "SELECT * FROM jgr_quantity_coupe_history WHERE 1=1";
                             
                             if (!empty($where_conditions)) {
                                 $sql_quantity .= " AND " . implode(" AND ", $where_conditions);
@@ -617,7 +617,7 @@ function displayBarcodeData($result) {
                         id="barcode" role="tabpanel" aria-labelledby="barcode-tab">
                         <?php
                         if (isset($_GET['search']) || isset($_GET['tab'])) {
-                            $sql_barcode = "SELECT * FROM jgr3_barcodes_history WHERE 1=1";
+                            $sql_barcode = "SELECT * FROM jgr_barcodes_history WHERE 1=1";
                             
                             if (!empty($where_conditions)) {
                                 $sql_barcode .= " AND " . implode(" AND ", $where_conditions);

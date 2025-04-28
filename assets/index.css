@@ -96,7 +96,7 @@ body {
 
 .btn-create {
     text-decoration: none;
-    background-color: #3182ce;
+    background-color: #0066FF;
     color: white;
     border: none;
     padding: 8px 15px;
@@ -118,7 +118,7 @@ body {
 }
 
 #open-path-btn {
-    background-color: #2196F3;
+    background-color: #1f618d;
 }
 
 #open-path-btn:hover {

@@ -391,15 +391,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
             }
             
             // Create a filename using barcode information
-            if ($is_lost_barcode) {
-                // For lost barcodes, use the first barcode's information
-                $pdfFilename = "{$of_number}-{$size}{$category}-{$piece_name}.pdf";
-            } elseif ($generate_costume_2pcs || $generate_costume_3pcs) {
-                // For costume sets, use a more descriptive name that shows it's a set
-                $pieces_suffix = $generate_costume_2pcs ? "2pcs" : "3pcs";
-                $pdfFilename = "{$of_number}-{$size}{$category}-{$pieces_suffix}.pdf";
+            if ($generate_pdf_only) {
+                // For PDF-only mode
+                $pdfFilename = "{$of_number}-{$size}{$category}-pdfonly.pdf";
+            } elseif ($is_lost_barcode) {
+                // For lost barcodes
+                $pdfFilename = "{$of_number}-{$size}{$category}-RTC.pdf";
+            } elseif ($generate_costume_2pcs) {
+                // For 2-piece costume (P and V)
+                $pdfFilename = "{$of_number}-{$size}{$category}-PV.pdf";
+            } elseif ($generate_costume_3pcs) {
+                // For 3-piece costume (P, V, and G)
+                $pdfFilename = "{$of_number}-{$size}{$category}-PVG.pdf";
             } else {
-                // For regular barcodes, use the format you requested
+                // Regular barcode with single piece
                 $pdfFilename = "{$of_number}-{$size}{$category}-{$piece_name}.pdf";
             }
 

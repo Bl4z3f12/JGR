@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 // For non-AJAX requests, redirect directly
                 if (!$isAjaxRequest) {
-                    header('Location: index.php');
+                    header('Location: dashboard.php');
                     exit;
                 }
             } else {
@@ -98,31 +98,99 @@ if (!$isAjaxRequest) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Page</title>
+    <link rel="icon" href="assets\favicon.png" type="image/png">
     <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+
+<style>
+
+    :root {
+        --tg-blue: #0088cc;
+        --tg-light-blue: #40a7e3;
+        --tg-bg: 
+        linear-gradient(135deg, #214864 0%, #1c3566 15%, #0a1c5c 30%, #101d54 48%, #19215e 65%, #0e125a 85%, #000076 100%)
+    }
+
+    body {
+        background: var(--tg-bg);
+        min-height: 100vh;
+        overflow: hidden;
+    }
+
+    .floating-circles div {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.05);
+        animation: float 5s infinite linear;
+    }
+
+    @keyframes float {
+        0% { transform: translateY(0) rotate(0deg); }
+        100% { transform: translateY(-100vh) rotate(360deg); }
+    }
+    .card-body {              
+        background: rgba(255, 255, 255, 0.27);
+        border-radius: 16px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        border: 1px solid rgba(255, 255, 255, 0.45);
+    }
+    .text-center{
+        text-align: center;
+        color: white;   
+    }
+    .form-label {
+        color: white;
+    }
+    .form-check-label{
+        color: white;
+    }
+    .text-center a{
+        color: white;
+
+    }
+</style>
+
 <body class="bg-light">
+
+    <div class="floating-circles">
+        <?php for($i=0; $i<15; $i++): ?>
+        <div style="
+            width: <?= rand(50, 150) ?>px;
+            height: <?= rand(50, 150) ?>px;
+            left: <?= rand(0, 100) ?>%;
+            top: <?= rand(100, 150) ?>%;
+            animation-delay: <?= rand(0, 10) ?>s;
+        "></div>
+        <?php endfor; ?>
+    </div>
+
     <div class="container">
         <div class="row min-vh-100 justify-content-center align-items-center">
             <div class="col-md-6 col-lg-4">
-                <div class="card shadow">
+                <div class="card_shadow">
                     <div class="card-body">
-                        <h3 class="card-title text-center mb-4">Sign In</h3>
+                        <h3 class="card-title text-center mb-4">Login</h3>
                         
-                        <?php if (!empty($response['message']) && !$response['success']): ?>
-                        <div class="alert alert-danger">
-                            <?php echo htmlspecialchars($response['message']); ?>
+
+                        <!-- Message Container -->
+                        <div id="messageContainer" class="mb-3">
+                            <?php if (!empty($response['message']) && !$response['success']): ?>
+                            <div class="alert alert-translucent alert-danger">
+                                <?php echo htmlspecialchars($response['message']); ?>
+                            </div>
+                            <?php endif; ?>
+                            
+                            <?php if (isset($_GET['registered']) && $_GET['registered'] == 'success'): ?>
+                            <div class="alert alert-translucent alert-success">
+                                Registration successful! You can now log in.
+                            </div>
+                            <?php endif; ?>
                         </div>
-                        <?php endif; ?>
-                        
-                        <?php if (isset($_GET['registered']) && $_GET['registered'] == 'success'): ?>
-                        <div class="alert alert-success">
-                            Registration successful! You can now log in.
-                        </div>
-                        <?php endif; ?>
-                        
+
                         <form method="post" id="loginForm">
                             <!-- Username Input -->
                             <div class="mb-3">
@@ -134,12 +202,10 @@ if (!$isAjaxRequest) {
                             <div class="mb-3">
                                 <label for="password" class="form-label">Password</label>
                                 <div class="position-relative">
-                                    <input type="password" class="form-control" id="password" name="password" 
-                                           placeholder="Enter password" required
-                                           style="padding-right: 40px;">
-                                    <i class="fa-solid fa-eye position-absolute top-50 end-0 translate-middle-y me-2"
-                                       style="cursor: pointer;"
-                                       id="togglePassword"></i>
+                                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required>
+                                    <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y" onclick="togglePassword('password')">
+                                        <i class="bi bi-eye-slash"></i>
+                                    </button>
                                 </div>
                             </div>
 
@@ -166,24 +232,66 @@ if (!$isAjaxRequest) {
     </div>
 
     <script>
+        function togglePassword(fieldId) {
+        const passwordField = document.getElementById(fieldId);
+        const eyeIcon = passwordField.parentElement.querySelector('i');
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            eyeIcon.classList.replace('bi-eye-slash', 'bi-eye');
+        } else {
+            passwordField.type = 'password';
+            eyeIcon.classList.replace('bi-eye', 'bi-eye-slash');
+        }
+    }
+    </script>
+    
+
+    <script>
+    // Modified JavaScript
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('loginForm');
-        
-        // Password visibility toggle
-        const togglePassword = document.getElementById('togglePassword');
-        if (togglePassword) {
-            togglePassword.addEventListener('click', function() {
-                const password = document.getElementById('password');
-                const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-                password.setAttribute('type', type);
-                this.classList.toggle('fa-eye-slash');
-                this.classList.toggle('fa-eye');
-            });
-        }
+        const messageContainer = document.getElementById('messageContainer');
         
         form.addEventListener('submit', function(e) {
-            // Rest of your existing form submission code...
-            // [Keep the existing form submission JavaScript code here]
+            if (window.fetch) {
+                e.preventDefault();
+                
+                // Clear previous messages
+                messageContainer.innerHTML = '';
+                
+                const formData = new FormData(form);
+                
+                fetch('login.php', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Create new alert element
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = `alert alert-translucent alert-${data.success ? 'success' : 'danger'}`;
+                    alertDiv.textContent = data.message;
+                    
+                    // Add to message container
+                    messageContainer.appendChild(alertDiv);
+                    
+                    if (data.success) {
+                        setTimeout(() => {
+                            window.location.href = 'scantoday.php';
+                        }, 1000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'alert alert-translucent alert-danger';
+                    errorDiv.textContent = 'An error occurred. Please try again later.';
+                    messageContainer.appendChild(errorDiv);
+                });
+            }
         });
     });
     </script>

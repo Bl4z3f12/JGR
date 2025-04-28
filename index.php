@@ -17,6 +17,15 @@ $items_per_page = 5000;
 <head>
     <?php include 'includes/head.php'; ?>
 </head>
+<style>
+    #costume-options {
+    display: flex;
+    flex: 0 0 auto;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+}
+</style>
 <body>
     <?php include 'includes/sidebar.php'; ?>
 
@@ -49,32 +58,63 @@ $items_per_page = 5000;
                     </a>
                 </div>
             </div>            
-<form id="filter-form" class="filter-form card p-3 shadow-sm" action="" method="GET">
-    <input type="hidden" name="view" value="<?php echo $current_view; ?>">
-    <h5 class="mb-3"><i class="fa-solid fa-arrow-up-wide-short"></i> Filter Options</h5>
-    <div class="row mb-3 align-items-end">
-        <div class="col-md-4">
-            <label for="filter-of" class="form-label mb-2">OF Number</label>
-            <input type="text" class="form-control" id="filter-of" name="filter_of"
-                   value="<?php echo htmlspecialchars($filter_of_number); ?>" placeholder="Enter OF number">
-        </div>
-        <div class="col-md-4">
-            <label for="filter-size" class="form-label mb-2">Size</label>
-            <input type="number" class="form-control" id="filter-size" name="filter_size"
-                   value="<?php echo htmlspecialchars($filter_size); ?>" placeholder="Enter size">
-        </div>
-        <div class="col-md-4">
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fa-solid fa-filter me-1"></i> Apply Filters
-                </button>
-                <button type="button" id="clear-filters" class="btn btn-outline-secondary">
-                    <i class="fa-solid fa-broom"></i> Clear
-                </button>
-            </div>
-        </div>
-    </div>
-</form>
+
+
+            <form id="filter-form" class="filter-form card p-3 shadow-sm" action="" method="GET">
+                <input type="hidden" name="view" value="<?php echo $current_view; ?>">
+                <h5 class="mb-3"><i class="fa-solid fa-arrow-up-wide-short"></i> Filter Options</h5>
+                <div class="row mb-3 align-items-end">
+                    <!-- OF Number -->
+                    <div class="col-md-2">
+                        <label for="filter-of" class="form-label mb-2">OF Number</label>
+                        <input type="text" class="form-control" id="filter-of" name="filter_of"
+                            value="<?php echo htmlspecialchars($filter_of_number); ?>" placeholder="Enter OF number">
+                    </div>
+                    <!-- Size -->
+                    <div class="col-md-2">
+                        <label for="filter-size" class="form-label mb-2">Size</label>
+                        <input type="number" class="form-control" id="filter-size" name="filter_size"
+                            value="<?php echo htmlspecialchars($filter_size); ?>" placeholder="Enter size">
+                    </div>
+                    <!-- Category -->
+                    <div class="col-md-2">
+                        <label for="filter-category" class="form-label mb-2">Category</label>
+                        <select class="form-control" id="filter-category" name="filter_category">
+                            <option value="">Select Category</option>
+                            <option value="R" <?php echo ($filter_category ?? '') === 'R' ? 'selected' : ''; ?>>R</option>
+                            <option value="C" <?php echo ($filter_category ?? '') === 'C' ? 'selected' : ''; ?>>C</option>
+                            <option value="L" <?php echo ($filter_category ?? '') === 'L' ? 'selected' : ''; ?>>L</option>
+                            <option value="LL" <?php echo ($filter_category ?? '') === 'LL' ? 'selected' : ''; ?>>LL</option>
+                            <option value="CC" <?php echo ($filter_category ?? '') === 'CC' ? 'selected' : ''; ?>>CC</option>
+                            <option value="N" <?php echo ($filter_category ?? '') === 'N' ? 'selected' : ''; ?>>N</option>
+                        </select>
+                    </div>
+                    <!-- Piece Name -->
+                    <div class="col-md-2">
+                        <label for="filter-piece-name" class="form-label mb-2">Piece Name</label>
+                        <select class="form-control" id="filter-piece-name" name="filter_piece_name">
+                            <option value="">Select Piece Name</option>
+                            <option value="P" <?php echo ($filter_piece_name ?? '') === 'P' ? 'selected' : ''; ?>>P</option>
+                            <option value="V" <?php echo ($filter_piece_name ?? '') === 'V' ? 'selected' : ''; ?>>V</option>
+                            <option value="G" <?php echo ($filter_piece_name ?? '') === 'G' ? 'selected' : ''; ?>>G</option>
+                            <option value="M" <?php echo ($filter_piece_name ?? '') === 'M' ? 'selected' : ''; ?>>M</option>
+                        </select>
+                    </div>
+                    <!-- Buttons -->
+                    <div class="col-md-4">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-filter me-1"></i> Apply Filters
+                            </button>
+                            <button type="button" id="clear-filters" class="btn btn-outline-secondary">
+                                <i class="fa-solid fa-broom"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+
             <table class="dashboard-table">
                 <thead>
                     <tr>
@@ -150,6 +190,12 @@ $items_per_page = 5000;
     <!-- Create Barcode Modal -->
     <div class="modal <?php echo $show_modal ? 'show' : ''; ?>" id="barcode-modal">
         <div class="modal-content">
+            <!-- Add modal header with title -->
+            <div class="modal-header">
+                <h5 class="modal-title">Create New Barcodes</h5>
+                <button type="button" class="btn-close" onclick="document.getElementById('barcode-modal').classList.remove('show')"></button>
+            </div>
+            
             <form action="index.php" method="POST" class="container-fluid">
                 <input type="hidden" name="action" value="create_barcode">
                 <input type="hidden" name="view" value="<?php echo $current_view; ?>">
@@ -197,7 +243,7 @@ $items_per_page = 5000;
                 </div>
                                 
                 <div class="row mb-3">
-                    <div class="col-12">
+                    <div class="col-12" id="costume-options">
                         <div class="form-check d-flex align-items-center">
                             <input class="form-check-input me-2" type="checkbox" id="lost-barcode" name="lost_barcode">
                             <label class="form-check-label me-3" for="lost-barcode">Lost Barcode</label>
@@ -231,7 +277,7 @@ $items_per_page = 5000;
                 </div>
 
                 <div class="row mb-3">
-                    <div class="col-12">
+                    <div class="col-12" id="costume-options">
                         <div class="form-check mb-2 d-flex align-items-center">
                             <input class="form-check-input me-2" type="checkbox" id="generate-costume-2pcs" name="generate_costume_2pcs">
                             <label class="form-check-label d-flex align-items-center" for="generate-costume-2pcs">
@@ -257,8 +303,7 @@ $items_per_page = 5000;
 
                 <div class="row mb-3">
                     <div class="col-12 d-flex justify-content-center gap-2">
-                        <button type="submit" class="btn btn-primary">Generate Barcodes</button>
-                        <!-- Add the cancel button here -->
+                        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-qrcode"></i> Generate Barcodes</button>
                         <button type="button" class="btn btn-outline-danger" onclick="document.getElementById('barcode-modal').classList.remove('show')">Cancel</button>
                     </div>
                 </div>    
