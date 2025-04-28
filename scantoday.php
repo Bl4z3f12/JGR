@@ -173,6 +173,7 @@ require "scantoday_settings.php";
                                 <option value="Pantalon">Pantalon</option>
                                 <option value="Repassage">Repassage</option>
                                 <option value="P_fini">P_fini</option>
+                                <option value="Exported">Exported</option>
                             </select>
                         </div>
                         
