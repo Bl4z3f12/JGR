@@ -163,8 +163,12 @@ if (!$isAjaxRequest) {
             height: <?= rand(50, 150) ?>px;
             left: <?= rand(0, 100) ?>%;
             top: <?= rand(100, 150) ?>%;
+<<<<<<< HEAD
             animation-delay: <?= rand(0, 10) ?>s;
         "></div>
+=======
+            animation-delay: <?= rand(0, 10) ?>"></div>
+>>>>>>> 2cd3e7705666e0ea92f5796b66cbfa6c3c200ef4
         <?php endfor; ?>
     </div>
 
@@ -270,6 +274,7 @@ if (!$isAjaxRequest) {
                 })
                 .then(response => response.json())
                 .then(data => {
+<<<<<<< HEAD
                     // Create new alert element
                     const alertDiv = document.createElement('div');
                     alertDiv.className = `alert alert-translucent alert-${data.success ? 'success' : 'danger'}`;
@@ -278,6 +283,9 @@ if (!$isAjaxRequest) {
                     // Add to message container
                     messageContainer.appendChild(alertDiv);
                     
+=======
+          
+>>>>>>> 2cd3e7705666e0ea92f5796b66cbfa6c3c200ef4
                     if (data.success) {
                         setTimeout(() => {
                             window.location.href = 'scantoday.php';

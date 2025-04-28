@@ -3,7 +3,11 @@
 require_once 'auth_functions.php';
 
 // Redirect to login page if not logged in
+<<<<<<< HEAD
  requireLogin('login.php');
+=======
+// requireLogin('login.php');
+>>>>>>> 2cd3e7705666e0ea92f5796b66cbfa6c3c200ef4
 // First check if this is an AJAX request that needs JSON response
 $isAjaxRequest = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
                   strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
@@ -146,8 +150,12 @@ if (!$isAjaxRequest) {
             height: <?= rand(50, 150) ?>px;
             left: <?= rand(0, 100) ?>%;
             top: <?= rand(100, 150) ?>%;
+<<<<<<< HEAD
             animation-delay: <?= rand(0, 10) ?>s;
         "></div>
+=======
+            animation-delay: <?= rand(0, 10) ?>"></div>
+>>>>>>> 2cd3e7705666e0ea92f5796b66cbfa6c3c200ef4
         <?php endfor; ?>
     </div>
 
