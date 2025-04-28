@@ -125,4 +125,5 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('edit_piece_name').addEventListener('input', updateBarcodePreview);
         document.getElementById('edit_order_str').addEventListener('input', updateBarcodePreview);
     }
+    
 });
