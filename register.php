@@ -146,8 +146,7 @@ if (!$isAjaxRequest) {
             height: <?= rand(50, 150) ?>px;
             left: <?= rand(0, 100) ?>%;
             top: <?= rand(100, 150) ?>%;
-            animation-delay: <?= rand(0, 10) ?>s;
-        "></div>
+            animation-delay: <?= rand(0, 10) ?>"></div>
         <?php endfor; ?>
     </div>
 

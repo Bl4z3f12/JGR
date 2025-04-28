@@ -440,35 +440,6 @@ $show_modal = isset($_GET['modal']) && $_GET['modal'] === 'create';
 //made by Akram Fouzi
 // Add the random button script to be included in the page
 $random_button_script = getRandomButtonScript();
-<<<<<<< HEAD
-?>
-=======
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//made by Akram Fouzi
 ?>
 
 
@@ -484,4 +455,20 @@ $random_button_script = getRandomButtonScript();
 
 
 
->>>>>>> 13351a0673320563a78ca5f56ad596eb76514f9c
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
