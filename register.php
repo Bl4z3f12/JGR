@@ -3,12 +3,12 @@
 require_once 'auth_functions.php';
 
 // Redirect to login page if not logged in
-<<<<<<< HEAD
+
  requireLogin('login.php');
-=======
+
 // requireLogin('login.php');
->>>>>>> 2cd3e7705666e0ea92f5796b66cbfa6c3c200ef4
-// First check if this is an AJAX request that needs JSON response
+
+//Bl4z3 was here
 $isAjaxRequest = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
                   strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
 
