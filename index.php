@@ -454,6 +454,8 @@ $items_per_page = 5000;
         // Start observing the modal for class changes
         observer.observe(barcodeModal, { attributes: true });
     });
+
+    
     </script>
 
 </body>

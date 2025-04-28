@@ -293,6 +293,7 @@ require "scantoday_settings.php";
                                         <div class="col-md-6">
                                             <label for="of_number" class="form-label">OF Number</label>
                                             <input type="text" class="form-control" id="of_number" name="of_number" 
+                                            
                                                    value="<?php echo htmlspecialchars($barcode_data['of_number']); ?>" required>
                                         </div>
                                         
@@ -304,14 +305,24 @@ require "scantoday_settings.php";
                                         
                                         <div class="col-md-6">
                                             <label for="category" class="form-label">Category</label>
-                                            <input type="text" class="form-control" id="category" name="category" 
-                                                   value="<?php echo htmlspecialchars($barcode_data['category']); ?>">
+                                            <?php $category_options = ['R', 'C', 'L', 'LL', 'CC', 'N']; ?>
+                                            <select class="form-control" id="category" name="category">
+                                                <option value="">Select Category</option>
+                                                <?php foreach($category_options as $option): ?>
+                                                    <option value="<?php echo $option; ?>" <?php echo (isset($barcode_data['category']) && $barcode_data['category'] === $option) ? 'selected' : ''; ?>><?php echo $option; ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
                                         </div>
-                                        
+
                                         <div class="col-md-6">
                                             <label for="piece_name" class="form-label">Piece Name</label>
-                                            <input type="text" class="form-control" id="piece_name" name="piece_name" 
-                                                   value="<?php echo htmlspecialchars($barcode_data['piece_name']); ?>" required>
+                                            <?php $piece_name_options = ['P', 'V', 'G', 'M']; ?>
+                                            <select class="form-control" id="piece_name" name="piece_name" required>
+                                                <option value="">Select Piece Name</option>
+                                                <?php foreach($piece_name_options as $option): ?>
+                                                    <option value="<?php echo $option; ?>" <?php echo (isset($barcode_data['piece_name']) && $barcode_data['piece_name'] === $option) ? 'selected' : ''; ?>><?php echo $option; ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
                                         </div>
                                         
                                         <div class="col-12">

@@ -13,6 +13,8 @@ $items_per_page = 5000;
 // Initialize filter variables
 $filter_of_number = $_GET['filter_of'] ?? '';
 $filter_size = $_GET['filter_size'] ?? '';
+$filter_category = $_GET['filter_category'] ?? '';
+$filter_piece_name = $_GET['filter_piece_name'] ?? '';
 
 // Establish database connection
 function connectDB() {
@@ -20,7 +22,7 @@ function connectDB() {
     return $conn->connect_error ? false : $conn;
 }
 
-function getBarcodes($view, $page, $items_per_page, $filter_of = '', $filter_size = '') {
+function getBarcodes($view, $page, $items_per_page, $filter_of = '', $filter_size = '', $filter_category = '', $filter_piece_name = '') {
     $conn = connectDB();
     if (!$conn) return [];
 
@@ -45,6 +47,14 @@ function getBarcodes($view, $page, $items_per_page, $filter_of = '', $filter_siz
         $conditions[] = "size = ?";
     }
     
+    if (!empty($filter_category)) {
+        $conditions[] = "category = ?";
+    }
+    
+    if (!empty($filter_piece_name)) {
+        $conditions[] = "piece_name = ?";
+    }
+    
     // Combine conditions
     $where = '';
     if (!empty($conditions)) {
@@ -55,16 +65,43 @@ function getBarcodes($view, $page, $items_per_page, $filter_of = '', $filter_siz
     $stmt = $conn->prepare($sql);
     
     // Bind parameters based on filters
-    if (!empty($filter_of) && !empty($filter_size)) {
+    $types = "";
+    $params = [];
+    
+    if (!empty($filter_of)) {
         $filter_of_param = "%$filter_of%"; // For LIKE search
-        $stmt->bind_param("siii", $filter_of_param, $filter_size, $offset, $items_per_page);
-    } elseif (!empty($filter_of)) {
-        $filter_of_param = "%$filter_of%";
-        $stmt->bind_param("sii", $filter_of_param, $offset, $items_per_page);
-    } elseif (!empty($filter_size)) {
-        $stmt->bind_param("iii", $filter_size, $offset, $items_per_page);
-    } else {
-        $stmt->bind_param("ii", $offset, $items_per_page);
+        $types .= "s";
+        $params[] = $filter_of_param;
+    }
+    
+    if (!empty($filter_size)) {
+        $types .= "i";
+        $params[] = $filter_size;
+    }
+    
+    if (!empty($filter_category)) {
+        $types .= "s";
+        $params[] = $filter_category;
+    }
+    
+    if (!empty($filter_piece_name)) {
+        $types .= "s";
+        $params[] = $filter_piece_name;
+    }
+    
+    // Add limit parameters
+    $types .= "ii";
+    $params[] = $offset;
+    $params[] = $items_per_page;
+    
+    // Dynamically bind parameters
+    if (!empty($params)) {
+        $refs = [];
+        foreach ($params as $key => $value) {
+            $refs[$key] = &$params[$key];
+        }
+        array_unshift($refs, $types);
+        call_user_func_array([$stmt, 'bind_param'], $refs);
     }
     
     $stmt->execute();
@@ -79,7 +116,7 @@ function getBarcodes($view, $page, $items_per_page, $filter_of = '', $filter_siz
     return $barcodes;
 }
 
-function getTotalBarcodes($view, $filter_of = '', $filter_size = '') {
+function getTotalBarcodes($view, $filter_of = '', $filter_size = '', $filter_category = '', $filter_piece_name = '') {
     $conn = connectDB();
     if (!$conn) return 100;
 
@@ -102,6 +139,14 @@ function getTotalBarcodes($view, $filter_of = '', $filter_size = '') {
         $conditions[] = "size = ?";
     }
     
+    if (!empty($filter_category)) {
+        $conditions[] = "category = ?";
+    }
+    
+    if (!empty($filter_piece_name)) {
+        $conditions[] = "piece_name = ?";
+    }
+    
     // Combine conditions
     $where = '';
     if (!empty($conditions)) {
@@ -112,14 +157,38 @@ function getTotalBarcodes($view, $filter_of = '', $filter_size = '') {
     $stmt = $conn->prepare($sql);
     
     // Bind parameters based on filters
-    if (!empty($filter_of) && !empty($filter_size)) {
-        $filter_of_param = "%$filter_of%";
-        $stmt->bind_param("si", $filter_of_param, $filter_size);
-    } elseif (!empty($filter_of)) {
-        $filter_of_param = "%$filter_of%";
-        $stmt->bind_param("s", $filter_of_param);
-    } elseif (!empty($filter_size)) {
-        $stmt->bind_param("i", $filter_size);
+    $types = "";
+    $params = [];
+    
+    if (!empty($filter_of)) {
+        $filter_of_param = "%$filter_of%"; // For LIKE search
+        $types .= "s";
+        $params[] = $filter_of_param;
+    }
+    
+    if (!empty($filter_size)) {
+        $types .= "i";
+        $params[] = $filter_size;
+    }
+    
+    if (!empty($filter_category)) {
+        $types .= "s";
+        $params[] = $filter_category;
+    }
+    
+    if (!empty($filter_piece_name)) {
+        $types .= "s";
+        $params[] = $filter_piece_name;
+    }
+    
+    // Dynamically bind parameters
+    if (!empty($params)) {
+        $refs = [];
+        foreach ($params as $key => $value) {
+            $refs[$key] = &$params[$key];
+        }
+        array_unshift($refs, $types);
+        call_user_func_array([$stmt, 'bind_param'], $refs);
     }
     
     $stmt->execute();
@@ -212,6 +281,8 @@ function getRandomButtonScript() {
                 e.preventDefault();
                 document.getElementById('filter-of').value = '';
                 document.getElementById('filter-size').value = '';
+                document.getElementById('filter-category').value = '';
+                document.getElementById('filter-piece-name').value = '';
                 document.getElementById('filter-form').submit();
             });
         }
@@ -431,8 +502,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
 }
 
 // Load barcodes for current view
-$barcodes = getBarcodes($current_view, $page, $items_per_page, $filter_of_number, $filter_size);
-$total_barcodes = getTotalBarcodes($current_view, $filter_of_number, $filter_size);
+$barcodes = getBarcodes($current_view, $page, $items_per_page, $filter_of_number, $filter_size, $filter_category, $filter_piece_name);
+$total_barcodes = getTotalBarcodes($current_view, $filter_of_number, $filter_size, $filter_category, $filter_piece_name);
 $total_pages = ceil($total_barcodes / $items_per_page);
 $show_success = isset($_GET['success']) && $_GET['success'] == 1;
 $error_message = $_GET['error'] ?? '';
@@ -441,37 +512,3 @@ $show_modal = isset($_GET['modal']) && $_GET['modal'] === 'create';
 // Add the random button script to be included in the page
 $random_button_script = getRandomButtonScript();
 ?>
-<<<<<<< HEAD
-=======
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
->>>>>>> 2cd3e7705666e0ea92f5796b66cbfa6c3c200ef4
