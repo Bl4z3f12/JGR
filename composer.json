@@ -11,5 +11,7 @@
             "email": "akramfouzi3@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "phpoffice/phpspreadsheet": "^4.2"
+    }
 }

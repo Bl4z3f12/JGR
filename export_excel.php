@@ -1,14 +1,28 @@
-*<?php
+<?php
 /**
- * export_excel.php - Exports table data to Excel file
+ * export_excel.php - Exports table data to Excel XLSX file
  * 
- * This file handles both the export functionality and the button display.
- * Place this file in the same directory as your main PHP file.
+ * Requirements:
+ * - PhpSpreadsheet library (install via Composer)
+ * - Command: composer require phpoffice/phpspreadsheet
  */
 
+require 'vendor/autoload.php';
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+
 // Check if this is an export request
-if (isset($_GET['export']) && $_GET['export'] == 'excel') {
-    // Include database connection and run export code
+if (isset($_GET['export']) && $_GET['export'] === 'excel') {
+
+    if (!class_exists(Spreadsheet::class)) {
+        die('PhpSpreadsheet library is not installed. Please run: composer require phpoffice/phpspreadsheet');
+    }
+
+    // Database connection
     $host = 'localhost';
     $db_name = 'jgr';
     $username = 'root';
@@ -21,17 +35,15 @@ if (isset($_GET['export']) && $_GET['export'] == 'excel') {
         PDO::ATTR_EMULATE_PREPARES => false,
     ];
 
-    // DSN (Data Source Name)
     $dsn = "mysql:host=$host;dbname=$db_name;charset=$charset";
 
     try {
-        // Create PDO connection
         $pdo = new PDO($dsn, $username, $password, $options);
     } catch (PDOException $e) {
         die("Connection failed: " . $e->getMessage());
     }
 
-    // Get parameters from the form
+    // Parameters
     $of_number = $_GET['of_number'] ?? '';
     $size = $_GET['size'] ?? '';
     $category = $_GET['category'] ?? '';
@@ -39,7 +51,6 @@ if (isset($_GET['export']) && $_GET['export'] == 'excel') {
     $stage = $_GET['stage'] ?? '';
     $date = $_GET['date'] ?? date("Y-m-d");
 
-    // Build the same query as in the main file
     $query = "SELECT 
                 b.of_number, 
                 b.size, 
@@ -92,7 +103,6 @@ if (isset($_GET['export']) && $_GET['export'] == 'excel') {
         $params[] = $stage;
     }
 
-    // Date filter
     if (!empty($date)) {
         $query .= " AND DATE(
                         (SELECT MAX(IFNULL(qc2.lastupdate, b2.last_update))
@@ -117,7 +127,7 @@ if (isset($_GET['export']) && $_GET['export'] == 'excel') {
     $stmt->execute($params);
     $results = $stmt->fetchAll();
 
-    // Calculate totals
+    // Totals
     $total_items = 0;
     $total_stage_quantity = 0;
     $total_main_quantity = 0;
@@ -128,84 +138,173 @@ if (isset($_GET['export']) && $_GET['export'] == 'excel') {
         $total_main_quantity += $row['total_main_quantity'] ?? 0;
     }
 
-    // Create excel directory if it doesn't exist
+    // Excel directory
     $excel_dir = __DIR__ . '/excel';
     if (!file_exists($excel_dir)) {
         mkdir($excel_dir, 0777, true);
     }
 
-    // Generate a unique filename
-    $filename = 'export_data_' . date('Y-m-d_H-i-s') . '.xls';
+    $filename = 'export_data_' . date('Y-m-d_H-i-s') . '.xlsx';
     $filepath = $excel_dir . '/' . $filename;
 
-    // Start output buffering to capture HTML
-    ob_start();
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+    $sheet->setTitle('Export Data');
 
-    // Create the Excel content
-    echo '<table border="1">';
-    echo '<tr>';
-    echo '<th>OF Number</th>';
-    echo '<th>Size</th>';
-    echo '<th>Category</th>';
-    echo '<th>Piece Name</th>';
-    echo '<th>Chef</th>';
-    echo '<th>Stage</th>';
-    echo '<th>Total Count</th>';
-    echo '<th>Quantity Coupe</th>';
-    echo '<th>Principale Quantity</th>';
-    echo '<th>SolPed Client</th>';
-    echo '<th>Pedido Client</th>';
-    echo '<th>Color Tissus</th>';
-    echo '<th>Manque</th>';
-    echo '<th>Suv Plus</th>';
-    echo '<th>Latest Update</th>';
-    echo '</tr>';
+    $headers = [
+        'OF Number', 'Size', 'Category', 'Piece Name', 'Chef', 'Stage', 
+        'Total Count', 'Quantity Coupe', 'Principale Quantity', 
+        'SolPed Client', 'Pedido Client', 'Color Tissus', 
+        'Manque', 'Suv Plus', 'Latest Update'
+    ];
 
-    // Fill in the data
-    foreach ($results as $row) {
-        echo '<tr>';
-        echo '<td>' . htmlspecialchars($row['of_number'] ?? '') . '</td>';
-        echo '<td>' . htmlspecialchars($row['size'] ?? '') . '</td>';
-        echo '<td>' . htmlspecialchars($row['category'] ?? '') . '</td>';
-        echo '<td>' . htmlspecialchars($row['p_name'] ?? '') . '</td>';
-        echo '<td>' . htmlspecialchars($row['chef'] ?? '') . '</td>';
-        echo '<td>' . htmlspecialchars($row['stage'] ?? '') . '</td>';
-        echo '<td>' . htmlspecialchars($row['total_count'] ?? '0') . '</td>';
-        echo '<td>' . htmlspecialchars($row['total_stage_quantity'] ?? '0') . '</td>';
-        echo '<td>' . htmlspecialchars($row['total_main_quantity'] ?? '0') . '</td>';
-        echo '<td>' . htmlspecialchars($row['solped_client'] ?? '') . '</td>';
-        echo '<td>' . htmlspecialchars($row['pedido_client'] ?? '') . '</td>';
-        echo '<td>' . htmlspecialchars($row['color_tissus'] ?? '') . '</td>';
-        echo '<td>' . htmlspecialchars($row['manque'] ?? '0') . '</td>';
-        echo '<td>' . htmlspecialchars($row['suv_plus'] ?? '0') . '</td>';
-        echo '<td>' . htmlspecialchars($row['latest_update'] ?? '') . '</td>';
-        echo '</tr>';
+    $headerStyle = [
+        'font' => [
+            'bold' => true,
+            'color' => ['rgb' => 'FFFFFF'],
+        ],
+        'fill' => [
+            'fillType' => Fill::FILL_SOLID,
+            'startColor' => ['rgb' => '4472C4'],
+        ],
+        'borders' => [
+            'allBorders' => [
+                'borderStyle' => Border::BORDER_THIN,
+                'color' => ['rgb' => '000000'],
+            ],
+        ],
+        'alignment' => [
+            'horizontal' => Alignment::HORIZONTAL_CENTER,
+            'vertical' => Alignment::VERTICAL_CENTER,
+        ],
+    ];
+
+    foreach ($headers as $idx => $header) {
+        $col = chr(65 + $idx); // A, B, C, ...
+        $sheet->setCellValue($col . '1', $header);
+        $sheet->getColumnDimension($col)->setAutoSize(true);
+    }
+    $sheet->getStyle('A1:O1')->applyFromArray($headerStyle);
+
+    $row = 2;
+    foreach ($results as $data) {
+        $sheet->setCellValue('A' . $row, $data['of_number'] ?? '');
+        $sheet->setCellValue('B' . $row, $data['size'] ?? '');
+        $sheet->setCellValue('C' . $row, $data['category'] ?? '');
+        $sheet->setCellValue('D' . $row, $data['p_name'] ?? '');
+        $sheet->setCellValue('E' . $row, $data['chef'] ?? '');
+        $sheet->setCellValue('F' . $row, $data['stage'] ?? '');
+        $sheet->setCellValue('G' . $row, $data['total_count'] ?? 0);
+        $sheet->setCellValue('H' . $row, $data['total_stage_quantity'] ?? 0);
+        $sheet->setCellValue('I' . $row, $data['total_main_quantity'] ?? 0);
+        $sheet->setCellValue('J' . $row, $data['solped_client'] ?? '');
+        $sheet->setCellValue('K' . $row, $data['pedido_client'] ?? '');
+        $sheet->setCellValue('L' . $row, $data['color_tissus'] ?? '');
+        $sheet->setCellValue('M' . $row, $data['manque'] ?? 0);
+        $sheet->setCellValue('N' . $row, $data['suv_plus'] ?? 0);
+        $sheet->setCellValue('O' . $row, $data['latest_update'] ?? '');
+
+        $sheet->getStyle('A' . $row . ':O' . $row)->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+
+        $row++;
     }
 
-    // Add summary row for totals
-    echo '<tr>';
-    echo '<td colspan="6"><strong>TOTALS</strong></td>';
-    echo '<td><strong>' . $total_items . '</strong></td>';
-    echo '<td><strong>' . $total_stage_quantity . '</strong></td>';
-    echo '<td><strong>' . $total_main_quantity . '</strong></td>';
-    echo '<td colspan="6"></td>';
-    echo '</tr>';
+    $totalRow = $row;
+    $sheet->setCellValue('A' . $totalRow, 'TOTALS');
+    $sheet->mergeCells('A' . $totalRow . ':F' . $totalRow);
+    $sheet->setCellValue('G' . $totalRow, $total_items);
+    $sheet->setCellValue('H' . $totalRow, $total_stage_quantity);
+    $sheet->setCellValue('I' . $totalRow, $total_main_quantity);
 
-    echo '</table>';
+    $sheet->getStyle('A' . $totalRow . ':O' . $totalRow)->applyFromArray([
+        'font' => [
+            'bold' => true,
+        ],
+        'fill' => [
+            'fillType' => Fill::FILL_SOLID,
+            'startColor' => ['rgb' => 'E2EFDA'],
+        ],
+        'borders' => [
+            'allBorders' => [
+                'borderStyle' => Border::BORDER_THIN,
+                'color' => ['rgb' => '000000'],
+            ],
+        ],
+        'alignment' => [
+            'horizontal' => Alignment::HORIZONTAL_CENTER,
+        ],
+    ]);
 
-    // Get the content from the buffer
-    $excel_content = ob_get_clean();
-    
-    // Save the file
-    if (file_put_contents($filepath, $excel_content)) {
-        // Inform the user that the file was saved successfully
-        echo "Excel file has been saved to: <strong>" . htmlspecialchars($filepath) . "</strong>";
-        echo "<br><br>";
-        echo "<a href='excel/" . htmlspecialchars($filename) . "' download>Download Excel File</a>";
-        echo " | <a href='javascript:history.back()'>Go Back</a>";
-    } else {
-        echo "Failed to save the Excel file. Please check permissions for the excel directory.";
-    }
+    $sheet->getStyle('G' . $totalRow . ':I' . $totalRow)->getNumberFormat()->setFormatCode('#,##0');
+
+    $writer = new Xlsx($spreadsheet);
+    $writer->save($filepath);
+
+    // Output HTML
+    echo '<!DOCTYPE html>
+    <html>
+    <head>
+        <title>Export Successful</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                margin: 20px;
+            }
+            .success-box {
+                background-color: #d4edda;
+                border: 1px solid #c3e6cb;
+                color: #155724;
+                padding: 15px;
+                border-radius: 5px;
+                margin-bottom: 20px;
+            }
+            .btn {
+                display: inline-block;
+                padding: 8px 16px;
+                background-color: #007bff;
+                color: white;
+                text-decoration: none;
+                border-radius: 4px;
+                margin-right: 10px;
+            }
+            .btn:hover {
+                background-color: #0069d9;
+            }
+            .btn-secondary {
+                background-color: #6c757d;
+            }
+            .btn-secondary:hover {
+                background-color: #5a6268;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="success-box">
+            Excel file has been saved successfully in XLSX format.
+        </div>
+        
+        <h3>File details:</h3>
+        <p>
+            <strong>Filename:</strong> ' . htmlspecialchars($filename) . '<br>
+            <strong>Path:</strong> ' . htmlspecialchars($filepath) . '<br>
+            <strong>Records:</strong> ' . count($results) . '
+        </p>
+        
+        <p>
+            <a href="excel/' . htmlspecialchars($filename) . '" download class="btn">Download Excel File</a>
+            <a href="javascript:history.back()" class="btn btn-secondary">Go Back</a>
+        </p>
+    </body>
+    </html>';
+
     exit;
 }
 ?>
