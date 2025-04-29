@@ -1,10 +1,10 @@
 <?php
 // register.php - Backend for user registration
-require_once 'auth_functions.php';
+//require_once 'auth_functions.php';
 
 // Redirect to login page if not logged in
 
- requireLogin('login.php');
+ //requireLogin('login.php');
 
 // requireLogin('login.php');
 
