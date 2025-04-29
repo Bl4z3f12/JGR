@@ -1,4 +1,5 @@
 <?php
+$current_view = 'dashboard'; // Ensure this line exists
 require_once 'auth_functions.php';
 
 // Redirect to login page if not logged in
@@ -19,12 +20,33 @@ $items_per_page = 5000;
 </head>
 <style>
     #costume-options {
-    display: flex;
-    flex: 0 0 auto;
-    width: 100%;
-    flex-direction: column;
-    align-items: center;
-}
+        display: flex;
+        flex: 0 0 auto;
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+    }
+    .status-in-progress {
+        color: black;
+        background-color: #f1c40f;
+        padding: 0px 1px;
+        font-size: 14px;
+        border-radius: 4px;
+    }
+    .status-badge.status-completed {
+        background-color: #4CAF50; /* Green */
+        color: white;
+        padding: 0px 1px;
+        font-size: 14px;
+        border-radius: 4px;
+    }
+    .status-badge.status-pending {
+        background-color: #f44336; /* Red */
+        color: white;
+        padding: 0px 1px;
+        font-size: 14px;
+        border-radius: 4px;
+    }
 </style>
 <body>
     <?php include 'includes/sidebar.php'; ?>
@@ -146,7 +168,7 @@ $items_per_page = 5000;
                             <td><?php echo htmlspecialchars($barcode['stage']); ?></td>
                             <td><?php echo htmlspecialchars($barcode['chef']); ?></td>
                             <td>
-                                <span class="status-badge status-<?php echo strtolower($barcode['status']); ?>">
+                                <span class="status-badge status-<?php echo str_replace(' ', '-', strtolower($barcode['status'])); ?>">    
                                     <?php echo htmlspecialchars($barcode['status']); ?>
                                 </span>
                             </td>

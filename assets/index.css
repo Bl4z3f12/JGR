@@ -7,6 +7,7 @@
 
 }
 
+
 body {
     display: flex;
     background-color: #f5f7fa;
@@ -31,9 +32,9 @@ body {
 }
 
 .sidebar-item.active {
-    background-color: #e6edf7;
-    color: #3182ce;
-    border-left: 3px solid #3182ce;
+    background-color: #0030cc;
+    color: white;
+    border-left: 3px solid #ffffff;
 }
 
 .sidebar-item-icon {

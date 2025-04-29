@@ -1,4 +1,7 @@
 <?php
+$current_view = 'history.php'; // Add this line
+require_once 'auth_functions.php';
+
 // Database connection details
 $db_host = "localhost";
 $db_user = "root";

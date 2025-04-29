@@ -1,4 +1,6 @@
 <?php
+
+$current_view = 'barcode_settings.php';
 require_once 'auth_functions.php';
 
 // Redirect to login page if not logged in
