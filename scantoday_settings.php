@@ -197,30 +197,31 @@ if (isset($_GET['delete_qc']) && !empty($_GET['id'])) {
 // Handle search action for Summary view
 if (isset($_GET['search']) || $active_tab == 'summary') {
     // MODIFIED: Changed query to include chef and stage in GROUP BY clause
-    $query = "SELECT 
-                b.of_number, 
-                b.size, 
-                b.category, 
-                b.piece_name AS p_name,
-                b.chef,
-                b.stage,
-                COUNT(b.id) AS total_count,
-                SUM(IFNULL(qc.quantity_coupe, 0)) AS total_stage_quantity,
-                SUM(IFNULL(qc.principale_quantity, 0)) AS total_main_quantity,
-                MAX(qc.solped_client) AS solped_client,
-                MAX(qc.pedido_client) AS pedido_client,
-                MAX(qc.color_tissus) AS color_tissus,
-                MAX(qc.principale_quantity) AS principale_quantity,
-                MAX(qc.quantity_coupe) AS quantity_coupe,
-                MAX(qc.manque) AS manque,
-                MAX(qc.suv_plus) AS suv_plus,
-                MAX(IFNULL(qc.lastupdate, b.last_update)) AS latest_update
-              FROM barcodes b
-              LEFT JOIN quantity_coupe qc ON b.of_number = qc.of_number 
-                AND b.size = qc.size 
-                AND b.category = qc.category 
-                AND b.piece_name = qc.piece_name
-              WHERE 1=1";
+// In the first PHP file, replace the summary query with:
+$query = "SELECT 
+            b.of_number, 
+            b.size, 
+            b.category, 
+            b.piece_name AS p_name,
+            b.chef,
+            b.stage,
+            COUNT(b.id) AS total_count,
+            qc.quantity_coupe AS total_stage_quantity,
+            qc.principale_quantity AS total_main_quantity,
+            qc.solped_client AS solped_client,
+            qc.pedido_client AS pedido_client,
+            qc.color_tissus AS color_tissus,
+            qc.principale_quantity AS principale_quantity,
+            qc.quantity_coupe AS quantity_coupe,
+            qc.manque AS manque,
+            qc.suv_plus AS suv_plus,
+            IFNULL(qc.lastupdate, b.last_update) AS latest_update
+          FROM barcodes b
+          LEFT JOIN quantity_coupe qc ON b.of_number = qc.of_number 
+            AND b.size = qc.size 
+            AND b.category = qc.category 
+            AND b.piece_name = qc.piece_name
+          WHERE 1=1";
     
     $params = [];
     

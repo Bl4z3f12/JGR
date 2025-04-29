@@ -1,0 +1,214 @@
+
+:root {
+    --primary-color: #2563eb;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    --info-color: #0ea5e9;
+}
+
+body {
+    background-color: #f8fafc;
+}
+
+.dashboard-header {
+    border-radius: 0.5rem;
+    border-left: 5px solid var(--primary-color);
+}
+
+.stage-card {
+    transition: all 0.3s;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    height: 100%;
+}
+
+.stage-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.stage-card .card-body {
+    padding: 1.5rem;
+}
+
+.total-card {
+    border-radius: 1rem;
+    background: linear-gradient(to right, #2563eb, #3b82f6);
+    color: white;
+}
+
+.emoji-container i {
+    filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.07));
+    transition: transform 0.3s;
+}
+
+.stage-card:hover .emoji-container i {
+    transform: scale(1.2) rotate(5deg);
+}
+
+.progress {
+    height: 12px;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.chart-container {
+    position: relative;
+    height: 350px;
+    margin-bottom: 1rem;
+}
+
+.chart-card {
+    border-radius: 1rem;
+    overflow: hidden;
+    height: 100%;
+}
+
+.no-stage-card {
+    border: 2px dashed rgba(107, 114, 128, 0.5);
+    background-color: rgba(243, 244, 246, 0.7) !important;
+}
+
+.filter-form {
+    background-color: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.form-control, .form-select {
+    border-radius: 0.5rem;
+    padding: 0.625rem 1rem;
+    border: 1px solid #e5e7eb;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25);
+}
+
+.btn {
+    border-radius: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #1d4ed8;
+    border-color: #1d4ed8;
+}
+
+.btn-outline-secondary {
+    color: #4b5563;
+    border-color: #d1d5db;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #f3f4f6;
+    color: #1f2937;
+}
+
+.stage-icon {
+    font-size: 1.5rem;
+    margin-right: 0.5rem;
+}
+
+.card-header {
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+}
+
+.stage-percentage {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.stats-value {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin: 0.5rem 0;
+}
+
+@media (max-width: 768px) {
+    .stats-value {
+        font-size: 1.75rem;
+    }
+    
+    .filter-form {
+        padding: 1rem;
+    }
+}
+
+.total-card, .stage-card {
+    background-color:rgb(0, 39, 99) !important; /* Dark blue - Bootstrap primary color */
+    color: white !important;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.total-card:hover, .stage-card:hover {
+    transform: translateY(-5px);
+}
+
+.stage-card {
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.no-stage-card {
+    background-color: #6c757d !important; /* Grey for 'No Stage' */
+}
+
+.stats-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 10px 0;
+}
+
+.stage-percentage {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.emoji-container {
+    display: inline-block;
+    padding: 8px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.chart-card {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.chart-container {
+    height: 300px;
+    position: relative;
+}
+
+.dashboard-header {
+    background-color: #f8f9fa;
+    border-radius: 12px;
+}
+
+.filter-form {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.stage-icon {
+    margin-right: 8px;
+    font-size: 1.2rem;
+}

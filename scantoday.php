@@ -118,101 +118,107 @@ require "scantoday_settings.php";
                 <!-- Summary Tab -->
                 <?php if($active_tab == 'summary'): ?>
 
-
-        <div class="card">
-            <div class="card-header">
-                <h5>Search</h5>
-            </div>
-            <div class="card-body">
-                <form method="GET" action="" class="row">
-                    <input type="hidden" name="tab" value="summary">
-                    
-                    <div class="search-container">
-                        <div class="search-field">
-                            <label for="of_number" class="form-label">OF Number</label>
-                            <input type="text" class="form-control" id="of_number" name="of_number" value="">
-                        </div>
-                        
-                        <div class="search-field">
-                            <label for="size" class="form-label">Size</label>
-                            <input type="text" class="form-control" id="size" name="size" value="">        
-                        </div>
-                        
-                        <div class="search-field">
-                            <label for="category" class="form-label">Category</label>
-                            <select class="form-select" id="category" name="category">
-                                <option value="select" selected>All Categories</option>
-                                <option value="R">R</option>
-                                <option value="C">C</option>
-                                <option value="L">L</option>
-                                <option value="LL">LL</option>
-                                <option value="CC">CC</option>
-                                <option value="N">N</option>
-                            </select>
-                        </div>
-                        
-                        <div class="search-field">
-                            <label for="p_name" class="form-label">Piece Name</label>
-                            <select class="form-select" id="p_name" name="p_name">
-                                <option value="select" selected>All Pieces</option>
-                                <option value="P">P</option>
-                                <option value="V">V</option>
-                                <option value="G">G</option>
-                                <option value="M">M</option>
-                            </select>
-                        </div>
-                        
-                        <div class="search-field">
-                            <label for="stage" class="form-label">Stage</label>
-                            <select class="form-select" id="stage" name="stage">
-                                <option value="select" selected>All Stages</option>
-                                <option value="Coupe">Coupe</option>
-                                <option value="V1">V1</option>
-                                <option value="V2">V2</option>
-                                <option value="V3">V3</option>
-                                <option value="Pantalon">Pantalon</option>
-                                <option value="Repassage">Repassage</option>
-                                <option value="P_fini">P_fini</option>
-                                <option value="Exported">Exported</option>
-                            </select>
-                        </div>
-                        
-                        <div class="search-field">
-                            <label for="date" class="form-label">Date</label>
-                            <input type="date" class="form-control" id="date" name="date" value="">
-                        </div>
-                        
-                        <div class="button-group">
-                            <button type="submit" name="search" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
-                            <a href="?tab=summary" class="btn btn-secondary"><i class="fa-solid fa-broom"></i> Reset</a>
-                        </div>
+                    <div class="card">
+    <div class="card-header">
+        <h5>Search</h5>
+    </div>
+    <div class="card-body">
+        <form method="GET" action="">
+            <input type="hidden" name="tab" value="summary">
+            
+            <div class="d-flex flex-nowrap align-items-end overflow-auto gap-2">
+                <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
+                    <label for="of_number" class="form-label">OF Number</label>
+                    <input type="text" class="form-control" id="of_number" name="of_number" value="">
+                </div>
+                
+                <div class="flex-grow-1 flex-shrink-1" style="min-width: 80px;">
+                    <label for="size" class="form-label">Size</label>
+                    <input type="text" class="form-control" id="size" name="size" value="">        
+                </div>
+                
+                <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
+                    <label for="category" class="form-label">Category</label>
+                    <select class="form-select" id="category" name="category">
+                        <option value="select" selected>All Categories</option>
+                        <option value="R">R</option>
+                        <option value="C">C</option>
+                        <option value="L">L</option>
+                        <option value="LL">LL</option>
+                        <option value="CC">CC</option>
+                        <option value="N">N</option>
+                    </select>
+                </div>
+                
+                <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
+                    <label for="p_name" class="form-label">Piece Name</label>
+                    <select class="form-select" id="p_name" name="p_name">
+                        <option value="select" selected>All Pieces</option>
+                        <option value="P">P</option>
+                        <option value="V">V</option>
+                        <option value="G">G</option>
+                        <option value="M">M</option>
+                    </select>
+                </div>
+                
+                <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
+                    <label for="stage" class="form-label">Stage</label>
+                    <select class="form-select" id="stage" name="stage">
+                        <option value="select" selected>All Stages</option>
+                        <option value="Coupe">Coupe</option>
+                        <option value="V1">V1</option>
+                        <option value="V2">V2</option>
+                        <option value="V3">V3</option>
+                        <option value="Pantalon">Pantalon</option>
+                        <option value="Repassage">Repassage</option>
+                        <option value="P_fini">P_fini</option>
+                        <option value="Exported">Exported</option>
+                    </select>
+                </div>
+                
+                <div class="flex-grow-1 flex-shrink-1" style="min-width: 120px;">
+                    <label for="date" class="form-label">Date</label>
+                    <input type="date" class="form-control" id="date" name="date" value="">
+                </div>
+                
+                <div class="flex-shrink-0">
+                    <div class="d-flex gap-2">
+                        <button type="submit" name="search" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+                        <a href="?tab=summary" class="btn btn-secondary"><i class="fa-solid fa-broom"></i> Reset</a>
                     </div>
-                </form>
-            </div>
-        </div>
-        
-        <!-- Stage Summary -->
-        <div class="card">
-            <div class="card-header">
-                <h5>Stage Summary</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <?php foreach($stage_options as $s): ?>
-                        <div class="col-md-2 mb-2">
-                            <div class="card">
-                                <div class="card-body text-center">
-                                    <h5><?php echo htmlspecialchars($s); ?></h5>
-                                    <span class="badge bg-primary fs-5">
-                                        <?php echo $stage_summary[$s] ?? ""; ?>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
                 </div>
             </div>
+        </form>
+    </div>
+
+  
+</div>
+        
+        
+        <!-- Stage Summary -->
+<!-- Stage Summary - Improved Responsive Design -->
+
+    <div class="card">
+    <div class="card-header">
+        <h5>Stage Summary</h5>
+    </div>
+    <div class="card-body">
+        <div class="d-flex justify-content-center">
+            <div class="d-flex flex-nowrap overflow-auto">
+                <?php foreach($stage_options as $s): ?>
+                    <div class="card mx-2" style="min-width: 130px; width: auto;">
+                        <div class="card-body text-center p-3">
+                            <h5 class="mb-2"><?php echo htmlspecialchars($s); ?></h5>
+                            <span class="badge bg-primary fs-5 d-block py-2">
+                                <?php echo $stage_summary[$s] ?? "0"; ?>
+                            </span>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
         </div>
+    </div>
+</div>
 
         <!-- Results Table -->
         <div class="table-responsive">
@@ -223,11 +229,11 @@ require "scantoday_settings.php";
                         <th>Size</th>
                         <th>Category</th>
                         <th>Piece Name</th>
-                        <th>Total Count</th>
                         <th>Chef</th>
                         <th>Total Stage Quantity</th>
                         <th>Total Main Quantity</th>
                         <th>Stages</th>
+                        <th>Total Count</th>
                         <th>Solped Client</th>
                         <th>Pedido Client</th>
                         <th>Color Tissus</th>
@@ -249,8 +255,7 @@ require "scantoday_settings.php";
                                 <td><?php echo htmlspecialchars($row['of_number']); ?></td>
                                 <td><?php echo htmlspecialchars($row['size']); ?></td>
                                 <td><?php echo htmlspecialchars($row['category']); ?></td>
-                                <td><?php echo htmlspecialchars($row['p_name']); ?></td>
-                                <td><?php echo $row['total_count']; ?></td>
+                                <td><?php echo htmlspecialchars($row['p_name']); ?></td> 
                                 <td><?php echo htmlspecialchars($row['chef'] ?? ''); ?></td>
                                 <td><?php echo $row['total_stage_quantity']; ?></td>
                                 <td><?php echo $row['total_main_quantity']; ?></td>
@@ -263,6 +268,7 @@ require "scantoday_settings.php";
                                         </span>
                                     <?php endforeach; ?>
                                 </td>
+                                <td><?php echo $row['total_count']; ?></td>
                                 <td><?php echo htmlspecialchars($row['solped_client'] ?? ''); ?></td>
                                 <td><?php echo htmlspecialchars($row['pedido_client'] ?? ''); ?></td>
                                 <td><?php echo htmlspecialchars($row['color_tissus'] ?? ''); ?></td>
@@ -276,6 +282,22 @@ require "scantoday_settings.php";
                     <?php endif; ?>
                 </tbody>
             </table>
+<div class="export-button-container">
+    <form method="GET" action="export_excel.php">
+        <!-- Hidden inputs to pass all current filter values -->
+        <input type="hidden" name="export" value="excel">
+        <input type="hidden" name="of_number" value="<?php echo htmlspecialchars($of_number ?? ''); ?>">
+        <input type="hidden" name="size" value="<?php echo htmlspecialchars($size ?? ''); ?>">
+        <input type="hidden" name="category" value="<?php echo htmlspecialchars($category ?? ''); ?>">
+        <input type="hidden" name="p_name" value="<?php echo htmlspecialchars($p_name ?? ''); ?>">
+        <input type="hidden" name="stage" value="<?php echo htmlspecialchars($stage ?? ''); ?>">
+        <input type="hidden" name="date" value="<?php echo htmlspecialchars($date ?? date('Y-m-d')); ?>">
+        
+        <button type="submit" class="btn btn-success">
+            <i class="fas fa-file-excel"></i> Export to Excel
+        </button>
+    </form>
+</div>
         </div>
     <?php endif; ?>
                     
@@ -528,6 +550,7 @@ require "scantoday_settings.php";
         
         // Calculate initial values if the form is loaded with existing data
         calculateDifferences();
+        
     });
     </script>
     
