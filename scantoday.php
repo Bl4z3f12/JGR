@@ -224,66 +224,149 @@ require "scantoday_settings.php";
 
         <!-- Results Table -->
         <div class="table-responsive">
-            <table class="table table-striped table-hover">
-                <thead class="table-primary">
-                    <tr>
-                        <th>OF Number</th>
-                        <th>Size</th>
-                        <th>Category</th>
-                        <th>Piece Name</th>
-                        <th>Chef</th>
-                        <th>Total Stage Quantity</th>
-                        <th>Total Main Quantity</th>
-                        <th>Stages</th>
-                        <th>Total Count</th>
-                        <th>Solped Client</th>
-                        <th>Pedido Client</th>
-                        <th>Color Tissus</th>
-                        <th>Main Qty</th>
-                        <th>Qty Coupe</th>
-                        <th>Manque</th>
-                        <th>Suv Plus</th>
-                        <th>Latest Update</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if(empty($grouped_results)): ?>
-                        <tr>
-                            <td colspan="17" class="text-center">No records found</td>
+        <table class="table table-striped table-hover">
+    <thead class="table-primary">
+        <tr>
+            <th>OF Number</th>
+            <th>Size</th>
+            <th>Category</th>
+            <th>Piece Name</th>
+            <th>Chef</th>
+            <th>Total Stage Quantity</th>
+            <th>Total Main Quantity</th>
+            <th>Stages</th>
+            <th>OF Total Count</th>
+            <th>Solped Client</th>
+            <th>Pedido Client</th>
+            <th>Color Tissus</th>
+            <th>Main Qty</th>
+            <th>Qty Coupe</th>
+            <th>Manque</th>
+            <th>Suv Plus</th>
+            <th>Latest Update</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if(empty($grouped_results)): ?>
+            <tr>
+                <td colspan="17" class="text-center">No records found</td>
+            </tr>
+        <?php else: ?>
+            <?php 
+            // Initialize variables for grouping
+            $current_of_number = null;
+            $of_total_count = 0;
+            $of_principale_quantity = 0;
+            $of_quantity_coupe = 0;
+            $of_manque = 0;
+            $of_suv_plus = 0;
+            
+            // Initialize grand totals
+            $grand_total_count = 0;
+            $grand_total_principale_quantity = 0;
+            $grand_total_quantity_coupe = 0;
+            $grand_total_manque = 0;
+            $grand_total_suv_plus = 0;
+            
+            // Sort the results by OF Number to ensure grouping works
+            usort($grouped_results, function($a, $b) {
+                return $a['of_number'] <=> $b['of_number'];
+            });
+            
+            foreach($grouped_results as $index => $row): 
+                // Check if we're starting a new OF Number
+                if ($current_of_number !== $row['of_number']) {
+                    // If not the first OF Number, output the subtotal row for the previous group
+                    if ($current_of_number !== null) {
+                        ?>
+                        <tr class="table-info">
+                            <td><?php echo htmlspecialchars($current_of_number); ?></td>
+                            <td colspan="6"></td>
+                            <td>TOTAL</td>
+                            <td><?php echo $of_total_count; ?></td>
+                            <td colspan="3"></td>
+                            <td><?php echo $of_principale_quantity; ?></td>
+                            <td><?php echo $of_quantity_coupe; ?></td>
+                            <td><?php echo $of_manque; ?></td>
+                            <td><?php echo $of_suv_plus; ?></td>
+                            <td></td>
                         </tr>
-                    <?php else: ?>
-                        <?php foreach($grouped_results as $row): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($row['of_number']); ?></td>
-                                <td><?php echo htmlspecialchars($row['size']); ?></td>
-                                <td><?php echo htmlspecialchars($row['category']); ?></td>
-                                <td><?php echo htmlspecialchars($row['p_name']); ?></td> 
-                                <td><?php echo htmlspecialchars($row['chef'] ?? ''); ?></td>
-                                <td><?php echo $row['total_stage_quantity']; ?></td>
-                                <td><?php echo $row['total_main_quantity']; ?></td>
-                                <td>
-                                    <?php 
-                                    $stages = explode(', ', $row['stage']);
-                                    foreach($stages as $s): ?>
-                                        <span class="badge bg-secondary stage-badge">
-                                            <?php echo htmlspecialchars($s); ?>
-                                        </span>
-                                    <?php endforeach; ?>
-                                </td>
-                                <td><?php echo $row['total_count']; ?></td>
-                                <td><?php echo htmlspecialchars($row['solped_client'] ?? ''); ?></td>
-                                <td><?php echo htmlspecialchars($row['pedido_client'] ?? ''); ?></td>
-                                <td><?php echo htmlspecialchars($row['color_tissus'] ?? ''); ?></td>
-                                <td><?php echo $row['principale_quantity']; ?></td>
-                                <td><?php echo $row['quantity_coupe']; ?></td>
-                                <td><?php echo $row['manque']; ?></td>
-                                <td><?php echo $row['suv_plus']; ?></td>
-                                <td><?php echo $row['latest_update'] ? date('Y-m-d H:i', strtotime($row['latest_update'])) : ''; ?></td>
-                            </tr>
+                        <?php
+                    }
+                    
+                    // Reset the subtotals for the new OF Number
+                    $current_of_number = $row['of_number'];
+                    $of_total_count = 0;
+                    $of_principale_quantity = 0;
+                    $of_quantity_coupe = 0;
+                    $of_manque = 0;
+                    $of_suv_plus = 0;
+                }
+                
+                // Add to subtotals for this OF Number
+                $of_total_count += $row['total_count'];
+                $of_principale_quantity += $row['principale_quantity'];
+                $of_quantity_coupe += $row['quantity_coupe'];
+                $of_manque += $row['manque'];
+                $of_suv_plus += $row['suv_plus'];
+                
+                // Also add to grand totals
+                $grand_total_count += $row['total_count'];
+                $grand_total_principale_quantity += $row['principale_quantity'];
+                $grand_total_quantity_coupe += $row['quantity_coupe'];
+                $grand_total_manque += $row['manque'];
+                $grand_total_suv_plus += $row['suv_plus'];
+            ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($row['of_number']); ?></td>
+                    <td><?php echo htmlspecialchars($row['size']); ?></td>
+                    <td><?php echo htmlspecialchars($row['category']); ?></td>
+                    <td><?php echo htmlspecialchars($row['p_name']); ?></td>
+                    <td><?php echo htmlspecialchars($row['chef'] ?? ''); ?></td>
+                    <td><?php echo $row['total_stage_quantity']; ?></td>
+                    <td><?php echo $row['total_main_quantity']; ?></td>
+                    <td>
+                        <?php
+                        $stages = explode(', ', $row['stage']);
+                        foreach($stages as $s): ?>
+                            <span class="badge bg-secondary stage-badge">
+                                <?php echo htmlspecialchars($s); ?>
+                            </span>
                         <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+                    </td>
+                    <td><?php echo $row['total_count']; ?></td>
+                    <td><?php echo htmlspecialchars($row['solped_client'] ?? ''); ?></td>
+                    <td><?php echo htmlspecialchars($row['pedido_client'] ?? ''); ?></td>
+                    <td><?php echo htmlspecialchars($row['color_tissus'] ?? ''); ?></td>
+                    <td><?php echo $row['principale_quantity']; ?></td>
+                    <td><?php echo $row['quantity_coupe']; ?></td>
+                    <td><?php echo $row['manque']; ?></td>
+                    <td><?php echo $row['suv_plus']; ?></td>
+                    <td><?php echo $row['latest_update'] ? date('Y-m-d H:i', strtotime($row['latest_update'])) : ''; ?></td>
+                </tr>
+            <?php 
+                // If this is the last row, output the subtotal for the final group
+                if ($index === count($grouped_results) - 1) {
+                    ?>
+                    <tr class="table-info">
+                        <td><?php echo htmlspecialchars($current_of_number); ?></td>
+                        <td colspan="6"></td>
+                        <td>TOTAL</td>
+                        <td><?php echo $of_total_count; ?></td>
+                        <td colspan="3"></td>
+                        <td><?php echo $of_principale_quantity; ?></td>
+                        <td><?php echo $of_quantity_coupe; ?></td>
+                        <td><?php echo $of_manque; ?></td>
+                        <td><?php echo $of_suv_plus; ?></td>
+                        <td></td>
+                    </tr>
+                    <?php
+                }
+            endforeach; 
+            ?>
+        <?php endif; ?>
+    </tbody>
+</table>
 <div class="export-button-container">
     <form method="GET" action="export_excel.php">
         <!-- Hidden inputs to pass all current filter values -->

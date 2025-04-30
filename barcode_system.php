@@ -302,6 +302,18 @@ function formatBarcodeString($of_number, $size, $category, $piece_name, $number)
     }
 }
 
+// NEW FUNCTION: Check if a barcode already exists in the database
+function barcodeExists($conn, $full_barcode_name) {
+    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM barcodes WHERE full_barcode_name = ?");
+    $stmt->bind_param("s", $full_barcode_name);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $stmt->close();
+    
+    return $row['count'] > 0;
+}
+
 // Handle barcode creation and PDF generation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'create_barcode') {
     $of_number = $_POST['barcode_prefix'] ?? '';
@@ -315,6 +327,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
     $generate_pdf_only = isset($_POST['generate_pdf_only']);
 
     $errors = [];
+    $duplicates = []; // NEW: Array to track duplicate barcodes
 
     if (!$of_number) $errors[] = "OF number is required";
     if ($size <= 0) $errors[] = "Size must be positive";
@@ -361,6 +374,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
             
             $col = 0;
             $row = 0;
+            $successCount = 0; // NEW: Counter for successfully created barcodes
             
             // Process differently based on mode
             if ($is_lost_barcode) {
@@ -378,9 +392,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
                     
                     // Insert into database
                     if (!$generate_pdf_only) {
+                        // Check if barcode already exists
+                        if (barcodeExists($conn, $full_barcode_name)) {
+                            $duplicates[] = $full_barcode_name;
+                            $lost_barcode_number++; // Move to next number even if duplicate
+                            continue;
+                        }
+                        
                         $stmt = $conn->prepare("INSERT INTO barcodes (of_number, size, category, piece_name, order_str, full_barcode_name, status, stage) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL)");
                         $stmt->bind_param("sissss", $of_number, $size, $category, $piece_name, $formatted_number, $full_barcode_name);
                         $stmt->execute();
+                        $successCount++;
                     }
                     
                     // Generate and place barcode in PDF
@@ -413,9 +435,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
                         
                         // Insert into database only if not PDF-only mode
                         if (!$generate_pdf_only) {
+                            // Check if barcode already exists
+                            if (barcodeExists($conn, $full_barcode_name)) {
+                                $duplicates[] = $full_barcode_name;
+                                continue;
+                            }
+                            
                             $stmt = $conn->prepare("INSERT INTO barcodes (of_number, size, category, piece_name, order_str, full_barcode_name, status, stage) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL)");
                             $stmt->bind_param("sissss", $of_number, $size, $category, $current_piece, $i, $full_barcode_name);
                             $stmt->execute();
+                            $successCount++;
                         }
                         
                         // Generate and place barcode in PDF
@@ -442,9 +471,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
                     
                     // Insert into database only if not PDF-only mode
                     if (!$generate_pdf_only) {
+                        // Check if barcode already exists
+                        if (barcodeExists($conn, $full_barcode_name)) {
+                            $duplicates[] = $full_barcode_name;
+                            continue;
+                        }
+                        
                         $stmt = $conn->prepare("INSERT INTO barcodes (of_number, size, category, piece_name, order_str, full_barcode_name, status, stage) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL)");
                         $stmt->bind_param("sissss", $of_number, $size, $category, $piece_name, $i, $full_barcode_name);
                         $stmt->execute();
+                        $successCount++;
                     }
                     
                     // Generate and place barcode in PDF
@@ -492,10 +528,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
             $pdf->Output('F', __DIR__ . "/barcodes/$pdfFilename");  
                       
             $conn->close();
+            
+            // Handle redirects based on results
+            if (!empty($duplicates)) {
+                $duplicate_message = "The following barcodes already exist: " . implode(", ", array_slice($duplicates, 0, 5));
+                if (count($duplicates) > 5) {
+                    $duplicate_message .= " and " . (count($duplicates) - 5) . " more";
+                }
+                
+                if ($successCount > 0) {
+                    // Some succeeded, some failed
+                    $message = "$successCount barcodes created successfully. $duplicate_message";
+                    header("Location: index.php?view=dashboard&modal=create&warning=" . urlencode($message) . "&pdf=$pdfFilename");
+                } else {
+                    // All failed
+                    header("Location: index.php?view=$form_view&modal=create&error=" . urlencode($duplicate_message));
+                }
+                exit;
+            } else {
+                // All succeeded
+                header("Location: index.php?view=dashboard&modal=create&success=1&pdf=$pdfFilename");
+                exit;
+            }
         }
-        
-        header("Location: index.php?view=dashboard&modal=create&success=1&pdf=$pdfFilename");
-        exit;
     } else {
         header("Location: index.php?view=$form_view&modal=create&error=" . urlencode(implode(", ", $errors)));
         exit;
@@ -508,6 +563,7 @@ $total_barcodes = getTotalBarcodes($current_view, $filter_of_number, $filter_siz
 $total_pages = ceil($total_barcodes / $items_per_page);
 $show_success = isset($_GET['success']) && $_GET['success'] == 1;
 $error_message = $_GET['error'] ?? '';
+$warning_message = $_GET['warning'] ?? ''; // NEW: Add support for warning messages
 $show_modal = isset($_GET['modal']) && $_GET['modal'] === 'create';
 //made by Akram Fouzi
 // Add the random button script to be included in the page

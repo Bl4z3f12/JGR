@@ -358,6 +358,7 @@ $items_per_page = 5000;
                 </div>
             </form>
         </div>
+        
     </div>
     
     <?php include 'includes/footer.php'; ?>
