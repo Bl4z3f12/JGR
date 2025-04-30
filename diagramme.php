@@ -1,4 +1,6 @@
 <?php
+
+$current_view = 'diagramme.php';
 // Initialize database connection with the same parameters as your other files
 $host = 'localhost';
 $db_name = 'jgr';

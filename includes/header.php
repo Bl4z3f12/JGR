@@ -1,6 +1,5 @@
 
 
-
 <div class="container-fluid bg-dark py-3 border-bottom text-white position-relative">
     <div class="row align-items-center">
         <!-- Toggler Button for Small Screens -->
@@ -14,14 +13,12 @@
             <h2 class="fs-4 fw-normal m-0"> Barcode System (JGR_FORMENS)</h2>
         </div>
 
-        <div class="col-auto">
-    <div class="dropdown text-white">
-        <?php if (isset($_SESSION['user'])): ?>
-            <?php echo htmlspecialchars($_SESSION['user']['username']); ?>
-        <?php else: ?>
-            Guest
-        <?php endif; ?>
-    </div>
+<div class="col-auto text-white">
+    <?php if (isset($_SESSION['username'])): ?>
+        <?php echo htmlspecialchars($_SESSION['username']); ?>
+    <?php else: ?>
+        Guest
+    <?php endif; ?>
 </div>
 
     </div>

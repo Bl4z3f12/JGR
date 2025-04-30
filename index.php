@@ -13,6 +13,7 @@ require_once 'barcode_system.php';
 $items_per_page = 5000;
 
 
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
