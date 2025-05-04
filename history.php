@@ -375,6 +375,9 @@ function displayBarcodeData($result) {
     <title>History Records</title>
     <link rel="stylesheet" href="assets/index.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
     <style>
         /* Layout styles for fixed header and sidebar with scrollable content */
         html, body {
@@ -460,6 +463,9 @@ function displayBarcodeData($result) {
             <div class="container-fluid">
                 <h2 class="mb-4" style="font-size: 18px;">History Records</h2>
                 
+                <div class="alert alert-warning text-left m-3" role="alert">
+                <i class="fa-solid fa-triangle-exclamation"></i> <span style="font-weight: bold;">Please Note:</span> History records (logs) are removed from our server after 3 months.
+                </div>
                 <!-- Search Form -->
                 <div class="card mb-4">
                     <div class="card-header">
@@ -471,66 +477,86 @@ function displayBarcodeData($result) {
                             
                             <div class="col-md-2 col-sm-6">
                                 <label for="of_number" class="form-label">OF Number</label>
-                                <input type="text" class="form-control" id="of_number" name="of_number" 
-                                    value="<?php echo htmlspecialchars($of_number); ?>">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-hashtag"></i></span>
+                                    <input type="number" class="form-control" id="of_number" name="of_number" placeholder="Enter OF Number"
+                                        value="<?php echo htmlspecialchars($of_number); ?>">
+                                </div>
                             </div>
                             
                             <div class="col-md-2 col-sm-6">
                                 <label for="size" class="form-label">Size</label>
-                                <input type="text" class="form-control" id="size" name="size" 
-                                    value="<?php echo htmlspecialchars($size); ?>">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-ruler"></i></span>
+                                    <input type="number" class="form-control" id="size" name="size" placeholder="Enter Size" 
+                                        value="<?php echo htmlspecialchars($size); ?>">
+                                </div>
                             </div>
                             
                             <div class="col-md-2 col-sm-6">
                                 <label for="category" class="form-label">Category</label>
-                                <select class="form-select" id="category" name="category">
-                                    <option value="select" <?php echo ($category === 'select') ? 'selected' : ''; ?>>All Categories</option>
-                                    <?php
-                                    $category_options = ['R', 'C', 'L', 'LL', 'CC', 'N'];
-                                    foreach ($category_options as $option): ?>
-                                        <option value="<?php echo htmlspecialchars($option); ?>" 
-                                                <?php echo ($category === $option) ? 'selected' : ''; ?>>
-                                            <?php echo htmlspecialchars($option); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
+
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-tags"></i></span>
+                                    <select class="form-select" id="category" name="category">
+                                        <option value="select" <?php echo ($category === 'select') ? 'selected' : ''; ?>>All Categories</option>
+                                        <?php
+                                        $category_options = ['R', 'C', 'L', 'LL', 'CC', 'N'];
+                                        foreach ($category_options as $option): ?>
+                                            <option value="<?php echo htmlspecialchars($option); ?>" 
+                                                    <?php echo ($category === $option) ? 'selected' : ''; ?>>
+                                                <?php echo htmlspecialchars($option); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
                             </div>
                             
                             <div class="col-md-2 col-sm-6">
                                 <label for="p_name" class="form-label">P Name</label>
-                                <select class="form-select" id="p_name" name="p_name">
-                                    <option value="select" <?php echo ($p_name === 'select') ? 'selected' : ''; ?>>All Pieces</option>
-                                    <?php
-                                    $p_name_options = ['P', 'V', 'G', 'M'];
-                                    foreach ($p_name_options as $option): ?>
-                                        <option value="<?php echo htmlspecialchars($option); ?>" 
-                                                <?php echo ($p_name === $option) ? 'selected' : ''; ?>>
-                                            <?php echo htmlspecialchars($option); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
+
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-puzzle-piece"></i></span>
+                                    <select class="form-select" id="p_name" name="p_name">
+                                        <option value="select" <?php echo ($p_name === 'select') ? 'selected' : ''; ?>>All Pieces</option>
+                                        <?php
+                                        $p_name_options = ['P', 'V', 'G', 'M'];
+                                        foreach ($p_name_options as $option): ?>
+                                            <option value="<?php echo htmlspecialchars($option); ?>" 
+                                                    <?php echo ($p_name === $option) ? 'selected' : ''; ?>>
+                                                <?php echo htmlspecialchars($option); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
                             </div>
                             
                             <div class="col-md-2 col-sm-6">
                                 <label for="stage" class="form-label">Stage</label>
-                                <select class="form-select" id="stage" name="stage">
-                                    <option value="select" <?php echo ($stage === 'select') ? 'selected' : ''; ?>>All Stages</option>
-                                    <?php
-                                    $stage_options = ['Coupe', 'V1', 'V2', 'V3', 'Pantalon', 'Repassage', 'P_fini'];
-                                    foreach ($stage_options as $option): ?>
-                                        <option value="<?php echo htmlspecialchars($option); ?>" 
-                                                <?php echo ($stage === $option) ? 'selected' : ''; ?>>
-                                            <?php echo htmlspecialchars($option); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-layer-group"></i></span>
+                                    <select class="form-select" id="stage" name="stage">
+                                        <option value="select" <?php echo ($stage === 'select') ? 'selected' : ''; ?>>All Stages</option>
+                                        <?php
+                                        $stage_options = ['Coupe', 'V1', 'V2', 'V3', 'Pantalon', 'Repassage', 'P_fini'];
+                                        foreach ($stage_options as $option): ?>
+                                            <option value="<?php echo htmlspecialchars($option); ?>" 
+                                                    <?php echo ($stage === $option) ? 'selected' : ''; ?>>
+                                                <?php echo htmlspecialchars($option); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
                             </div>
                             
                             <div class="col-md-2 col-sm-6">
                                 <label for="date" class="form-label">Date</label>
-                                <input type="date" class="form-control" id="date" name="date" 
-                                    value="<?php echo htmlspecialchars($date); ?>">
-                            </div>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-calendar"></i></span>
+                                    <!-- Use date input type for better date selection -->
+                                    <input type="date" class="form-control" id="date" name="date" 
+                                        value="<?php echo htmlspecialchars($date); ?>">
+                                </div>
                             
                             <div class="col-12 mt-3">
                                 <button type="submit" name="search" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Search</button>

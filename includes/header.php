@@ -1,26 +1,39 @@
+<?php
+function is_mobile() {
+    return preg_match(
+      '/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|pal|phone|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|ucweb|vodafone|wap|windows ce|xda|xiino/i',
+      $_SERVER['HTTP_USER_AGENT']
+    );
+}
+?>
 
-
-<div class="container-fluid bg-dark py-3 border-bottom text-white position-relative">
-    <div class="row align-items-center">
-        <!-- Toggler Button for Small Screens -->
-        <div class="col-auto d-block d-md-none">
-            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
-                <i class="fas fa-bars"></i>
-            </button>
-        </div>
-
-        <div class="col">
-            <h2 class="fs-4 fw-normal m-0"> Barcode System (JGR_FORMENS)</h2>
-        </div>
-
-<div class="col-auto text-white">
-    <?php if (isset($_SESSION['username'])): ?>
-        <?php echo htmlspecialchars($_SESSION['username']); ?>
-    <?php else: ?>
-        Guest
-    <?php endif; ?>
-</div>
-
+<div class="container-fluid bg-dark py-3 border-bottom text-white">
+  <div class="d-flex justify-content-between align-items-center">
+    <!-- Left: Toggler Button and Title -->
+    <div class="d-flex align-items-center">
+      <!-- Toggler Button for Small Screens -->
+      <button class="navbar-toggler d-block d-md-none me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars"></i>
+      </button>
+      <h2 class="fs-4 fw-normal m-0">Barcode System (JGR_FORMENS)</h2>
     </div>
-</div>
 
+    <!-- Right: Username and Logout -->
+    <div class="d-flex align-items-center">
+        <i class="fas fa-user-circle me-2"></i>
+      <span class="me-3">
+        <?php if (isset($_SESSION['username'])): ?>
+          <?php echo htmlspecialchars($_SESSION['username']); ?>
+        <?php else: ?>
+          Guest
+        <?php endif; ?>
+      </span>
+      
+        <?php if ( ! is_mobile() ): ?>
+            <a href="logout.php" class="btn btn-outline-light btn-sm">Logout 
+            <i class="fas fa-sign-out-alt"></i>
+            </a>
+        <?php endif; ?>
+    </div>
+  </div>
+</div>

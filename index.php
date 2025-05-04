@@ -19,6 +19,8 @@ $items_per_page = 5000;
 <html lang="en">
 <head>
     <?php include 'includes/head.php'; ?>
+    <!-- Add Bootstrap CSS if not already included in head.php -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <style>
     #costume-options {
@@ -49,6 +51,102 @@ $items_per_page = 5000;
         font-size: 14px;
         border-radius: 4px;
     }
+    
+    /* PDF Modal Styles */
+    #pdf-modal {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.4);
+    }
+    
+    #pdf-modal .modal-content {
+        background-color: #fefefe;
+        margin: 2% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 90%;
+        max-width: 1200px;
+        max-height: 90vh;
+        overflow-y: auto;
+        border-radius: 8px;
+    }
+    
+    .pdf-card {
+        transition: transform 0.2s;
+        height: 100%;
+    }
+    
+    .pdf-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .pdf-icon {
+        font-size: 3rem;
+        color: #dc3545;
+    }
+    
+    .row-pdf {
+        display: flex;
+        flex-wrap: wrap;
+        margin-right: -15px;
+        margin-left: -15px;
+    }
+    
+    .pdf-col {
+        flex: 0 0 20%;
+        max-width: 20%;
+        padding: 0 15px;
+        margin-bottom: 30px;
+    }
+    
+    @media (max-width: 1200px) {
+        .pdf-col {
+            flex: 0 0 25%;
+            max-width: 25%;
+        }
+    }
+    
+    @media (max-width: 992px) {
+        .pdf-col {
+            flex: 0 0 33.333333%;
+            max-width: 33.333333%;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .pdf-col {
+            flex: 0 0 50%;
+            max-width: 50%;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .pdf-col {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+    }
+    
+    .filter-buttons {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .filter-buttons .btn {
+        flex: 1;
+    }
+    
+    #pdf-modal-loader {
+        text-align: center;
+        padding: 40px;
+    }
 </style>
 <body>
     <?php include 'includes/sidebar.php'; ?>
@@ -77,7 +175,7 @@ $items_per_page = 5000;
                     <a href="?view=<?php echo $current_view; ?>&modal=create" class="btn-create">
                         <span><i class="fa-solid fa-gears"></i></span> Create New Barcodes
                     </a>
-                    <a href="pdf.php" class="btn-create" id="open-path-btn">
+                    <a href="#" class="btn-create" id="open-path-btn">
                         <span><i class="fa-solid fa-folder-open"></i></span> Open Path
                     </a>
                 </div>
@@ -91,38 +189,51 @@ $items_per_page = 5000;
                     <!-- OF Number -->
                     <div class="col-md-2">
                         <label for="filter-of" class="form-label mb-2">OF Number</label>
-                        <input type="text" class="form-control" id="filter-of" name="filter_of"
-                            value="<?php echo htmlspecialchars($filter_of_number); ?>" placeholder="Enter OF number">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-hashtag"></i></span>
+                            <input type="number" class="form-control" id="filter-of" name="filter_of"
+                                value="<?php echo htmlspecialchars($filter_of_number); ?>" placeholder="Enter OF number">
+                        </div>
                     </div>
                     <!-- Size -->
                     <div class="col-md-2">
                         <label for="filter-size" class="form-label mb-2">Size</label>
-                        <input type="number" class="form-control" id="filter-size" name="filter_size"
-                            value="<?php echo htmlspecialchars($filter_size); ?>" placeholder="Enter size">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-ruler"></i></span>
+                            <input type="number" class="form-control" id="filter-size" name="filter_size"
+                                value="<?php echo htmlspecialchars($filter_size); ?>" placeholder="Enter size">
+                        </div>
                     </div>
                     <!-- Category -->
                     <div class="col-md-2">
                         <label for="filter-category" class="form-label mb-2">Category</label>
-                        <select class="form-control" id="filter-category" name="filter_category">
-                            <option value="">Select Category</option>
-                            <option value="R" <?php echo ($filter_category ?? '') === 'R' ? 'selected' : ''; ?>>R</option>
-                            <option value="C" <?php echo ($filter_category ?? '') === 'C' ? 'selected' : ''; ?>>C</option>
-                            <option value="L" <?php echo ($filter_category ?? '') === 'L' ? 'selected' : ''; ?>>L</option>
-                            <option value="LL" <?php echo ($filter_category ?? '') === 'LL' ? 'selected' : ''; ?>>LL</option>
-                            <option value="CC" <?php echo ($filter_category ?? '') === 'CC' ? 'selected' : ''; ?>>CC</option>
-                            <option value="N" <?php echo ($filter_category ?? '') === 'N' ? 'selected' : ''; ?>>N</option>
-                        </select>
+
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-tags"></i></span>
+                            <select class="form-select" id="filter-category" name="filter_category">
+                                <option value="">Category</option>
+                                <option value="R" <?php echo ($filter_category ?? '') === 'R' ? 'selected' : ''; ?>>R</option>
+                                <option value="C" <?php echo ($filter_category ?? '') === 'C' ? 'selected' : ''; ?>>C</option>
+                                <option value="L" <?php echo ($filter_category ?? '') === 'L' ? 'selected' : ''; ?>>L</option>
+                                <option value="LL" <?php echo ($filter_category ?? '') === 'LL' ? 'selected' : ''; ?>>LL</option>
+                                <option value="CC" <?php echo ($filter_category ?? '') === 'CC' ? 'selected' : ''; ?>>CC</option>
+                                <option value="N" <?php echo ($filter_category ?? '') === 'N' ? 'selected' : ''; ?>>N</option>
+                            </select>
+                        </div>
                     </div>
                     <!-- Piece Name -->
                     <div class="col-md-2">
                         <label for="filter-piece-name" class="form-label mb-2">Piece Name</label>
-                        <select class="form-control" id="filter-piece-name" name="filter_piece_name">
-                            <option value="">Select Piece Name</option>
-                            <option value="P" <?php echo ($filter_piece_name ?? '') === 'P' ? 'selected' : ''; ?>>P</option>
-                            <option value="V" <?php echo ($filter_piece_name ?? '') === 'V' ? 'selected' : ''; ?>>V</option>
-                            <option value="G" <?php echo ($filter_piece_name ?? '') === 'G' ? 'selected' : ''; ?>>G</option>
-                            <option value="M" <?php echo ($filter_piece_name ?? '') === 'M' ? 'selected' : ''; ?>>M</option>
-                        </select>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-puzzle-piece"></i></span>
+                            <select class="form-select" id="filter-piece-name" name="filter_piece_name">
+                                <option value="">Piece Name</option>
+                                <option value="P" <?php echo ($filter_piece_name ?? '') === 'P' ? 'selected' : ''; ?>>P</option>
+                                <option value="V" <?php echo ($filter_piece_name ?? '') === 'V' ? 'selected' : ''; ?>>V</option>
+                                <option value="G" <?php echo ($filter_piece_name ?? '') === 'G' ? 'selected' : ''; ?>>G</option>
+                                <option value="M" <?php echo ($filter_piece_name ?? '') === 'M' ? 'selected' : ''; ?>>M</option>
+                            </select>
+                        </div>
                     </div>
                     <!-- Buttons -->
                     <div class="col-md-4">
@@ -139,8 +250,11 @@ $items_per_page = 5000;
             </form>
 
 
-            <table class="dashboard-table">
-                <thead>
+            <div class="container-fluid py-3">
+        <!-- Desktop version (visible only on md screens and up) -->
+        <div class="d-none d-md-block">
+            <table class="table table-striped table-hover">
+                <thead class="table-light">
                     <tr>
                         <th>OF_Number</th>
                         <th>Size</th>
@@ -157,7 +271,7 @@ $items_per_page = 5000;
                 <tbody>
                     <?php if (empty($barcodes)): ?>
                     <tr>
-                        <td colspan="12" style="text-align: center;">No barcodes found</td>
+                        <td colspan="10" class="text-center">No barcodes found</td>
                     </tr>
                     <?php else: ?>
                         <?php foreach ($barcodes as $barcode): ?>
@@ -170,7 +284,33 @@ $items_per_page = 5000;
                             <td><?php echo htmlspecialchars($barcode['stage']); ?></td>
                             <td><?php echo htmlspecialchars($barcode['chef']); ?></td>
                             <td>
-                                <span class="status-badge status-<?php echo str_replace(' ', '-', strtolower($barcode['status'])); ?>">    
+                                <?php 
+                                $statusClass = '';
+                                $icon = '';
+                                switch(strtolower($barcode['status'])) {
+                                    case 'completed':
+                                        $statusClass = 'bg-success';
+                                        $icon = 'fa-check';
+                                        break;
+                                    case 'in progress':
+                                        $statusClass = 'bg-warning';
+                                        $icon = 'fa-clock';
+                                        break;
+                                    case 'pending':
+                                        $statusClass = 'bg-secondary';
+                                        $icon = 'fa-hourglass';
+                                        break;
+                                    case 'error':
+                                        $statusClass = 'bg-danger';
+                                        $icon = 'fa-exclamation-circle';
+                                        break;
+                                    default:
+                                        $statusClass = 'bg-info';
+                                        $icon = 'fa-info-circle';
+                                }
+                                ?>
+                                <span class="badge <?php echo $statusClass; ?>">
+                                    <i class="fas <?php echo $icon; ?> me-1"></i>
                                     <?php echo htmlspecialchars($barcode['status']); ?>
                                 </span>
                             </td>
@@ -181,7 +321,89 @@ $items_per_page = 5000;
                     <?php endif; ?>
                 </tbody>
             </table>
-            
+        </div>
+        
+        <!-- Mobile version (visible only on screens smaller than md) -->
+        <div class="d-md-none">
+            <?php if (empty($barcodes)): ?>
+                <div class="alert alert-info text-center">No barcodes found</div>
+            <?php else: ?>
+                <?php foreach ($barcodes as $barcode): ?>
+                    <div class="card mb-3">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <strong><?php echo htmlspecialchars($barcode['piece_name']); ?></strong>
+                            <?php 
+                            $statusClass = '';
+                            $icon = '';
+                            switch(strtolower($barcode['status'])) {
+                                case 'completed':
+                                    $statusClass = 'bg-success';
+                                    $icon = 'fa-check';
+                                    break;
+                                case 'in progress':
+                                    $statusClass = 'bg-warning';
+                                    $icon = 'fa-clock';
+                                    break;
+                                case 'pending':
+                                    $statusClass = 'bg-secondary';
+                                    $icon = 'fa-hourglass';
+                                    break;
+                                case 'error':
+                                    $statusClass = 'bg-danger';
+                                    $icon = 'fa-exclamation-circle';
+                                    break;
+                                default:
+                                    $statusClass = 'bg-info';
+                                    $icon = 'fa-info-circle';
+                            }
+                            ?>
+                            <span class="badge <?php echo $statusClass; ?>">
+                                <i class="fas <?php echo $icon; ?> me-1"></i>
+                                <?php echo htmlspecialchars($barcode['status']); ?>
+                            </span>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span class="fw-bold"><i class="fas fa-hashtag me-2"></i>OF Number:</span>
+                                    <span><?php echo htmlspecialchars($barcode['of_number']); ?></span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span class="fw-bold"><i class="fas fa-expand me-2"></i>Size:</span>
+                                    <span><?php echo htmlspecialchars($barcode['size']); ?></span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span class="fw-bold"><i class="fas fa-tag me-2"></i>Category:</span>
+                                    <span><?php echo htmlspecialchars($barcode['category']); ?></span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span class="fw-bold"><i class="fas fa-sort-numeric-up me-2"></i>Order:</span>
+                                    <span><?php echo htmlspecialchars($barcode['order_str']); ?></span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span class="fw-bold"><i class="fas fa-tasks me-2"></i>Stage:</span>
+                                    <span><?php echo htmlspecialchars($barcode['stage']); ?></span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span class="fw-bold"><i class="fas fa-user-chef me-2"></i>Chef:</span>
+                                    <span><?php echo htmlspecialchars($barcode['chef']); ?></span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span class="fw-bold"><i class="fas fa-barcode me-2"></i>Full Barcode:</span>
+                                    <span class="text-truncate ms-2" style="max-width: 180px;"><?php echo htmlspecialchars($barcode['full_barcode_name']); ?></span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span class="fw-bold"><i class="fas fa-clock me-2"></i>Last Update:</span>
+                                    <span><?php echo htmlspecialchars($barcode['last_update']); ?></span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+    </div>
+
             <div class="pagination">
                 <?php if ($page > 1): ?>
                 <a href="?view=<?php echo $current_view; ?>&page=<?php echo ($page - 1); ?><?php echo !empty($filter_of_number) ? '&filter_of=' . urlencode($filter_of_number) : ''; ?><?php echo !empty($filter_size) ? '&filter_size=' . urlencode($filter_size) : ''; ?>" class="pagination-btn">
@@ -227,7 +449,7 @@ $items_per_page = 5000;
                 <div class="row mb-3">
                     <label for="barcode-prefix" class="col-sm-3 col-form-label">OF_ number</label>
                     <div class="col-sm-9">
-                        <input class="form-control ofinput" type="text" id="barcode-prefix" name="barcode_prefix" required>
+                        <input class="form-control ofinput" type="number" id="barcode-prefix" name="barcode_prefix" placeholder="Enter OF number" required>
                     </div>
                 </div>
                 
@@ -334,31 +556,50 @@ $items_per_page = 5000;
 
                 <div class="row mb-3">
                     <div class="col-12">
-                        <div class="d-flex flex-wrap gap-3">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-white border" style="width: 20px; height: 20px;"></div>
-                                <span class="ms-2">1 ---> 1000</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <div class="bg-warning" style="width: 20px; height: 20px;"></div>
-                                <span class="ms-2">1001 ---> 2000</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <div class="bg-success" style="width: 20px; height: 20px;"></div>
-                                <span class="ms-2">2001 ---> 3000</span>
-                            </div>
+                        <div class="d-flex flex-wrap gap-3 justify-content-center">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-white border" style="width: 20px; height: 20px;"></div>
+                            <span class="ms-2">1 → 1000</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-warning" style="width: 20px; height: 20px;"></div>
+                            <span class="ms-2">1001 → 2000</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-success" style="width: 20px; height: 20px;"></div>
+                            <span class="ms-2">2001 → 3000</span>
+                        </div>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="row">
-                    <div class="col-12">
-                        <p class="small text-muted">1 --> CC / 2 --> C / 3 --> R / 4 --> L / 5 --> LL</p>
+                    <div class="col-12 text-center">
+                        <p class="small text-muted">
+                        1 → CC &nbsp;/&nbsp; 2 → C &nbsp;/&nbsp; 3 → R &nbsp;/&nbsp; 4 → L &nbsp;/&nbsp; 5 → LL
+                        </p>
                     </div>
                 </div>
             </form>
         </div>
-        
+    </div>
+    
+    <!-- PDF Modal -->
+    <div id="pdf-modal">
+        <div class="modal-content">
+            <div class="modal-header d-flex justify-content-between align-items-center">
+                <h5 class="modal-title">Generated PDF Files</h5>
+                <button type="button" class="btn-close" onclick="document.getElementById('pdf-modal').style.display='none'"></button>
+            </div>
+            <div id="pdf-modal-content">
+                <div id="pdf-modal-loader">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading PDF files...</p>
+                </div>
+            </div>
+        </div>
     </div>
     
     <?php include 'includes/footer.php'; ?>
@@ -439,49 +680,105 @@ $items_per_page = 5000;
                     });
                 }
             }
-        });
-    </script>
-    
-
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Get references to the modal and input field
-        const barcodeModal = document.getElementById('barcode-modal');
-        const barcodePrefix = document.getElementById('barcode-prefix');
-        
-        // Function to set focus when modal is shown
-        const setFocusOnModal = function() {
-            if (barcodeModal.classList.contains('show')) {
-                // Set timeout to ensure DOM is fully rendered
-                setTimeout(function() {
-                    barcodePrefix.focus();
-                }, 100);
+            
+            // PDF Modal functionality
+            const openPathBtn = document.getElementById('open-path-btn');
+            const pdfModal = document.getElementById('pdf-modal');
+            
+            if (openPathBtn && pdfModal) {
+                openPathBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Show the modal
+                    pdfModal.style.display = 'block';
+                    
+                    // Load PDF content via AJAX
+                    fetch('pdf.php')
+                        .then(response => response.text())
+                        .then(data => {
+                            document.getElementById('pdf-modal-content').innerHTML = data;
+                            
+                            // Initialize any events in the loaded content
+                            initPdfModalEvents();
+                        })
+                        .catch(error => {
+                            document.getElementById('pdf-modal-content').innerHTML = 
+                                '<div class="alert alert-danger">Error loading PDF content: ' + error.message + '</div>';
+                        });
+                });
             }
-        };
-        
-        // Call when the page loads in case modal is shown by default
-        setFocusOnModal();
-        
-        // Set up a mutation observer to detect when modal gets 'show' class
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.attributeName === 'class') {
-                    if (barcodeModal.classList.contains('show')) {
-                        // Modal was just shown
-                        setTimeout(function() {
-                            barcodePrefix.focus();
-                        }, 100);
-                    }
+            
+            // Close the modal when clicking outside of it
+            window.addEventListener('click', function(event) {
+                if (event.target === pdfModal) {
+                    pdfModal.style.display = 'none';
                 }
             });
         });
         
-        // Start observing the modal for class changes
-        observer.observe(barcodeModal, { attributes: true });
-    });
-
-    
+        // Function to initialize events within the PDF modal
+        function initPdfModalEvents() {
+            // Handle search form submission in the PDF modal
+            const searchForm = document.getElementById('pdf-search-form');
+            if (searchForm) {
+                searchForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(this);
+                    const searchParams = new URLSearchParams(formData);
+                    
+                    // Show loader
+                    document.getElementById('pdf-modal-content').innerHTML = `
+                        <div id="pdf-modal-loader">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Searching...</p>
+                        </div>
+                    `;
+                    
+                    // Fetch filtered results
+                    fetch('pdf.php?' + searchParams.toString())
+                        .then(response => response.text())
+                        .then(data => {
+                            document.getElementById('pdf-modal-content').innerHTML = data;
+                            initPdfModalEvents(); // Re-initialize events
+                        })
+                        .catch(error => {
+                            document.getElementById('pdf-modal-content').innerHTML = 
+                                '<div class="alert alert-danger">Error loading PDF content: ' + error.message + '</div>';
+                        });
+                });
+            }
+            
+            // Handle clear filter button
+            const clearFilterBtn = document.getElementById('clear-pdf-filters');
+            if (clearFilterBtn) {
+                clearFilterBtn.addEventListener('click', function() {
+                    // Reload the PDF content without filters
+                    document.getElementById('pdf-modal-content').innerHTML = `
+                        <div id="pdf-modal-loader">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Loading PDF files...</p>
+                        </div>
+                    `;
+                    
+                    fetch('pdf.php')
+                        .then(response => response.text())
+                        .then(data => {
+                            document.getElementById('pdf-modal-content').innerHTML = data;
+                            initPdfModalEvents();
+                        })
+                        .catch(error => {
+                            document.getElementById('pdf-modal-content').innerHTML = 
+                                '<div class="alert alert-danger">Error loading PDF content: ' + error.message + '</div>';
+                        });
+                });
+            }
+        }
     </script>
-
+    
 </body>
 </html>

@@ -131,56 +131,74 @@ require "scantoday_settings.php";
             <div class="d-flex flex-nowrap align-items-end overflow-auto gap-2">
                 <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
                     <label for="of_number" class="form-label">OF Number</label>
-                    <input type="text" class="form-control" id="of_number" name="of_number" value="">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-hashtag"></i></span>
+                        <input type="number" class="form-control" id="of_number" name="of_number" placeholder="Enter OF number" value="">
+                    </div>
                 </div>
                 
                 <div class="flex-grow-1 flex-shrink-1" style="min-width: 80px;">
                     <label for="size" class="form-label">Size</label>
-                    <input type="text" class="form-control" id="size" name="size" value="">        
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-ruler"></i></span>
+                        <input type="number" class="form-control" id="size" name="size" placeholder="Enter size" value="">
+                    </div>     
                 </div>
                 
                 <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
                     <label for="category" class="form-label">Category</label>
-                    <select class="form-select" id="category" name="category">
-                        <option value="select" selected>All Categories</option>
-                        <option value="R">R</option>
-                        <option value="C">C</option>
-                        <option value="L">L</option>
-                        <option value="LL">LL</option>
-                        <option value="CC">CC</option>
-                        <option value="N">N</option>
-                    </select>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-tags"></i></span>
+                        <select class="form-select" id="category" name="category">
+                            <option value="select" selected>Category</option>
+                            <option value="R">R</option>
+                            <option value="C">C</option>
+                            <option value="L">L</option>
+                            <option value="LL">LL</option>
+                            <option value="CC">CC</option>
+                            <option value="N">N</option>
+                        </select>
+                    </div>
                 </div>
                 
                 <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
                     <label for="p_name" class="form-label">Piece Name</label>
-                    <select class="form-select" id="p_name" name="p_name">
-                        <option value="select" selected>All Pieces</option>
-                        <option value="P">P</option>
-                        <option value="V">V</option>
-                        <option value="G">G</option>
-                        <option value="M">M</option>
-                    </select>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-puzzle-piece"></i></span>
+                        <select class="form-select" id="p_name" name="p_name">
+                            <option value="select" selected>Piece Name</option>
+                            <option value="P">P</option>
+                            <option value="V">V</option>
+                            <option value="G">G</option>
+                            <option value="M">M</option>
+                        </select>
+                    </div>
                 </div>
                 
                 <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
                     <label for="stage" class="form-label">Stage</label>
-                    <select class="form-select" id="stage" name="stage">
-                        <option value="select" selected>All Stages</option>
-                        <option value="Coupe">Coupe</option>
-                        <option value="V1">V1</option>
-                        <option value="V2">V2</option>
-                        <option value="V3">V3</option>
-                        <option value="Pantalon">Pantalon</option>
-                        <option value="Repassage">Repassage</option>
-                        <option value="P_fini">P_fini</option>
-                        <option value="Exported">Exported</option>
-                    </select>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-tasks"></i></span>
+                        <select class="form-select" id="stage" name="stage">
+                            <option value="select" selected>All Stages</option>
+                            <option value="Coupe">Coupe</option>
+                            <option value="V1">V1</option>
+                            <option value="V2">V2</option>
+                            <option value="V3">V3</option>
+                            <option value="Pantalon">Pantalon</option>
+                            <option value="Repassage">Repassage</option>
+                            <option value="P_fini">P_fini</option>
+                            <option value="Exported">Exported</option>
+                        </select>
+                    </div>
                 </div>
                 
                 <div class="flex-grow-1 flex-shrink-1" style="min-width: 120px;">
                     <label for="date" class="form-label">Date</label>
-                    <input type="date" class="form-control" id="date" name="date" value="">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                        <input type="date" class="form-control" id="date" name="date" value="">
+                    </div>
                 </div>
                 
                 <div class="flex-shrink-0">
@@ -192,35 +210,43 @@ require "scantoday_settings.php";
             </div>
         </form>
     </div>
-
   
 </div>
         
-        
-        <!-- Stage Summary -->
-<!-- Stage Summary - Improved Responsive Design -->
-
     <div class="card">
-    <div class="card-header">
-        <h5>Stage Summary</h5>
-    </div>
-    <div class="card-body">
-        <div class="d-flex justify-content-center">
-            <div class="d-flex flex-nowrap overflow-auto">
-                <?php foreach($stage_options as $s): ?>
-                    <div class="card mx-2" style="min-width: 130px; width: auto;">
-                        <div class="card-body text-center p-3">
-                            <h5 class="mb-2"><?php echo htmlspecialchars($s); ?></h5>
-                            <span class="badge bg-primary fs-5 d-block py-2">
-                                <?php echo $stage_summary[$s] ?? "0"; ?>
-                            </span>
+        <div class="card-header">
+            <h5>Stage Summary</h5>
+        </div>
+
+        <div class="card-body">
+            <div class="d-flex justify-content-center">
+                <div class="d-flex flex-nowrap overflow-auto">
+                    <?php foreach($stage_options as $s): ?>
+                        <div class="card mx-2" style="min-width: 130px; width: auto;">
+                            <div class="card-body text-center p-3">
+                                <h5 class="mb-2"><?php echo htmlspecialchars($s); ?></h5>
+                                <span class="badge bg-primary fs-5 d-block py-2">
+                                    <?php echo $stage_summary[$s] ?? "0"; ?>
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                <?php endforeach; ?>
+                    <?php endforeach; ?>
+                </div>
             </div>
         </div>
+
     </div>
-</div>
+
+        <?php if(!empty($grouped_results)): ?>
+            <button type="submit" class="btn btn-success mb-3">
+                <i class="fas fa-file-excel"></i> Export to Excel
+            </button>
+        <?php else: ?>
+            <button type="submit" class="btn btn-success mb-3" disabled>
+                <i class="fas fa-file-excel"></i> Export to Excel
+            </button>
+        <?php endif; ?>
+
 
         <!-- Results Table -->
         <div class="table-responsive">
@@ -377,10 +403,6 @@ require "scantoday_settings.php";
         <input type="hidden" name="p_name" value="<?php echo htmlspecialchars($p_name ?? ''); ?>">
         <input type="hidden" name="stage" value="<?php echo htmlspecialchars($stage ?? ''); ?>">
         <input type="hidden" name="date" value="<?php echo htmlspecialchars($date ?? date('Y-m-d')); ?>">
-        
-        <button type="submit" class="btn btn-success">
-            <i class="fas fa-file-excel"></i> Export to Excel
-        </button>
     </form>
 </div>
         </div>
@@ -393,63 +415,136 @@ require "scantoday_settings.php";
                         <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header">
-                                    <h5>Check Barcode</h5>
+                                <h5>Check Barcode</h5>
                                 </div>
                                 <div class="card-body">
-                                    <form method="POST" action="?tab=quantity_coupe" class="row g-3">
-                                        <div class="col-md-6">
-                                            <label for="of_number" class="form-label">OF Number</label>
-                                            <input type="text" class="form-control" id="of_number" name="of_number" 
-                                            
-                                                   value="<?php echo htmlspecialchars($barcode_data['of_number']); ?>" required>
-                                        </div>
-                                        
-                                        <div class="col-md-6">
-                                            <label for="size" class="form-label">Size</label>
-                                            <input type="text" class="form-control" id="size" name="size" 
-                                                   value="<?php echo htmlspecialchars($barcode_data['size']); ?>" required>
-                                        </div>
-                                        
-                                        <div class="col-md-6">
-                                            <label for="category" class="form-label">Category</label>
-                                            <?php $category_options = ['R', 'C', 'L', 'LL', 'CC', 'N']; ?>
-                                            <select class="form-control" id="category" name="category">
-                                                <option value="">Select Category</option>
-                                                <?php foreach($category_options as $option): ?>
-                                                    <option value="<?php echo $option; ?>" <?php echo (isset($barcode_data['category']) && $barcode_data['category'] === $option) ? 'selected' : ''; ?>><?php echo $option; ?></option>
-                                                <?php endforeach; ?>
-                                            </select>
-                                        </div>
+                                <form method="POST" action="?tab=quantity_coupe" class="row g-3">
+                                    <!-- OF Number -->
+                                    <div class="col-md-6">
+                                    <label for="of_number" class="form-label">
+                                        OF Number <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text" id="of-addon">
+                                        <i class="fa-solid fa-hashtag"></i>
+                                        </span>
+                                        <input
+                                        type="number"
+                                        class="form-control"
+                                        id="of_number"
+                                        name="of_number"
+                                        placeholder="Enter OF number"
+                                        value="<?php echo htmlspecialchars($barcode_data['of_number']); ?>"
+                                        required
+                                        aria-describedby="of-addon"
+                                        >
+                                    </div>
+                                    </div>
 
-                                        <div class="col-md-6">
-                                            <label for="piece_name" class="form-label">Piece Name</label>
-                                            <?php $piece_name_options = ['P', 'V', 'G', 'M']; ?>
-                                            <select class="form-control" id="piece_name" name="piece_name" required>
-                                                <option value="">Select Piece Name</option>
-                                                <?php foreach($piece_name_options as $option): ?>
-                                                    <option value="<?php echo $option; ?>" <?php echo (isset($barcode_data['piece_name']) && $barcode_data['piece_name'] === $option) ? 'selected' : ''; ?>><?php echo $option; ?></option>
-                                                <?php endforeach; ?>
-                                            </select>
+                                    <!-- Size -->
+                                    <div class="col-md-6">
+                                    <label for="size" class="form-label">
+                                        Size <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text" id="size-addon">
+                                        <i class="fa-solid fa-ruler"></i>
+                                        </span>
+                                        <input
+                                        type="number"
+                                        class="form-control"
+                                        id="size"
+                                        name="size"
+                                        placeholder="Enter size"
+                                        value="<?php echo htmlspecialchars($barcode_data['size']); ?>"
+                                        required
+                                        aria-describedby="size-addon"
+                                        >
+                                    </div>
+                                    </div>
+
+                                    <!-- Category -->
+                                    <div class="col-md-6">
+                                    <label for="category" class="form-label">
+                                        Category <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text" id="cat-addon">
+                                        <i class="fa-solid fa-tags"></i>
+                                        </span>
+                                        <select
+                                        class="form-select"
+                                        id="category"
+                                        name="category"
+                                        required
+                                        aria-describedby="cat-addon"
+                                        >
+                                        <option value="">Select Category</option>
+                                        <?php $category_options = ['R', 'C', 'L', 'LL', 'CC', 'N']; ?>
+                                        <?php foreach($category_options as $option): ?>
+                                            <option
+                                            value="<?php echo $option; ?>"
+                                            <?php echo (isset($barcode_data['category']) && $barcode_data['category'] === $option) ? 'selected' : ''; ?>
+                                            >
+                                            <?php echo $option; ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    </div>
+
+                                    <!-- Piece Name -->
+                                    <div class="col-md-6">
+                                    <label for="piece_name" class="form-label">
+                                        Piece Name <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text" id="piece-addon">
+                                        <i class="fa-solid fa-puzzle-piece"></i>
+                                        </span>
+                                        <select
+                                        class="form-select"
+                                        id="piece_name"
+                                        name="piece_name"
+                                        required
+                                        aria-describedby="piece-addon"
+                                        >
+                                        <option value="">Select Piece Name</option>
+                                        <?php $piece_name_options = ['P', 'V', 'G', 'M']; ?>
+                                        <?php foreach($piece_name_options as $option): ?>
+                                            <option
+                                            value="<?php echo $option; ?>"
+                                            <?php echo (isset($barcode_data['piece_name']) && $barcode_data['piece_name'] === $option) ? 'selected' : ''; ?>
+                                            >
+                                            <?php echo $option; ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    </div>
+
+                                    <!-- Submit -->
+                                    <div class="col-12">
+                                    <button type="submit" name="check_barcode" class="btn btn-primary">
+                                        <i class="fa-solid fa-microscope"></i> Check Barcode
+                                    </button>
+                                    </div>
+
+                                    <!-- Feedback -->
+                                    <?php if($barcode_checked): ?>
+                                    <div class="col-12">
+                                        <?php if($barcode_exists): ?>
+                                        <div class="alert alert-success">
+                                            Barcode exists! You can now enter quantity data.
                                         </div>
-                                        
-                                        <div class="col-12">
-                                            <button type="submit" name="check_barcode" class="btn btn-primary">Check Barcode <i class="fa-solid fa-microscope"></i></button>
+                                        <?php else: ?>
+                                        <div class="alert alert-danger">
+                                            Barcode does not exist. Please check your input.
                                         </div>
-                                        
-                                        <?php if($barcode_checked): ?>
-                                            <div class="col-12">
-                                                <?php if($barcode_exists): ?>
-                                                    <div class="alert alert-success">
-                                                        Barcode exists! You can now enter quantity data.
-                                                    </div>
-                                                <?php else: ?>
-                                                    <div class="alert alert-danger">
-                                                        Barcode does not exist. Please check your input.
-                                                    </div>
-                                                <?php endif; ?>
-                                            </div>
                                         <?php endif; ?>
-                                    </form>
+                                    </div>
+                                    <?php endif; ?>
+                                </form>
                                 </div>
                             </div>
                         </div>
@@ -524,12 +619,29 @@ require "scantoday_settings.php";
                                 <div class="search-inline-container">
                                     <div class="search-field">
                                         <label for="of_number" class="form-label">OF Number</label>
-                                        <input type="text" class="form-control" id="of_number" name="of_number" value="">
+                                        <div class="input-group">
+                                        <span class="input-group-text" id="of-addon">
+                                            <i class="fa-solid fa-hashtag"></i>
+                                        </span>
+                                        <input
+                                            type="number"
+                                            class="form-control"
+                                            id="of_number"
+                                            name="of_number"
+                                            value=""
+                                            aria-describedby="of-addon"
+                                            placeholder="Enter OF number"
+                                        >
+                                        </div>
                                     </div>
                                     
                                     <div class="button-group">
-                                        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
-                                        <a href="?tab=quantity_coupe" class="btn btn-secondary"><i class="fa-solid fa-broom"></i> Reset</a>
+                                        <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-search"></i> Search
+                                        </button>
+                                        <a href="?tab=quantity_coupe" class="btn btn-secondary">
+                                        <i class="fa-solid fa-broom"></i> Reset
+                                        </a>
                                     </div>
                                 </div>
                             </form>
