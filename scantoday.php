@@ -211,188 +211,113 @@ require "scantoday_settings.php";
         </form>
     </div>
   
+
+  
 </div>
         
-    <div class="card">
-        <div class="card-header">
-            <h5>Stage Summary</h5>
-        </div>
+        
+        <!-- Stage Summary -->
+<!-- Stage Summary - Improved Responsive Design -->
 
-        <div class="card-body">
-            <div class="d-flex justify-content-center">
-                <div class="d-flex flex-nowrap overflow-auto">
-                    <?php foreach($stage_options as $s): ?>
-                        <div class="card mx-2" style="min-width: 130px; width: auto;">
-                            <div class="card-body text-center p-3">
-                                <h5 class="mb-2"><?php echo htmlspecialchars($s); ?></h5>
-                                <span class="badge bg-primary fs-5 d-block py-2">
-                                    <?php echo $stage_summary[$s] ?? "0"; ?>
-                                </span>
-                            </div>
+<div class="card">
+    <div class="card-header">
+        <h5>Stage Summary</h5>
+    </div>
+    <div class="card-body">
+        <div class="d-flex justify-content-center">
+            <div class="d-flex flex-nowrap overflow-auto">
+                <?php foreach($stage_options as $s): ?>
+                    <div class="card mx-2" style="min-width: 130px; width: auto;">
+                        <div class="card-body text-center p-3">
+                            <h5 class="mb-2"><?php echo htmlspecialchars($s); ?></h5>
+                            <span class="badge bg-primary fs-5 d-block py-2">
+                                <?php echo $stage_summary[$s] ?? "0"; ?>
+                            </span>
                         </div>
-                    <?php endforeach; ?>
-                </div>
+                    </div>
+                <?php endforeach; ?>
             </div>
         </div>
-
     </div>
-
-        <?php if(!empty($grouped_results)): ?>
-            <button type="submit" class="btn btn-success mb-3">
-                <i class="fas fa-file-excel"></i> Export to Excel
-            </button>
-        <?php else: ?>
-            <button type="submit" class="btn btn-success mb-3" disabled>
-                <i class="fas fa-file-excel"></i> Export to Excel
-            </button>
-        <?php endif; ?>
-
-
+</div>
+<div class="export-button-container mb-3">
+    <form method="GET" action="export_excel.php">
+        <!-- Hidden inputs to pass all current filter values -->
+        <input type="hidden" name="export" value="excel">
+        <input type="hidden" name="of_number" value="<?php echo htmlspecialchars($of_number ?? ''); ?>">
+        <input type="hidden" name="size" value="<?php echo htmlspecialchars($size ?? ''); ?>">
+        <input type="hidden" name="category" value="<?php echo htmlspecialchars($category ?? ''); ?>">
+        <input type="hidden" name="p_name" value="<?php echo htmlspecialchars($p_name ?? ''); ?>">
+        <input type="hidden" name="stage" value="<?php echo htmlspecialchars($stage ?? ''); ?>">
+        <input type="hidden" name="date" value="<?php echo htmlspecialchars($date ?? date('Y-m-d')); ?>">
+        
+        <button type="submit" class="btn btn-success">
+            <i class="fas fa-file-excel"></i> Export to Excel
+        </button>
+    </form>
+</div>
         <!-- Results Table -->
         <div class="table-responsive">
-        <table class="table table-striped table-hover">
-    <thead class="table-primary">
-        <tr>
-            <th>OF Number</th>
-            <th>Size</th>
-            <th>Category</th>
-            <th>Piece Name</th>
-            <th>Chef</th>
-            <th>Total Stage Quantity</th>
-            <th>Total Main Quantity</th>
-            <th>Stages</th>
-            <th>OF Total Count</th>
-            <th>Solped Client</th>
-            <th>Pedido Client</th>
-            <th>Color Tissus</th>
-            <th>Main Qty</th>
-            <th>Qty Coupe</th>
-            <th>Manque</th>
-            <th>Suv Plus</th>
-            <th>Latest Update</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if(empty($grouped_results)): ?>
-            <tr>
-                <td colspan="17" class="text-center">No records found</td>
-            </tr>
-        <?php else: ?>
-            <?php 
-            // Initialize variables for grouping
-            $current_of_number = null;
-            $of_total_count = 0;
-            $of_principale_quantity = 0;
-            $of_quantity_coupe = 0;
-            $of_manque = 0;
-            $of_suv_plus = 0;
-            
-            // Initialize grand totals
-            $grand_total_count = 0;
-            $grand_total_principale_quantity = 0;
-            $grand_total_quantity_coupe = 0;
-            $grand_total_manque = 0;
-            $grand_total_suv_plus = 0;
-            
-            // Sort the results by OF Number to ensure grouping works
-            usort($grouped_results, function($a, $b) {
-                return $a['of_number'] <=> $b['of_number'];
-            });
-            
-            foreach($grouped_results as $index => $row): 
-                // Check if we're starting a new OF Number
-                if ($current_of_number !== $row['of_number']) {
-                    // If not the first OF Number, output the subtotal row for the previous group
-                    if ($current_of_number !== null) {
-                        ?>
-                        <tr class="table-info">
-                            <td><?php echo htmlspecialchars($current_of_number); ?></td>
-                            <td colspan="6"></td>
-                            <td>TOTAL</td>
-                            <td><?php echo $of_total_count; ?></td>
-                            <td colspan="3"></td>
-                            <td><?php echo $of_principale_quantity; ?></td>
-                            <td><?php echo $of_quantity_coupe; ?></td>
-                            <td><?php echo $of_manque; ?></td>
-                            <td><?php echo $of_suv_plus; ?></td>
-                            <td></td>
-                        </tr>
-                        <?php
-                    }
-                    
-                    // Reset the subtotals for the new OF Number
-                    $current_of_number = $row['of_number'];
-                    $of_total_count = 0;
-                    $of_principale_quantity = 0;
-                    $of_quantity_coupe = 0;
-                    $of_manque = 0;
-                    $of_suv_plus = 0;
-                }
-                
-                // Add to subtotals for this OF Number
-                $of_total_count += $row['total_count'];
-                $of_principale_quantity += $row['principale_quantity'];
-                $of_quantity_coupe += $row['quantity_coupe'];
-                $of_manque += $row['manque'];
-                $of_suv_plus += $row['suv_plus'];
-                
-                // Also add to grand totals
-                $grand_total_count += $row['total_count'];
-                $grand_total_principale_quantity += $row['principale_quantity'];
-                $grand_total_quantity_coupe += $row['quantity_coupe'];
-                $grand_total_manque += $row['manque'];
-                $grand_total_suv_plus += $row['suv_plus'];
-            ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($row['of_number']); ?></td>
-                    <td><?php echo htmlspecialchars($row['size']); ?></td>
-                    <td><?php echo htmlspecialchars($row['category']); ?></td>
-                    <td><?php echo htmlspecialchars($row['p_name']); ?></td>
-                    <td><?php echo htmlspecialchars($row['chef'] ?? ''); ?></td>
-                    <td><?php echo $row['total_stage_quantity']; ?></td>
-                    <td><?php echo $row['total_main_quantity']; ?></td>
-                    <td>
-                        <?php
-                        $stages = explode(', ', $row['stage']);
-                        foreach($stages as $s): ?>
-                            <span class="badge bg-secondary stage-badge">
-                                <?php echo htmlspecialchars($s); ?>
-                            </span>
-                        <?php endforeach; ?>
-                    </td>
-                    <td><?php echo $row['total_count']; ?></td>
-                    <td><?php echo htmlspecialchars($row['solped_client'] ?? ''); ?></td>
-                    <td><?php echo htmlspecialchars($row['pedido_client'] ?? ''); ?></td>
-                    <td><?php echo htmlspecialchars($row['color_tissus'] ?? ''); ?></td>
-                    <td><?php echo $row['principale_quantity']; ?></td>
-                    <td><?php echo $row['quantity_coupe']; ?></td>
-                    <td><?php echo $row['manque']; ?></td>
-                    <td><?php echo $row['suv_plus']; ?></td>
-                    <td><?php echo $row['latest_update'] ? date('Y-m-d H:i', strtotime($row['latest_update'])) : ''; ?></td>
-                </tr>
-            <?php 
-                // If this is the last row, output the subtotal for the final group
-                if ($index === count($grouped_results) - 1) {
-                    ?>
-                    <tr class="table-info">
-                        <td><?php echo htmlspecialchars($current_of_number); ?></td>
-                        <td colspan="6"></td>
-                        <td>TOTAL</td>
-                        <td><?php echo $of_total_count; ?></td>
-                        <td colspan="3"></td>
-                        <td><?php echo $of_principale_quantity; ?></td>
-                        <td><?php echo $of_quantity_coupe; ?></td>
-                        <td><?php echo $of_manque; ?></td>
-                        <td><?php echo $of_suv_plus; ?></td>
-                        <td></td>
+            <table class="table table-striped table-hover">
+                <thead class="table-primary">
+                    <tr>
+                        <th>OF Number</th>
+                        <th>Size</th>
+                        <th>Category</th>
+                        <th>Piece Name</th>
+                        <th>Chef</th>
+                        <th>Total Stage Quantity</th>
+                        <th>Total Main Quantity</th>
+                        <th>Stages</th>
+                        <th>Total Count</th>
+                        <th>Solped Client</th>
+                        <th>Pedido Client</th>
+                        <th>Color Tissus</th>
+                        <th>Main Qty</th>
+                        <th>Qty Coupe</th>
+                        <th>Manque</th>
+                        <th>Suv Plus</th>
+                        <th>Latest Update</th>
                     </tr>
-                    <?php
-                }
-            endforeach; 
-            ?>
-        <?php endif; ?>
-    </tbody>
-</table>
+                </thead>
+                <tbody>
+                    <?php if(empty($grouped_results)): ?>
+                        <tr>
+                            <td colspan="17" class="text-center">No records found</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach($grouped_results as $row): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($row['of_number']); ?></td>
+                                <td><?php echo htmlspecialchars($row['size']); ?></td>
+                                <td><?php echo htmlspecialchars($row['category']); ?></td>
+                                <td><?php echo htmlspecialchars($row['p_name']); ?></td> 
+                                <td><?php echo htmlspecialchars($row['chef'] ?? ''); ?></td>
+                                <td><?php echo $row['total_stage_quantity']; ?></td>
+                                <td><?php echo $row['total_main_quantity']; ?></td>
+                                <td>
+                                    <?php 
+                                    $stages = explode(', ', $row['stage']);
+                                    foreach($stages as $s): ?>
+                                        <span class="badge bg-secondary stage-badge">
+                                            <?php echo htmlspecialchars($s); ?>
+                                        </span>
+                                    <?php endforeach; ?>
+                                </td>
+                                <td><?php echo $row['total_count']; ?></td>
+                                <td><?php echo htmlspecialchars($row['solped_client'] ?? ''); ?></td>
+                                <td><?php echo htmlspecialchars($row['pedido_client'] ?? ''); ?></td>
+                                <td><?php echo htmlspecialchars($row['color_tissus'] ?? ''); ?></td>
+                                <td><?php echo $row['principale_quantity']; ?></td>
+                                <td><?php echo $row['quantity_coupe']; ?></td>
+                                <td><?php echo $row['manque']; ?></td>
+                                <td><?php echo $row['suv_plus']; ?></td>
+                                <td><?php echo $row['latest_update'] ? date('Y-m-d H:i', strtotime($row['latest_update'])) : ''; ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
 <div class="export-button-container">
     <form method="GET" action="export_excel.php">
         <!-- Hidden inputs to pass all current filter values -->
@@ -403,6 +328,10 @@ require "scantoday_settings.php";
         <input type="hidden" name="p_name" value="<?php echo htmlspecialchars($p_name ?? ''); ?>">
         <input type="hidden" name="stage" value="<?php echo htmlspecialchars($stage ?? ''); ?>">
         <input type="hidden" name="date" value="<?php echo htmlspecialchars($date ?? date('Y-m-d')); ?>">
+        
+        <button type="submit" class="btn btn-success">
+            <i class="fas fa-file-excel"></i> Export to Excel
+        </button>
     </form>
 </div>
         </div>
@@ -415,136 +344,63 @@ require "scantoday_settings.php";
                         <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header">
-                                <h5>Check Barcode</h5>
+                                    <h5>Check Barcode</h5>
                                 </div>
                                 <div class="card-body">
-                                <form method="POST" action="?tab=quantity_coupe" class="row g-3">
-                                    <!-- OF Number -->
-                                    <div class="col-md-6">
-                                    <label for="of_number" class="form-label">
-                                        OF Number <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="input-group">
-                                        <span class="input-group-text" id="of-addon">
-                                        <i class="fa-solid fa-hashtag"></i>
-                                        </span>
-                                        <input
-                                        type="number"
-                                        class="form-control"
-                                        id="of_number"
-                                        name="of_number"
-                                        placeholder="Enter OF number"
-                                        value="<?php echo htmlspecialchars($barcode_data['of_number']); ?>"
-                                        required
-                                        aria-describedby="of-addon"
-                                        >
-                                    </div>
-                                    </div>
-
-                                    <!-- Size -->
-                                    <div class="col-md-6">
-                                    <label for="size" class="form-label">
-                                        Size <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="input-group">
-                                        <span class="input-group-text" id="size-addon">
-                                        <i class="fa-solid fa-ruler"></i>
-                                        </span>
-                                        <input
-                                        type="number"
-                                        class="form-control"
-                                        id="size"
-                                        name="size"
-                                        placeholder="Enter size"
-                                        value="<?php echo htmlspecialchars($barcode_data['size']); ?>"
-                                        required
-                                        aria-describedby="size-addon"
-                                        >
-                                    </div>
-                                    </div>
-
-                                    <!-- Category -->
-                                    <div class="col-md-6">
-                                    <label for="category" class="form-label">
-                                        Category <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="input-group">
-                                        <span class="input-group-text" id="cat-addon">
-                                        <i class="fa-solid fa-tags"></i>
-                                        </span>
-                                        <select
-                                        class="form-select"
-                                        id="category"
-                                        name="category"
-                                        required
-                                        aria-describedby="cat-addon"
-                                        >
-                                        <option value="">Select Category</option>
-                                        <?php $category_options = ['R', 'C', 'L', 'LL', 'CC', 'N']; ?>
-                                        <?php foreach($category_options as $option): ?>
-                                            <option
-                                            value="<?php echo $option; ?>"
-                                            <?php echo (isset($barcode_data['category']) && $barcode_data['category'] === $option) ? 'selected' : ''; ?>
-                                            >
-                                            <?php echo $option; ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                        </select>
-                                    </div>
-                                    </div>
-
-                                    <!-- Piece Name -->
-                                    <div class="col-md-6">
-                                    <label for="piece_name" class="form-label">
-                                        Piece Name <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="input-group">
-                                        <span class="input-group-text" id="piece-addon">
-                                        <i class="fa-solid fa-puzzle-piece"></i>
-                                        </span>
-                                        <select
-                                        class="form-select"
-                                        id="piece_name"
-                                        name="piece_name"
-                                        required
-                                        aria-describedby="piece-addon"
-                                        >
-                                        <option value="">Select Piece Name</option>
-                                        <?php $piece_name_options = ['P', 'V', 'G', 'M']; ?>
-                                        <?php foreach($piece_name_options as $option): ?>
-                                            <option
-                                            value="<?php echo $option; ?>"
-                                            <?php echo (isset($barcode_data['piece_name']) && $barcode_data['piece_name'] === $option) ? 'selected' : ''; ?>
-                                            >
-                                            <?php echo $option; ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                        </select>
-                                    </div>
-                                    </div>
-
-                                    <!-- Submit -->
-                                    <div class="col-12">
-                                    <button type="submit" name="check_barcode" class="btn btn-primary">
-                                        <i class="fa-solid fa-microscope"></i> Check Barcode
-                                    </button>
-                                    </div>
-
-                                    <!-- Feedback -->
-                                    <?php if($barcode_checked): ?>
-                                    <div class="col-12">
-                                        <?php if($barcode_exists): ?>
-                                        <div class="alert alert-success">
-                                            Barcode exists! You can now enter quantity data.
+                                    <form method="POST" action="?tab=quantity_coupe" class="row g-3">
+                                        <div class="col-md-6">
+                                            <label for="of_number" class="form-label">OF Number</label>
+                                            <input type="text" class="form-control" id="of_number" name="of_number" 
+                                            
+                                                   value="<?php echo htmlspecialchars($barcode_data['of_number']); ?>" required>
                                         </div>
-                                        <?php else: ?>
-                                        <div class="alert alert-danger">
-                                            Barcode does not exist. Please check your input.
+                                        
+                                        <div class="col-md-6">
+                                            <label for="size" class="form-label">Size</label>
+                                            <input type="text" class="form-control" id="size" name="size" 
+                                                   value="<?php echo htmlspecialchars($barcode_data['size']); ?>" required>
                                         </div>
+                                        
+                                        <div class="col-md-6">
+                                            <label for="category" class="form-label">Category</label>
+                                            <?php $category_options = ['R', 'C', 'L', 'LL', 'CC', 'N']; ?>
+                                            <select class="form-control" id="category" name="category">
+                                                <option value="">Select Category</option>
+                                                <?php foreach($category_options as $option): ?>
+                                                    <option value="<?php echo $option; ?>" <?php echo (isset($barcode_data['category']) && $barcode_data['category'] === $option) ? 'selected' : ''; ?>><?php echo $option; ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label for="piece_name" class="form-label">Piece Name</label>
+                                            <?php $piece_name_options = ['P', 'V', 'G', 'M']; ?>
+                                            <select class="form-control" id="piece_name" name="piece_name" required>
+                                                <option value="">Select Piece Name</option>
+                                                <?php foreach($piece_name_options as $option): ?>
+                                                    <option value="<?php echo $option; ?>" <?php echo (isset($barcode_data['piece_name']) && $barcode_data['piece_name'] === $option) ? 'selected' : ''; ?>><?php echo $option; ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="col-12">
+                                            <button type="submit" name="check_barcode" class="btn btn-primary">Check Barcode <i class="fa-solid fa-microscope"></i></button>
+                                        </div>
+                                        
+                                        <?php if($barcode_checked): ?>
+                                            <div class="col-12">
+                                                <?php if($barcode_exists): ?>
+                                                    <div class="alert alert-success">
+                                                        Barcode exists! You can now enter quantity data.
+                                                    </div>
+                                                <?php else: ?>
+                                                    <div class="alert alert-danger">
+                                                        Barcode does not exist. Please check your input.
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
                                         <?php endif; ?>
-                                    </div>
-                                    <?php endif; ?>
-                                </form>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -619,29 +475,12 @@ require "scantoday_settings.php";
                                 <div class="search-inline-container">
                                     <div class="search-field">
                                         <label for="of_number" class="form-label">OF Number</label>
-                                        <div class="input-group">
-                                        <span class="input-group-text" id="of-addon">
-                                            <i class="fa-solid fa-hashtag"></i>
-                                        </span>
-                                        <input
-                                            type="number"
-                                            class="form-control"
-                                            id="of_number"
-                                            name="of_number"
-                                            value=""
-                                            aria-describedby="of-addon"
-                                            placeholder="Enter OF number"
-                                        >
-                                        </div>
+                                        <input type="text" class="form-control" id="of_number" name="of_number" value="">
                                     </div>
                                     
                                     <div class="button-group">
-                                        <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-search"></i> Search
-                                        </button>
-                                        <a href="?tab=quantity_coupe" class="btn btn-secondary">
-                                        <i class="fa-solid fa-broom"></i> Reset
-                                        </a>
+                                        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+                                        <a href="?tab=quantity_coupe" class="btn btn-secondary"><i class="fa-solid fa-broom"></i> Reset</a>
                                     </div>
                                 </div>
                             </form>
