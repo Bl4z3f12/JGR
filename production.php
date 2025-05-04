@@ -1,6 +1,11 @@
 <?php
 
 $current_view = 'production.php';
+require_once 'auth_functions.php';
+
+// Redirect to login page if not logged in
+requireLogin('login.php');
+
 // Initialize database connection with the same parameters as your other files
 $host = 'localhost';
 $db_name = 'jgr';

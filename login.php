@@ -282,7 +282,7 @@ if (!$isAjaxRequest) {
 
                     if (data.success) {
                         setTimeout(() => {
-                            window.location.href = 'index.php';
+                            window.location.href = 'scantoday.php';
                         }, 1000);
                     }
                 })

@@ -5,6 +5,121 @@ require_once 'auth_functions.php';
 
 // Redirect to login page if not logged in
 requireLogin('login.php');
+
+// Enhanced IP authorization check
+$allowed_ips = ['127.0.0.1', '192.168.1.130', '::1'];
+$client_ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
+$client_ip = trim(explode(',', $client_ip)[0]);
+$is_localhost = in_array($client_ip, ['127.0.0.1', '::1']) || 
+               stripos($_SERVER['HTTP_HOST'], 'localhost') !== false;
+
+               // Check authorization
+if (!$is_localhost && !in_array($client_ip, $allowed_ips)) {
+    // Show authorization message and stop execution
+    die('
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Access Denied</title>
+        <style>
+              
+            * {
+                position: relative;
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                background: linear-gradient(to bottom right, #eee, #aaa);
+            }
+            h1 {
+                margin: 40px 0 20px;
+            }
+            .lock {
+                border-radius: 5px;
+                width: 55px;
+                height: 45px;
+                background-color: #333;
+                animation: dip 1s;
+                animation-delay: 1.5s;
+            }
+            .lock::before, .lock::after {
+                content: "";
+                position: absolute;
+                border-left: 5px solid #333;
+                height: 20px;
+                width: 15px;
+                left: calc(50% - 12.5px);
+            }
+            .lock::before {
+                top: -30px;
+                border: 5px solid #333;
+                border-bottom-color: transparent;
+                border-radius: 15px 15px 0 0;
+                height: 30px;
+                animation: lock 2s, spin 2s;
+            }
+            .lock::after {
+                top: -10px;
+                border-right: 5px solid transparent;
+                animation: spin 2s;
+            }
+            @keyframes lock {
+                0% {
+                    top: -45px;
+                }
+                65% {
+                    top: -45px;
+                }
+                100% {
+                    top: -30px;
+                }
+            }
+            @keyframes spin {
+                0% {
+                    transform: scaleX(-1);
+                    left: calc(50% - 30px);
+                }
+                65% {
+                    transform: scaleX(1);
+                    left: calc(50% - 12.5px);
+                }
+            }
+            @keyframes dip {
+                0% {
+                    transform: translateY(0px);
+                }
+                50% {
+                    transform: translateY(10px);
+                }
+                100% {
+                    transform: translateY(0px);
+                }
+            }
+            
+
+        </style>
+    </head>
+    <body>
+        <div class="lock"><i class="fa-solid fa-lock"></i></div>
+        
+        <div class="message">
+            <h1>Access to this page is restricted</h1>
+            <p>You are not authorized to access this feature, contact the developer <br> +212 663655585</p>
+        </div>
+    </body>
+    </html>
+    ');
+}
+
+
 // Include PHP logic file
 require_once 'settings.php';
 ?>
