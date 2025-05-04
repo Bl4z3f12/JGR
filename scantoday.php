@@ -251,7 +251,7 @@ require "scantoday_settings.php";
         <input type="hidden" name="stage" value="<?php echo htmlspecialchars($stage ?? ''); ?>">
         <input type="hidden" name="date" value="<?php echo htmlspecialchars($date ?? date('Y-m-d')); ?>">
         
-        <button type="submit" class="btn btn-success">
+        <button type="submit" class="btn btn-success" <?php echo empty($grouped_results) ? 'disabled' : ''; ?>>
             <i class="fas fa-file-excel"></i> Export to Excel
         </button>
     </form>
@@ -318,22 +318,6 @@ require "scantoday_settings.php";
                     <?php endif; ?>
                 </tbody>
             </table>
-<div class="export-button-container">
-    <form method="GET" action="export_excel.php">
-        <!-- Hidden inputs to pass all current filter values -->
-        <input type="hidden" name="export" value="excel">
-        <input type="hidden" name="of_number" value="<?php echo htmlspecialchars($of_number ?? ''); ?>">
-        <input type="hidden" name="size" value="<?php echo htmlspecialchars($size ?? ''); ?>">
-        <input type="hidden" name="category" value="<?php echo htmlspecialchars($category ?? ''); ?>">
-        <input type="hidden" name="p_name" value="<?php echo htmlspecialchars($p_name ?? ''); ?>">
-        <input type="hidden" name="stage" value="<?php echo htmlspecialchars($stage ?? ''); ?>">
-        <input type="hidden" name="date" value="<?php echo htmlspecialchars($date ?? date('Y-m-d')); ?>">
-        
-        <button type="submit" class="btn btn-success">
-            <i class="fas fa-file-excel"></i> Export to Excel
-        </button>
-    </form>
-</div>
         </div>
     <?php endif; ?>
                     

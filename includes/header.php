@@ -6,7 +6,9 @@ function is_mobile() {
     );
 }
 ?>
-
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&family=Tagesschrift&display=swap');
+</style>
 <div class="container-fluid bg-dark py-3 border-bottom text-white">
   <div class="d-flex justify-content-between align-items-center">
     <!-- Left: Toggler Button and Title -->
@@ -15,7 +17,7 @@ function is_mobile() {
       <button class="navbar-toggler d-block d-md-none me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
         <i class="fas fa-bars"></i>
       </button>
-      <h2 class="fs-4 fw-normal m-0">Barcode System (JGR_FORMENS)</h2>
+      <h2 class="fs-4 fw-normal m-0" style="font-family: 'Tagesschrift', sans-serif;">Barcode System (JGR_FORMENS)</h2>
     </div>
 
     <!-- Right: Username and Logout -->

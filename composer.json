@@ -1,20 +1,14 @@
 {
-    "name": "akram/project",
+    "name": "hamza/jgr",
     "autoload": {
         "psr-4": {
-            "Akram\\Project\\": "src/"
+            "Hamza\\Jgr\\": "src/"
         }
     },
-    "authors": [
-        {
-            "name": "Akram",
-            "email": "akramfouzi3@gmail.com"
-        }
-    ],
     "require": {
-        "phpoffice/phpspreadsheet": "^4.2",
-        "picqer/php-barcode-generator": "^3.2",
         "tecnickcom/tcpdf": "^6.9",
-        "setasign/fpdf": "^1.8"
+        "setasign/fpdf": "^1.8",
+        "phpoffice/phpspreadsheet": "^4.2",
+        "picqer/php-barcode-generator": "^3.2"
     }
 }

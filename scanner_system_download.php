@@ -73,6 +73,14 @@ requireLogin('login.php');
             cursor: not-allowed;       /* Force the no-entry cursor */
         }
 
+        @keyframes button-flash {
+        0%, 100% { box-shadow: 0 0 15px transparent; }
+        50% { box-shadow: 0 0 15px #FF00CC; }
+        }
+        .flash-effect {
+            animation: button-flash 1s ease 3; /* Flash 3 times */
+            position: relative;
+        }
     </style>
 </head>
 <body>
@@ -214,14 +222,15 @@ requireLogin('login.php');
                                 <li class="mb-2">Download the latest version of the program via the <a href="#down" class="download-href">download button above</a>.</li>
                                 <li class="mb-2">No installation needed.</li>
                                 <li class="mb-2">Make sure that all your programs are not using port 3306.</li>
-                                <li class="mb-2">Select additional components if needed.</li>
+                                <li class="mb-2">Install additional components if needed.</li>
                                 <li class="mb-2">Launch the Scanner Program from your desktop or start menu.</li>
                                 <li class="mb-2">Ensure you have an active internet connection.</li>
                                 <li class="mb-2">Make sure that your computer is connected to the same server network(LAN).</li>
                                 <li class="mb-2">Make sure Scanner Device <img width="25" height="25" src="https://img.icons8.com/ios/50/barcode-scanner-2.png" alt="barcode-scanner-2"/> is connected properly.</li>
                                 <li class="mb-2">Ensure all software dependencies are installed.</li>
                                 <li class="mb-2">Disable Firewall.</li>
-                                <li class="mb-2">Restart your computer if prompted.</li>
+                                <li class="mb-2">Grant higher access permissions <i class="fa-solid fa-shield-halved"></i> to the program <span style="font-style: italic; font-size: 13px; color:rgb(158, 158, 158);">(comes automatically with the program)</span></li>
+                                <li class="mb-2">Restart your computer if needed.</li>
                             </ol>
                         </div>
                     </div>
@@ -318,6 +327,30 @@ requireLogin('login.php');
                 button.addEventListener('click', function(e) {
                     e.preventDefault();
                     alert('Download starting... Please wait.');
+                });
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle "download button above" link click
+            document.querySelectorAll('.download-href').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetBtn = document.getElementById('down');
+                    
+                    if (targetBtn) {
+                        // Smooth scroll to the button
+                        targetBtn.scrollIntoView({ behavior: 'smooth', block: "center" });
+                        
+                        // Add flash effect
+                        targetBtn.classList.add('flash-effect');
+                        
+                        // Remove effect after animation completes
+                        setTimeout(() => {
+                            targetBtn.classList.remove('flash-effect');
+                        }, 3000); // Matches 3 iterations of 1s animation
+                    }
                 });
             });
         });

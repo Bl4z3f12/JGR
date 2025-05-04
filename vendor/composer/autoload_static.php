@@ -23,14 +23,14 @@ class ComposerStaticInit2935297e8b139be28baf73bd528cdad6
         array (
             'Matrix\\' => 7,
         ),
+        'H' => 
+        array (
+            'Hamza\\Jgr\\' => 10,
+        ),
         'C' => 
         array (
             'Composer\\Pcre\\' => 14,
             'Complex\\' => 8,
-        ),
-        'A' => 
-        array (
-            'Akram\\Project\\' => 14,
         ),
     );
 
@@ -64,6 +64,10 @@ class ComposerStaticInit2935297e8b139be28baf73bd528cdad6
         array (
             0 => __DIR__ . '/..' . '/markbaker/matrix/classes/src',
         ),
+        'Hamza\\Jgr\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/src',
+        ),
         'Composer\\Pcre\\' => 
         array (
             0 => __DIR__ . '/..' . '/composer/pcre/src',
@@ -71,10 +75,6 @@ class ComposerStaticInit2935297e8b139be28baf73bd528cdad6
         'Complex\\' => 
         array (
             0 => __DIR__ . '/..' . '/markbaker/complex/classes/src',
-        ),
-        'Akram\\Project\\' => 
-        array (
-            0 => __DIR__ . '/../..' . '/src',
         ),
     );
 
