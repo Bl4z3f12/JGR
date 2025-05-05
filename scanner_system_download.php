@@ -83,11 +83,11 @@ requireLogin('login.php');
         }
         
         #atelierModal .modal-content {
-            border: none;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        }
+        border: none;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
         
         #atelierModal .modal-header {
             background: linear-gradient(135deg, #007bff, #0056b3);
@@ -186,7 +186,45 @@ requireLogin('login.php');
         .version-card:nth-child(5) { animation-delay: 0.3s; }
         .version-card:nth-child(6) { animation-delay: 0.35s; }
         .version-card:nth-child(7) { animation-delay: 0.4s; }
-    </style>
+
+        /* Disabled state for mobile */
+        .version-card.disabled {
+        pointer-events: none;
+        position: relative;
+        }
+
+        .disabled-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0,0,0,0.05);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
+        border-radius: 8px;
+        }
+
+        /* Mobile warning */
+        .alert-warning {
+        border-left: 4px solid #ffc107;
+        background-color: #fff8e1;
+        }
+
+        /* Modal size adjustments */
+        #atelierModal .modal-content {
+        max-width: 100%;
+        }
+
+        @media (min-width: 992px) {
+        #atelierModal .modal-lg {
+            max-width: 800px;
+        }
+        }
+
+</style>
 </head>
 <body>
     <?php include 'includes/sidebar.php'; ?>
@@ -396,126 +434,134 @@ requireLogin('login.php');
     </div>
 
 
-    <!-- Add this modal HTML before the footer include -->
     <div class="modal fade" id="atelierModal" tabindex="-1" aria-labelledby="atelierModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
-            <h5 class="modal-title" id="atelierModalLabel">
-            <i class="fas fa-box-open me-2"></i>Select Atelier Version
-            </h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="atelierModalLabel">
+          <i class="fas fa-box-open me-2"></i>Select Atelier Version
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      
+      <div class="modal-body p-4">
+        <p class="text-muted mb-3">Please select the version you want to download:</p>
         
-        <div class="modal-body p-4">
-            <p class="text-muted mb-3">Please select the version you want to download:</p>
+        <div class="version-container">
+          <div class="row g-1">
+            <div class="col-md-6">
+              <div class="version-card" data-version="coupe">
+                <div class="version-icon">
+                  <i class="fas fa-cut"></i>
+                </div>
+                <div class="version-details">
+                  <h6>Coupe</h6>
+                  <span class="badge bg-info">v2.5.0</span>
+                </div>
+              </div>
+            </div>
             
-            <div class="version-container">
-            <div class="row g-3">
-                <div class="col-md-6">
-                <div class="version-card" data-version="coupe">
-                    <div class="version-icon">
-                    <i class="fas fa-cut"></i>
-                    </div>
-                    <div class="version-details">
-                    <h6>Coupe</h6>
-                    <span class="badge bg-info">v2.5.0</span>
-                    </div>
+            <div class="col-md-6">
+              <div class="version-card" data-version="v1">
+                <div class="version-icon">
+                  <i class="fas fa-tshirt"></i>
                 </div>
+                <div class="version-details">
+                  <h6>V1</h6>
+                  <span class="badge bg-info">v2.5.0</span>
                 </div>
-                
-                <div class="col-md-6">
-                <div class="version-card" data-version="v1">
-                    <div class="version-icon">
-                    <i class="fas fa-tshirt"></i>
-                    </div>
-                    <div class="version-details">
-                    <h6>V1</h6>
-                    <span class="badge bg-info">v2.5.0</span>
-                    </div>
-                </div>
-                </div>
-                
-                <div class="col-md-6">
-                <div class="version-card" data-version="v2">
-                    <div class="version-icon">
-                    <i class="fas fa-vest"></i>
-                    </div>
-                    <div class="version-details">
-                    <h6>V2</h6>
-                    <span class="badge bg-info">v2.5.0</span>
-                    </div>
-                </div>
-                </div>
-                
-                <div class="col-md-6">
-                <div class="version-card" data-version="v3">
-                    <div class="version-icon">
-                    <i class="fas fa-vest-patches"></i>
-                    </div>
-                    <div class="version-details">
-                    <h6>V3</h6>
-                    <span class="badge bg-info">v2.5.0</span>
-                    </div>
-                </div>
-                </div>
-                
-                <div class="col-md-6">
-                <div class="version-card" data-version="pantalan">
-                    <div class="version-icon">
-                    <i class="fas fa-socks"></i>
-                    </div>
-                    <div class="version-details">
-                    <h6>PANTALAN</h6>
-                    <span class="badge bg-info">v2.5.0</span>
-                    </div>
-                </div>
-                </div>
-                
-                <div class="col-md-6">
-                <div class="version-card" data-version="repassage">
-                    <div class="version-icon">
-                    <i class="fas fa-iron"></i>
-                    </div>
-                    <div class="version-details">
-                    <h6>REPASSAGE</h6>
-                    <span class="badge bg-info">v2.5.0</span>
-                    </div>
-                </div>
-                </div>
-                
-                <div class="col-md-6">
-                <div class="version-card" data-version="p_fini">
-                    <div class="version-icon">
-                    <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="version-details">
-                    <h6>P_FINI</h6>
-                    <span class="badge bg-info">v2.5.0</span>
-                    </div>
-                </div>
-                </div>
+              </div>
             </div>
+            
+            <div class="col-md-6">
+              <div class="version-card" data-version="v2">
+                <div class="version-icon">
+                  <i class="fas fa-vest"></i>
+                </div>
+                <div class="version-details">
+                  <h6>V2</h6>
+                  <span class="badge bg-info">v2.5.0</span>
+                </div>
+              </div>
             </div>
-        </div>
-        
-        <div class="modal-footer bg-light">
-            <div class="d-flex align-items-center me-auto">
-            <i class="fas fa-info-circle text-primary me-2"></i>
-            <small class="text-muted">Click on a version to download</small>
+            
+            <div class="col-md-6">
+              <div class="version-card" data-version="v3">
+                <div class="version-icon">
+                  <i class="fas fa-vest-patches"></i>
+                </div>
+                <div class="version-details">
+                  <h6>V3</h6>
+                  <span class="badge bg-info">v2.5.0</span>
+                </div>
+              </div>
             </div>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            
+            <div class="col-md-6">
+              <div class="version-card" data-version="pantalan">
+                <div class="version-icon">
+                  <i class="fas fa-socks"></i>
+                </div>
+                <div class="version-details">
+                  <h6>PANTALAN</h6>
+                  <span class="badge bg-info">v2.5.0</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="version-card" data-version="repassage">
+                <div class="version-icon">
+                  <i class="fas fa-iron"></i>
+                </div>
+                <div class="version-details">
+                  <h6>REPASSAGE</h6>
+                  <span class="badge bg-info">v2.5.0</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="version-card" data-version="p_fini">
+                <div class="version-icon">
+                  <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="version-details">
+                  <h6>P_FINI</h6>
+                  <span class="badge bg-info">v2.5.0</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
+      
+      <div class="modal-footer bg-light">
+        <div class="d-flex align-items-center me-auto">
+          <i class="fas fa-info-circle text-primary me-2"></i>
+          <small class="text-muted">Click on a version to download</small>
         </div>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      </div>
     </div>
-    </div>
+  </div>
+</div>
+
+
+
 
     <?php include 'includes/footer.php'; ?>
+
 
 
     
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Function to check if device is mobile
+    function isMobile() {
+      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+    
     // Mapping of Atelier versions to their specific filenames
     const versionMap = {
       'coupe': 'coupe.exe',
@@ -527,59 +573,92 @@ requireLogin('login.php');
       'p_fini': 'P_Fini.exe'
     };
 
-    document.querySelectorAll('.version-card').forEach(card => {
-      card.addEventListener('click', function() {
-        // Remove active class from all cards
-        document.querySelectorAll('.version-card').forEach(c => c.classList.remove('active'));
+    // Disable downloads on mobile devices
+    if (isMobile()) {
+      // Add mobile warning to modal
+      const modalBody = document.querySelector('#atelierModal .modal-body');
+      const mobileWarning = document.createElement('div');
+      mobileWarning.className = 'alert alert-warning mb-3';
+      mobileWarning.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i> <strong>Mobile device detected!</strong> Downloads are only available on desktop computers.';
+      modalBody.insertBefore(mobileWarning, modalBody.firstChild);
+      
+      // Disable all version cards
+      document.querySelectorAll('.version-card').forEach(card => {
+        card.classList.add('disabled');
+        card.style.opacity = '0.6';
+        card.style.cursor = 'not-allowed';
         
-        // Add active class to clicked card
-        this.classList.add('active');
-        
-        const version = this.dataset.version;
-        const filename = versionMap[version];
-        
-        if (filename) {
-          // Show download starting feedback
-          const toast = document.createElement('div');
-          toast.className = 'position-fixed bottom-0 end-0 p-3';
-          toast.style.zIndex = '5000';
-          toast.innerHTML = `
-            <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
-              <div class="toast-header">
-                <i class="fas fa-download text-primary me-2"></i>
-                <strong class="me-auto">Download Started</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-              </div>
-              <div class="toast-body">
-                Downloading ${filename} now...
-              </div>
-            </div>
-          `;
-          document.body.appendChild(toast);
-          
-          setTimeout(() => {
-            document.body.removeChild(toast);
-          }, 3000);
-          
-          // Create and trigger download
-          const link = document.createElement('a');
-          link.href = `downloads/${filename}`;
-          link.download = filename;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          
-          // Close modal with slight delay for better UX
-          setTimeout(() => {
-            bootstrap.Modal.getInstance(document.getElementById('atelierModal')).hide();
-          }, 500);
-        } else {
-          console.error('No file mapped for version:', version);
-        }
+        // Add disabled overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'disabled-overlay';
+        card.appendChild(overlay);
       });
-    });
+      
+      // Also modify the main download button on the page
+      const downloadTriggers = document.querySelectorAll('[data-bs-target="#atelierModal"]');
+      downloadTriggers.forEach(trigger => {
+        trigger.innerHTML = '<i class="fas fa-ban me-2"></i> Not available on mobile devices';
+        trigger.classList.add('pe-none', 'btn-secondary');
+        trigger.classList.remove('btn-primary');
+      });
+    } else {
+      // Desktop functionality
+      document.querySelectorAll('.version-card').forEach(card => {
+        card.addEventListener('click', function() {
+          // Remove active class from all cards
+          document.querySelectorAll('.version-card').forEach(c => c.classList.remove('active'));
+          
+          // Add active class to clicked card
+          this.classList.add('active');
+          
+          const version = this.dataset.version;
+          const filename = versionMap[version];
+          
+          if (filename) {
+            // Show download starting feedback
+            const toast = document.createElement('div');
+            toast.className = 'position-fixed bottom-0 end-0 p-3';
+            toast.style.zIndex = '5000';
+            toast.innerHTML = `
+              <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                  <i class="fas fa-download text-primary me-2"></i>
+                  <strong class="me-auto">Download Started</strong>
+                  <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                  Downloading ${filename} now...
+                </div>
+              </div>
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+              document.body.removeChild(toast);
+            }, 3000);
+            
+            // Create and trigger download
+            const link = document.createElement('a');
+            link.href = `downloads/${filename}`;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Close modal with slight delay for better UX
+            setTimeout(() => {
+              bootstrap.Modal.getInstance(document.getElementById('atelierModal')).hide();
+            }, 500);
+          } else {
+            console.error('No file mapped for version:', version);
+          }
+        });
+      });
+    }
   });
 </script>
+
+
 
 
 </body>
