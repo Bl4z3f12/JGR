@@ -51,8 +51,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
     $stage = $_GET['stage'] ?? '';
     $date = $_GET['date'] ?? date("Y-m-d");
 
-    // Instead of querying all records, we should retrieve only those visible in the table
-    // This follows the same logic as in scantoday.php to group and display data
+    // Base query - Only get the specific fields we need for the export
     $query = "SELECT 
                 b.of_number, 
                 b.size, 
@@ -61,16 +60,17 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
                 b.chef,
                 b.stage,
                 COUNT(b.id) AS total_count,
-                qc.quantity_coupe AS total_stage_quantity,
-                qc.principale_quantity AS total_main_quantity,
-                qc.solped_client AS solped_client,
-                qc.pedido_client AS pedido_client,
-                qc.color_tissus AS color_tissus,
-                qc.principale_quantity AS principale_quantity,
-                qc.quantity_coupe AS quantity_coupe,
-                qc.manque AS manque,
-                qc.suv_plus AS suv_plus,
-                IFNULL(qc.lastupdate, b.last_update) AS latest_update
+                -- Get the values from quantity_coupe if they exist
+                MAX(qc.quantity_coupe) AS total_stage_quantity,
+                MAX(qc.principale_quantity) AS total_main_quantity,
+                MAX(qc.solped_client) AS solped_client,
+                MAX(qc.pedido_client) AS pedido_client,
+                MAX(qc.color_tissus) AS color_tissus,
+                MAX(qc.principale_quantity) AS principale_quantity,
+                MAX(qc.quantity_coupe) AS quantity_coupe,
+                MAX(qc.manque) AS manque,
+                MAX(qc.suv_plus) AS suv_plus,
+                MAX(IFNULL(qc.lastupdate, b.last_update)) AS latest_update
               FROM barcodes b
               LEFT JOIN quantity_coupe qc ON b.of_number = qc.of_number 
                 AND b.size = qc.size 
@@ -79,6 +79,12 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
               WHERE 1=1";
 
     $params = [];
+
+    // Add date filter first since it's the most restrictive
+    if (!empty($date)) {
+        $query .= " AND DATE(IFNULL(qc.lastupdate, b.last_update)) = ?";
+        $params[] = $date;
+    }
 
     if (!empty($of_number)) {
         $query .= " AND b.of_number LIKE ?";
@@ -103,23 +109,6 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
     if (!empty($stage) && $stage != 'select') {
         $query .= " AND b.stage = ?";
         $params[] = $stage;
-    }
-
-    if (!empty($date)) {
-        $query .= " AND DATE(
-                        (SELECT MAX(IFNULL(qc2.lastupdate, b2.last_update))
-                         FROM barcodes b2
-                         LEFT JOIN quantity_coupe qc2 ON b2.of_number = qc2.of_number 
-                            AND b2.size = qc2.size 
-                            AND b2.category = qc2.category 
-                            AND b2.piece_name = qc2.piece_name
-                         WHERE b2.of_number = b.of_number
-                            AND b2.size = b.size
-                            AND b2.category = b.category
-                            AND b2.piece_name = b.piece_name
-                        )
-                    ) = ?";
-        $params[] = $date;
     }
 
     $query .= " GROUP BY b.of_number, b.size, b.category, b.piece_name, b.chef, b.stage";
@@ -201,7 +190,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
     $sheet = $spreadsheet->getActiveSheet();
     $sheet->setTitle('Export Data');
 
-    // Updated headers to match the table view
+    // Headers for the Excel file - Ensure these match exactly what's shown in the table
     $headers = [
         'OF Number', 'Size', 'Category', 'Piece Name', 'Chef', 'Total Stage Quantity', 
         'Total Main Quantity', 'Stages', 'Total Count', 'Solped Client', 'Pedido Client', 
@@ -254,7 +243,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
         $sheet->setCellValue('N' . $row, $data['quantity_coupe'] ?? 0);
         $sheet->setCellValue('O' . $row, $data['manque'] ?? 0);
         $sheet->setCellValue('P' . $row, $data['suv_plus'] ?? 0);
-        $sheet->setCellValue('Q' . $row, $data['latest_update'] ?? '');
+        $sheet->setCellValue('Q' . $row, $data['latest_update'] ? date('Y-m-d H:i', strtotime($data['latest_update'])) : '');
 
         $sheet->getStyle('A' . $row . ':Q' . $row)->applyFromArray([
             'borders' => [
