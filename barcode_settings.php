@@ -234,6 +234,7 @@ require_once 'settings.php';
                 <div class="input-group">
                     <span class="input-group-text">
                         <i class="fas fa-sort"></i>
+                        
                     </span>
                     <input type="text" class="form-control" id="order_str_search" name="order_str_search" placeholder="Enter order">
                 </div>
