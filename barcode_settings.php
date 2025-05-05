@@ -240,20 +240,10 @@ require_once 'settings.php';
                 </div>
             </div>
 
-            <!-- Date Filters (Start Date) -->
+         
+        <!-- Date Filters (End Date) -->
             <div class="col-lg-3 col-md-6 col-sm-6">
-                <label for="date_from" class="form-label">From Date</label>
-                <div class="input-group">
-                    <span class="input-group-text">
-                        <i class="fas fa-calendar-alt"></i>
-                    </span>
-                    <input type="datetime-local" class="form-control" id="date_from" name="date_from">
-                </div>
-            </div>
-
-            <!-- Date Filters (End Date) -->
-            <div class="col-lg-3 col-md-6 col-sm-6">
-                <label for="date_to" class="form-label">To Date</label>
+                <label for="date_to" class="form-label"> Date</label>
                 <div class="input-group">
                     <span class="input-group-text">
                         <i class="fas fa-calendar-alt"></i>
@@ -264,15 +254,16 @@ require_once 'settings.php';
 
             <!-- Buttons -->
             <div class="col-lg-3 col-md-6 col-sm-12 d-flex align-items-end">
-                <div class="d-flex justify-content-between gap-2 w-100">
-                    <button type="submit" class="btn btn-primary w-50">
+                <div class="d-flex gap-2 w-100 justify-content-start">
+                    <button type="submit" class="btn btn-primary" style="min-width: 150px;">
                         <i class="fas fa-search"></i> Search
                     </button>
-                    <a href="barcode_settings.php" class="btn btn-secondary w-50">
+                    <a href="barcode_settings.php" class="btn btn-secondary" style="min-width: 150px;">
                         <i class="fas fa-broom"></i> Clear
                     </a>
                 </div>
             </div>
+
         </div>
     </form>
 </div>

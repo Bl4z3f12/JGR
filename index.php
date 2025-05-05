@@ -326,6 +326,8 @@ $items_per_page = 200;
                                 value="<?php echo htmlspecialchars($filter_size); ?>" placeholder="Enter size">
                         </div>
                     </div>
+                    <!-- Date Filter -->
+               
                     <!-- Category -->
                     <div class="col-md-2">
                         <label for="filter-category" class="form-label mb-2">Category</label>
@@ -357,8 +359,16 @@ $items_per_page = 200;
                             </select>
                         </div>
                     </div>
+                    <div class="col-md-2">
+                        <label for="filter-date" class="form-label mb-2">Date</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-calendar"></i></span>
+                            <input type="date" class="form-control" id="filter-date" name="filter_date"
+                                value="<?php echo htmlspecialchars($filter_date ?? ''); ?>" placeholder="Select date">
+                        </div>
+                    </div>
                     <!-- Buttons -->
-                    <div class="col-md-4">
+                    <div class="col-md-2">
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">
                                 <i class="fa-solid fa-filter me-1"></i> Apply Filters

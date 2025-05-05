@@ -16,6 +16,7 @@ $filter_of_number = $_GET['filter_of'] ?? '';
 $filter_size = $_GET['filter_size'] ?? '';
 $filter_category = $_GET['filter_category'] ?? '';
 $filter_piece_name = $_GET['filter_piece_name'] ?? '';
+$filter_date = $_GET['filter_date'] ?? '';
 
 // Establish database connection
 function connectDB() {
@@ -23,7 +24,7 @@ function connectDB() {
     return $conn->connect_error ? false : $conn;
 }
 
-function getBarcodes($view, $page, $items_per_page, $filter_of = '', $filter_size = '', $filter_category = '', $filter_piece_name = '') {
+function getBarcodes($view, $page, $items_per_page, $filter_of = '', $filter_size = '', $filter_category = '', $filter_piece_name = '', $filter_date = '') {
     $conn = connectDB();
     if (!$conn) return [];
 
@@ -54,6 +55,11 @@ function getBarcodes($view, $page, $items_per_page, $filter_of = '', $filter_siz
     
     if (!empty($filter_piece_name)) {
         $conditions[] = "piece_name = ?";
+    }
+    
+    // Add date filter condition
+    if (!empty($filter_date)) {
+        $conditions[] = "DATE(last_update) = ?";
     }
     
     // Combine conditions
@@ -90,6 +96,12 @@ function getBarcodes($view, $page, $items_per_page, $filter_of = '', $filter_siz
         $params[] = $filter_piece_name;
     }
     
+    // Add date parameter
+    if (!empty($filter_date)) {
+        $types .= "s";
+        $params[] = $filter_date;
+    }
+    
     // Add limit parameters
     $types .= "ii";
     $params[] = $offset;
@@ -117,7 +129,7 @@ function getBarcodes($view, $page, $items_per_page, $filter_of = '', $filter_siz
     return $barcodes;
 }
 
-function getTotalBarcodes($view, $filter_of = '', $filter_size = '', $filter_category = '', $filter_piece_name = '') {
+function getTotalBarcodes($view, $filter_of = '', $filter_size = '', $filter_category = '', $filter_piece_name = '', $filter_date = '') {
     $conn = connectDB();
     if (!$conn) return 100;
 
@@ -146,6 +158,11 @@ function getTotalBarcodes($view, $filter_of = '', $filter_size = '', $filter_cat
     
     if (!empty($filter_piece_name)) {
         $conditions[] = "piece_name = ?";
+    }
+    
+    // Add date filter condition
+    if (!empty($filter_date)) {
+        $conditions[] = "DATE(last_update) = ?";
     }
     
     // Combine conditions
@@ -180,6 +197,12 @@ function getTotalBarcodes($view, $filter_of = '', $filter_size = '', $filter_cat
     if (!empty($filter_piece_name)) {
         $types .= "s";
         $params[] = $filter_piece_name;
+    }
+    
+    // Add date parameter
+    if (!empty($filter_date)) {
+        $types .= "s";
+        $params[] = $filter_date;
     }
     
     // Dynamically bind parameters
@@ -284,6 +307,7 @@ function getRandomButtonScript() {
                 document.getElementById('filter-size').value = '';
                 document.getElementById('filter-category').value = '';
                 document.getElementById('filter-piece-name').value = '';
+                document.getElementById('filter-date').value = '';
                 document.getElementById('filter-form').submit();
             });
         }
@@ -558,8 +582,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
 }
 
 // Load barcodes for current view
-$barcodes = getBarcodes($current_view, $page, $items_per_page, $filter_of_number, $filter_size, $filter_category, $filter_piece_name);
-$total_barcodes = getTotalBarcodes($current_view, $filter_of_number, $filter_size, $filter_category, $filter_piece_name);
+$barcodes = getBarcodes($current_view, $page, $items_per_page, $filter_of_number, $filter_size, $filter_category, $filter_piece_name, $filter_date);
+$total_barcodes = getTotalBarcodes($current_view, $filter_of_number, $filter_size, $filter_category, $filter_piece_name, $filter_date);
 $total_pages = ceil($total_barcodes / $items_per_page);
 $show_success = isset($_GET['success']) && $_GET['success'] == 1;
 $error_message = $_GET['error'] ?? '';
