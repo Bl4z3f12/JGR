@@ -349,7 +349,7 @@ require_once 'settings.php';
                                             <select class="form-select" id="bulk_stage" name="bulk_stage" disabled>
                                                 <option value="">Select Stage</option>
                                                 <?php
-                                                  $stage_options = ['Coupe', 'V1', 'V2', 'V3', 'Pantalon', 'Repassage', 'P_fini','Exported'];
+                                                  $stage_options = ['Coupe', 'V1', 'V2', 'V3', 'Pantalon', 'Repassage', 'P_ fini','Exported'];
                                                  foreach ($stage_options as $option): ?>
                                                     <option value="<?php echo htmlspecialchars($option); ?>"><?php echo htmlspecialchars($option); ?></option>
                                                 <?php endforeach; ?>
@@ -629,7 +629,7 @@ require_once 'settings.php';
                                         "V3",
                                         "Pantalon",
                                         "Repassage",
-                                        "P_fini"
+                                        "P_ fini"
                                     ];
                                     foreach ($stage_options as $option): ?>
                                         <option value="<?php echo htmlspecialchars($option); ?>" <?php echo $edit_barcode['stage'] === $option ? 'selected' : ''; ?>>

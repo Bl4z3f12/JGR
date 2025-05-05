@@ -131,12 +131,12 @@ require "scantoday_settings.php";
             <div class="d-flex flex-nowrap align-items-end overflow-auto gap-2">
                 <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
                     <label for="of_number" class="form-label">OF Number</label>
-                    <input type="text" class="form-control" id="of_number" name="of_number" value="<?php echo htmlspecialchars($of_number ?? ''); ?>">
+                    <input type="number" class="form-control" id="of_number" name="of_number" value="<?php echo htmlspecialchars($of_number ?? ''); ?>">
                 </div>
                 
                 <div class="flex-grow-1 flex-shrink-1" style="min-width: 80px;">
                     <label for="size" class="form-label">Size</label>
-                    <input type="text" class="form-control" id="size" name="size" value="<?php echo htmlspecialchars($size ?? ''); ?>">        
+                    <input type="number" class="form-control" id="size" name="size" value="<?php echo htmlspecialchars($size ?? ''); ?>">        
                 </div>
                 
                 <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
@@ -214,6 +214,23 @@ require "scantoday_settings.php";
     </div>
 </div>
 
+    <div class="export-button-container">
+        <form method="GET" action="export_excel.php">
+            <!-- Hidden inputs to pass all current filter values -->
+            <input type="hidden" name="export" value="excel">
+            <input type="hidden" name="of_number" value="<?php echo htmlspecialchars($of_number ?? ''); ?>">
+            <input type="hidden" name="size" value="<?php echo htmlspecialchars($size ?? ''); ?>">
+            <input type="hidden" name="category" value="<?php echo htmlspecialchars($category ?? ''); ?>">
+            <input type="hidden" name="p_name" value="<?php echo htmlspecialchars($p_name ?? ''); ?>">
+            <input type="hidden" name="stage" value="<?php echo htmlspecialchars($stage ?? ''); ?>">
+            <input type="hidden" name="date" value="<?php echo htmlspecialchars($date ?? date('Y-m-d')); ?>">
+            
+            <button type="submit" class="btn btn-success mb-2">
+                <i class="fas fa-file-excel"></i> Export to Excel
+            </button>
+        </form>
+    </div>
+
         <!-- Results Table -->
         <div class="table-responsive">
             <table class="table table-striped table-hover">
@@ -276,22 +293,6 @@ require "scantoday_settings.php";
                     <?php endif; ?>
                 </tbody>
             </table>
-<div class="export-button-container">
-    <form method="GET" action="export_excel.php">
-        <!-- Hidden inputs to pass all current filter values -->
-        <input type="hidden" name="export" value="excel">
-        <input type="hidden" name="of_number" value="<?php echo htmlspecialchars($of_number ?? ''); ?>">
-        <input type="hidden" name="size" value="<?php echo htmlspecialchars($size ?? ''); ?>">
-        <input type="hidden" name="category" value="<?php echo htmlspecialchars($category ?? ''); ?>">
-        <input type="hidden" name="p_name" value="<?php echo htmlspecialchars($p_name ?? ''); ?>">
-        <input type="hidden" name="stage" value="<?php echo htmlspecialchars($stage ?? ''); ?>">
-        <input type="hidden" name="date" value="<?php echo htmlspecialchars($date ?? date('Y-m-d')); ?>">
-        
-        <button type="submit" class="btn btn-success">
-            <i class="fas fa-file-excel"></i> Export to Excel
-        </button>
-    </form>
-</div>
         </div>
     <?php endif; ?>
                     
@@ -308,14 +309,14 @@ require "scantoday_settings.php";
                                     <form method="POST" action="?tab=quantity_coupe" class="row g-3">
                                         <div class="col-md-6">
                                             <label for="of_number" class="form-label">OF Number</label>
-                                            <input type="text" class="form-control" id="of_number" name="of_number" 
+                                            <input type="number" class="form-control" id="of_number" name="of_number" 
                                             
                                                    value="<?php echo htmlspecialchars($barcode_data['of_number']); ?>" required>
                                         </div>
                                         
                                         <div class="col-md-6">
                                             <label for="size" class="form-label">Size</label>
-                                            <input type="text" class="form-control" id="size" name="size" 
+                                            <input type="number" class="form-control" id="size" name="size" 
                                                    value="<?php echo htmlspecialchars($barcode_data['size']); ?>" required>
                                         </div>
                                         
@@ -433,7 +434,7 @@ require "scantoday_settings.php";
                                 <div class="search-inline-container">
                                     <div class="search-field">
                                         <label for="of_number" class="form-label">OF Number</label>
-                                        <input type="text" class="form-control" id="of_number" name="of_number" value="">
+                                        <input type="number" class="form-control" id="of_number" name="of_number" value="">
                                     </div>
                                     
                                     <div class="button-group">

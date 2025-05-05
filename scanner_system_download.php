@@ -81,6 +81,111 @@ requireLogin('login.php');
             animation: button-flash 1s ease 3; /* Flash 3 times */
             position: relative;
         }
+        
+        #atelierModal .modal-content {
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        #atelierModal .modal-header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border-bottom: none;
+            padding: 15px 20px;
+        }
+        
+        .version-container {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        
+        .version-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .version-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .version-container::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+        
+        .version-card {
+            display: flex;
+            align-items: center;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            transition: all 0.3s;
+            cursor: pointer;
+            height: 100%;
+        }
+        
+        .version-card:hover {
+            background-color: #f8f9fa;
+            border-color: #007bff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .version-card.active {
+            background-color: #e8f3ff;
+            border-color: #007bff;
+        }
+        
+        .version-icon {
+            width: 40px;
+            height: 40px;
+            background: #e9f5ff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: #007bff;
+            font-size: 1.2rem;
+        }
+        
+        .version-details {
+            flex: 1;
+        }
+        
+        .version-details h6 {
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .badge {
+            font-weight: 500;
+            font-size: 0.75rem;
+        }
+        
+        .modal-footer {
+            border-top: 1px solid #eaeaea;
+        }
+        
+        /* Animation for cards */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .version-card {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        
+        .version-card:nth-child(1) { animation-delay: 0.1s; }
+        .version-card:nth-child(2) { animation-delay: 0.15s; }
+        .version-card:nth-child(3) { animation-delay: 0.2s; }
+        .version-card:nth-child(4) { animation-delay: 0.25s; }
+        .version-card:nth-child(5) { animation-delay: 0.3s; }
+        .version-card:nth-child(6) { animation-delay: 0.35s; }
+        .version-card:nth-child(7) { animation-delay: 0.4s; }
     </style>
 </head>
 <body>
@@ -92,7 +197,7 @@ requireLogin('login.php');
         <div class="content">
             <div class="content-header">
                 <h2 class="content-title">
-                    <i class="fas fa-download me-2"></i> Scanner Program Downloads/ Updates
+                    Scanner Program Downloads/ Updates
                 </h2>
             </div>
 
@@ -132,8 +237,12 @@ requireLogin('login.php');
                                 <li>[...] and more</li>
                             </ul>
                             <div class="mt-3">
-                                <a href="downloads/tst.txt" download id="down" class="btn btn-primary w-100 mb-2">
-                                    <i class="fas fa-download me-2"></i> Download (64-bit)
+                                <a href="#" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#atelierModal" 
+                                    id="down" 
+                                    class="btn btn-primary w-100 mb-2">
+                                        <i class="fas fa-download me-2"></i> Download (64-bit)
                                 </a>
                             </div>
                         </div>
@@ -285,52 +394,193 @@ requireLogin('login.php');
             </div>
         </div>
     </div>
-    
-    <?php include 'includes/footer.php'; ?>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Mobile detection and button modification
-            function isMobile() {
-                return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            }
 
-            if (isMobile()) {
-                const downloadButtons = document.querySelectorAll('.download-card .btn');
-                downloadButtons.forEach(button => {
-                    button.innerHTML = 'You cannot download this program, it is only for computers';
-                    if (button.tagName === 'A') {
-                        button.removeAttribute('href');
-                    }
-                    button.classList.add('pe-none', 'btn-secondary');
-                    button.classList.remove('btn-primary');
-                });
-            }
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Handle "download button above" link click
-            document.querySelectorAll('.download-href').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const targetBtn = document.getElementById('down');
-                    
-                    if (targetBtn) {
-                        // Smooth scroll to the button
-                        targetBtn.scrollIntoView({ behavior: 'smooth', block: "center" });
-                        
-                        // Add flash effect
-                        targetBtn.classList.add('flash-effect');
-                        
-                        // Remove effect after animation completes
-                        setTimeout(() => {
-                            targetBtn.classList.remove('flash-effect');
-                        }, 3000); // Matches 3 iterations of 1s animation
-                    }
-                });
-            });
-        });
-    </script>
+
+    <!-- Add this modal HTML before the footer include -->
+    <div class="modal fade" id="atelierModal" tabindex="-1" aria-labelledby="atelierModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="atelierModalLabel">
+            <i class="fas fa-box-open me-2"></i>Select Atelier Version
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        
+        <div class="modal-body p-4">
+            <p class="text-muted mb-3">Please select the version you want to download:</p>
+            
+            <div class="version-container">
+            <div class="row g-3">
+                <div class="col-md-6">
+                <div class="version-card" data-version="coupe">
+                    <div class="version-icon">
+                    <i class="fas fa-cut"></i>
+                    </div>
+                    <div class="version-details">
+                    <h6>Coupe</h6>
+                    <span class="badge bg-info">v2.5.0</span>
+                    </div>
+                </div>
+                </div>
+                
+                <div class="col-md-6">
+                <div class="version-card" data-version="v1">
+                    <div class="version-icon">
+                    <i class="fas fa-tshirt"></i>
+                    </div>
+                    <div class="version-details">
+                    <h6>V1</h6>
+                    <span class="badge bg-info">v2.5.0</span>
+                    </div>
+                </div>
+                </div>
+                
+                <div class="col-md-6">
+                <div class="version-card" data-version="v2">
+                    <div class="version-icon">
+                    <i class="fas fa-vest"></i>
+                    </div>
+                    <div class="version-details">
+                    <h6>V2</h6>
+                    <span class="badge bg-info">v2.5.0</span>
+                    </div>
+                </div>
+                </div>
+                
+                <div class="col-md-6">
+                <div class="version-card" data-version="v3">
+                    <div class="version-icon">
+                    <i class="fas fa-vest-patches"></i>
+                    </div>
+                    <div class="version-details">
+                    <h6>V3</h6>
+                    <span class="badge bg-info">v2.5.0</span>
+                    </div>
+                </div>
+                </div>
+                
+                <div class="col-md-6">
+                <div class="version-card" data-version="pantalan">
+                    <div class="version-icon">
+                    <i class="fas fa-socks"></i>
+                    </div>
+                    <div class="version-details">
+                    <h6>PANTALAN</h6>
+                    <span class="badge bg-info">v2.5.0</span>
+                    </div>
+                </div>
+                </div>
+                
+                <div class="col-md-6">
+                <div class="version-card" data-version="repassage">
+                    <div class="version-icon">
+                    <i class="fas fa-iron"></i>
+                    </div>
+                    <div class="version-details">
+                    <h6>REPASSAGE</h6>
+                    <span class="badge bg-info">v2.5.0</span>
+                    </div>
+                </div>
+                </div>
+                
+                <div class="col-md-6">
+                <div class="version-card" data-version="p_fini">
+                    <div class="version-icon">
+                    <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="version-details">
+                    <h6>P_FINI</h6>
+                    <span class="badge bg-info">v2.5.0</span>
+                    </div>
+                </div>
+                </div>
+            </div>
+            </div>
+        </div>
+        
+        <div class="modal-footer bg-light">
+            <div class="d-flex align-items-center me-auto">
+            <i class="fas fa-info-circle text-primary me-2"></i>
+            <small class="text-muted">Click on a version to download</small>
+            </div>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+        </div>
+    </div>
+    </div>
+
+    <?php include 'includes/footer.php'; ?>
+
+
+    
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Mapping of Atelier versions to their specific filenames
+    const versionMap = {
+      'coupe': 'coupe.exe',
+      'v1': 'V1.exe',
+      'v2': 'V2.exe',
+      'v3': 'V3.exe',
+      'pantalan': 'Pantalan.exe',
+      'repassage': 'Repassage.exe',
+      'p_fini': 'P_Fini.exe'
+    };
+
+    document.querySelectorAll('.version-card').forEach(card => {
+      card.addEventListener('click', function() {
+        // Remove active class from all cards
+        document.querySelectorAll('.version-card').forEach(c => c.classList.remove('active'));
+        
+        // Add active class to clicked card
+        this.classList.add('active');
+        
+        const version = this.dataset.version;
+        const filename = versionMap[version];
+        
+        if (filename) {
+          // Show download starting feedback
+          const toast = document.createElement('div');
+          toast.className = 'position-fixed bottom-0 end-0 p-3';
+          toast.style.zIndex = '5000';
+          toast.innerHTML = `
+            <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+              <div class="toast-header">
+                <i class="fas fa-download text-primary me-2"></i>
+                <strong class="me-auto">Download Started</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+              </div>
+              <div class="toast-body">
+                Downloading ${filename} now...
+              </div>
+            </div>
+          `;
+          document.body.appendChild(toast);
+          
+          setTimeout(() => {
+            document.body.removeChild(toast);
+          }, 3000);
+          
+          // Create and trigger download
+          const link = document.createElement('a');
+          link.href = `downloads/${filename}`;
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          // Close modal with slight delay for better UX
+          setTimeout(() => {
+            bootstrap.Modal.getInstance(document.getElementById('atelierModal')).hide();
+          }, 500);
+        } else {
+          console.error('No file mapped for version:', version);
+        }
+      });
+    });
+  });
+</script>
+
+
 </body>
 </html>

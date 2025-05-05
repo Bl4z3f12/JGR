@@ -667,7 +667,7 @@ function displayBarcodeData($result) {
                                     <select class="form-select" id="stage" name="stage">
                                         <option value="select" <?php echo ($stage === 'select') ? 'selected' : ''; ?>>All Stages</option>
                                         <?php
-                                        $stage_options = ['Coupe', 'V1', 'V2', 'V3', 'Pantalon', 'Repassage', 'P_fini'];
+                                        $stage_options = ['Coupe', 'V1', 'V2', 'V3', 'Pantalon', 'Repassage', 'P_ fini'];
                                         foreach ($stage_options as $option): ?>
                                             <option value="<?php echo htmlspecialchars($option); ?>" 
                                                     <?php echo ($stage === $option) ? 'selected' : ''; ?>>

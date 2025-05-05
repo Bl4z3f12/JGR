@@ -40,7 +40,7 @@ $stage_summary = [];
 // Define category and piece name options
 $category_options = ['R', 'C', 'L', 'LL', 'CC', 'N'];
 $p_name_options = ['P', 'V', 'G', 'M'];
-$stage_options = ['Coupe', 'V1', 'V2', 'V3', 'Pantalon', 'Repassage', 'P_fini','Exported'];
+$stage_options = ['Coupe', 'V1', 'V2', 'V3', 'Pantalon', 'Repassage', 'P_ fini','Exported'];
 // Initialize date and search parameters
 $current_date = date("Y-m-d");
 
@@ -64,7 +64,7 @@ $stage_summary = [];
 // Define category and piece name options
 $category_options = ['R', 'C', 'L', 'LL', 'CC', 'N'];
 $p_name_options = ['P', 'V', 'G', 'M'];
-$stage_options = ['Coupe', 'V1', 'V2', 'V3', 'Pantalon', 'Repassage', 'P_fini','Exported'];
+$stage_options = ['Coupe', 'V1', 'V2', 'V3', 'Pantalon', 'Repassage', 'P_ fini','Exported'];
 
 // Function to check if barcode exists
 function checkBarcodeExists($pdo, $of_number, $size, $category, $piece_name) {

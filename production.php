@@ -40,7 +40,7 @@ $p_name = $_GET['piece_name'] ?? '';
 $date = $_GET['date'] ?? $current_date;
 
 // Define stage options - add 'No Stage' for NULL values
-$stage_options = ['Coupe', 'V1', 'V2', 'V3', 'Pantalon', 'Repassage', 'P_fini', 'Exported', 'No Stage'];
+$stage_options = ['Coupe', 'V1', 'V2', 'V3', 'Pantalon', 'Repassage', 'P_ fini', 'Exported', 'No Stage'];
 
 // Query to get barcode counts by stage - modified to handle NULL values
 $query = "SELECT 
@@ -263,7 +263,7 @@ if (empty($chart_labels)) {
                                     <label for="of_number" class="form-label text-muted">OF Number</label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-light"><i class="fas fa-hashtag"></i></span>
-                                        <input type="text" class="form-control" id="of_number" name="of_number" 
+                                        <input type="number" class="form-control" id="of_number" name="of_number" 
                                                value="<?php echo htmlspecialchars($of_number); ?>" placeholder="Enter OF Number">
                                     </div>
                                 </div>
@@ -272,7 +272,7 @@ if (empty($chart_labels)) {
                                     <label for="size" class="form-label text-muted">Size</label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-light"><i class="fas fa-ruler"></i></span>
-                                        <input type="text" class="form-control" id="size" name="size" 
+                                        <input type="number" class="form-control" id="size" name="size" 
                                                value="<?php echo htmlspecialchars($size); ?>" placeholder="Size">
                                     </div>
                                 </div>
