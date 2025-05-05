@@ -1,26 +1,20 @@
 <?php
+// Database connection settings
+$host = 'localhost';     // Your database host (usually localhost)
+$dbname = 'jgr';      // Your database name
+$username = 'root';      // Your database username
+$password = '';          // Your database password (empty for default XAMPP setup)
 
-
-$host = 'localhost';
-$db_name = 'jgr';
-$username = 'root';
-$password = '';
-$charset = 'utf8mb4';
-
-$options = [
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES => false,
-];
-
-// DSN (Data Source Name)
-$dsn = "mysql:host=$host;dbname=$db_name;charset=$charset";
-
+// Create PDO connection
 try {
-    // Create PDO connection
-    $pdo = new PDO($dsn, $username, $password, $options);
-} catch (PDOException $e) {
-    die("Connection failed: " . $e->getMessage());
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
+    // Set the PDO error mode to exception
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // Set default fetch mode to associative array
+    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+} catch(PDOException $e) {
+    // If connection fails, display error message and exit
+    die("Database Connection Error: " . $e->getMessage());
 }
 
 // Initialize date and search parameters
@@ -32,7 +26,9 @@ $size = $_GET['size'] ?? '';
 $category = $_GET['category'] ?? '';
 $p_name = $_GET['p_name'] ?? '';
 $stage = $_GET['stage'] ?? ''; 
+// Default to current date if not specified
 $date = $_GET['date'] ?? $current_date;
+$use_date_filter = true; // Always apply date filter by default
 
 // Default active tab
 $active_tab = $_GET['tab'] ?? 'summary';
@@ -44,7 +40,31 @@ $stage_summary = [];
 // Define category and piece name options
 $category_options = ['R', 'C', 'L', 'LL', 'CC', 'N'];
 $p_name_options = ['P', 'V', 'G', 'M'];
-$stage_options = ['Coupe', 'V1', 'V2', 'V3', 'Pantalon', 'Repassage', 'P_ fini','Exported'];
+$stage_options = ['Coupe', 'V1', 'V2', 'V3', 'Pantalon', 'Repassage', 'P_fini','Exported'];
+// Initialize date and search parameters
+$current_date = date("Y-m-d");
+
+// Common search parameters
+$of_number = $_GET['of_number'] ?? '';
+$size = $_GET['size'] ?? '';
+$category = $_GET['category'] ?? '';
+$p_name = $_GET['p_name'] ?? '';
+$stage = $_GET['stage'] ?? ''; 
+// Default to current date if not specified
+$date = $_GET['date'] ?? $current_date;
+$use_date_filter = true; // Always apply date filter by default
+
+// Default active tab
+$active_tab = $_GET['tab'] ?? 'summary';
+
+// Initialize arrays to store results
+$grouped_results = [];
+$stage_summary = [];
+
+// Define category and piece name options
+$category_options = ['R', 'C', 'L', 'LL', 'CC', 'N'];
+$p_name_options = ['P', 'V', 'G', 'M'];
+$stage_options = ['Coupe', 'V1', 'V2', 'V3', 'Pantalon', 'Repassage', 'P_fini','Exported'];
 
 // Function to check if barcode exists
 function checkBarcodeExists($pdo, $of_number, $size, $category, $piece_name) {
@@ -195,33 +215,31 @@ if (isset($_GET['delete_qc']) && !empty($_GET['id'])) {
 }
 
 // Handle search action for Summary view
-if (isset($_GET['search']) || $active_tab == 'summary') {
-    // MODIFIED: Changed query to include chef and stage in GROUP BY clause
-// In the first PHP file, replace the summary query with:
-$query = "SELECT 
-            b.of_number, 
-            b.size, 
-            b.category, 
-            b.piece_name AS p_name,
-            b.chef,
-            b.stage,
-            COUNT(b.id) AS total_count,
-            qc.quantity_coupe AS total_stage_quantity,
-            qc.principale_quantity AS total_main_quantity,
-            qc.solped_client AS solped_client,
-            qc.pedido_client AS pedido_client,
-            qc.color_tissus AS color_tissus,
-            qc.principale_quantity AS principale_quantity,
-            qc.quantity_coupe AS quantity_coupe,
-            qc.manque AS manque,
-            qc.suv_plus AS suv_plus,
-            IFNULL(qc.lastupdate, b.last_update) AS latest_update
-          FROM barcodes b
-          LEFT JOIN quantity_coupe qc ON b.of_number = qc.of_number 
-            AND b.size = qc.size 
-            AND b.category = qc.category 
-            AND b.piece_name = qc.piece_name
-          WHERE 1=1";
+if ($active_tab == 'summary') {
+    $query = "SELECT 
+                b.of_number, 
+                b.size, 
+                b.category, 
+                b.piece_name AS p_name,
+                b.chef,
+                b.stage,
+                COUNT(b.id) AS total_count,
+                qc.quantity_coupe AS total_stage_quantity,
+                qc.principale_quantity AS total_main_quantity,
+                qc.solped_client AS solped_client,
+                qc.pedido_client AS pedido_client,
+                qc.color_tissus AS color_tissus,
+                qc.principale_quantity AS principale_quantity,
+                qc.quantity_coupe AS quantity_coupe,
+                qc.manque AS manque,
+                qc.suv_plus AS suv_plus,
+                IFNULL(qc.lastupdate, b.last_update) AS latest_update
+              FROM barcodes b
+              LEFT JOIN quantity_coupe qc ON b.of_number = qc.of_number 
+                AND b.size = qc.size 
+                AND b.category = qc.category 
+                AND b.piece_name = qc.piece_name
+              WHERE 1=1";
     
     $params = [];
     
@@ -250,34 +268,22 @@ $query = "SELECT
         $params[] = $stage;
     }
     
-    // FIXED DATE FILTER
-    if (!empty($date)) {
-        $query .= " AND DATE(
-                        (SELECT MAX(IFNULL(qc2.lastupdate, b2.last_update))
-                         FROM barcodes b2
-                         LEFT JOIN quantity_coupe qc2 ON b2.of_number = qc2.of_number 
-                            AND b2.size = qc2.size 
-                            AND b2.category = qc2.category 
-                            AND b2.piece_name = qc2.piece_name
-                         WHERE b2.of_number = b.of_number
-                            AND b2.size = b.size
-                            AND b2.category = b.category
-                            AND b2.piece_name = b.piece_name
-                        )
-                    ) = ?";
+    // Always apply date filter unless explicitly disabled
+    if ($use_date_filter && !empty($date)) {
+        $query .= " AND DATE(IFNULL(qc.lastupdate, b.last_update)) = ?";
         $params[] = $date;
     }
     
-    // MODIFIED: Group by core identifiers AND chef AND stage to separate by chef and stage
+    // Group by core identifiers AND chef AND stage to separate by chef and stage
     $query .= " GROUP BY b.of_number, b.size, b.category, b.piece_name, b.chef, b.stage";
-    $query .= " ORDER BY b.of_number, b.size, b.category, b.piece_name, b.chef, b.stage";
+    $query .= " ORDER BY b.of_number, b.size, b.category, b.piece_name";
     $query .= " LIMIT 100";  // Limit for performance
     
     $stmt = $pdo->prepare($query);
     $stmt->execute($params);
     $grouped_results = $stmt->fetchAll();
     
-    // Second query to get stage breakdown counts - FIXED DATE FILTER HERE TOO
+    // Second query to get stage breakdown counts - with the same date filter
     $stage_query = "SELECT 
                     b.stage,
                     COUNT(*) as stage_count
@@ -316,21 +322,9 @@ $query = "SELECT
         $stage_params[] = $stage;
     }
     
-    // FIXED DATE FILTER for stage query too
-    if (!empty($date)) {
-        $stage_query .= " AND DATE(
-                            (SELECT MAX(IFNULL(qc2.lastupdate, b2.last_update))
-                             FROM barcodes b2
-                             LEFT JOIN quantity_coupe qc2 ON b2.of_number = qc2.of_number 
-                                AND b2.size = qc2.size 
-                                AND b2.category = qc2.category 
-                                AND b2.piece_name = qc2.piece_name
-                             WHERE b2.of_number = b.of_number
-                                AND b2.size = b.size
-                                AND b2.category = b.category
-                                AND b2.piece_name = b.piece_name
-                            )
-                        ) = ?";
+    // Always apply date filter unless explicitly disabled
+    if ($use_date_filter && !empty($date)) {
+        $stage_query .= " AND DATE(IFNULL(qc.lastupdate, b.last_update)) = ?";
         $stage_params[] = $date;
     }
     
@@ -343,6 +337,13 @@ $query = "SELECT
     $stage_summary = [];
     foreach ($stage_counts as $sc) {
         $stage_summary[$sc['stage']] = $sc['stage_count'];
+    }
+    
+    // Fill in missing stages with zero counts
+    foreach ($stage_options as $option) {
+        if (!isset($stage_summary[$option])) {
+            $stage_summary[$option] = 0;
+        }
     }
 }
 
@@ -365,22 +366,33 @@ $total_main_quantity = 0;
 if (!empty($grouped_results)) {
     foreach ($grouped_results as $row) {
         $total_items += $row['total_count'];
-        $total_stage_quantity += $row['total_stage_quantity'];
-        $total_main_quantity += $row['total_main_quantity'];
+        $total_stage_quantity += $row['total_stage_quantity'] ?? 0;
+        $total_main_quantity += $row['total_main_quantity'] ?? 0;
     }
 }
 
 // Function to get quantity coupe data
 function getQuantityCoupeData($pdo, $of_number = '') {
-    $where = '';
+    global $date, $use_date_filter, $current_date;
+    
+    $where = [];
     $params = [];
     
     if (!empty($of_number)) {
-        $where = "WHERE of_number LIKE ?";
+        $where[] = "of_number LIKE ?";
         $params[] = "%$of_number%";
     }
     
-    $sql = "SELECT * FROM quantity_coupe $where ORDER BY of_number, size, category, piece_name, lastupdate DESC";
+    // Apply date filter by default
+    if ($use_date_filter) {
+        $filter_date = !empty($date) ? $date : $current_date;
+        $where[] = "DATE(lastupdate) = ?";
+        $params[] = $filter_date;
+    }
+    
+    $where_clause = !empty($where) ? "WHERE " . implode(" AND ", $where) : "";
+    
+    $sql = "SELECT * FROM quantity_coupe $where_clause ORDER BY of_number, size, category, piece_name, lastupdate DESC";
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
     return $stmt->fetchAll();

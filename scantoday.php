@@ -120,7 +120,7 @@ require "scantoday_settings.php";
                 <!-- Summary Tab -->
                 <?php if($active_tab == 'summary'): ?>
 
-                    <div class="card">
+    <div class="card">
     <div class="card-header">
         <h5>Search</h5>
     </div>
@@ -131,56 +131,47 @@ require "scantoday_settings.php";
             <div class="d-flex flex-nowrap align-items-end overflow-auto gap-2">
                 <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
                     <label for="of_number" class="form-label">OF Number</label>
-                    <input type="text" class="form-control" id="of_number" name="of_number" value="">
+                    <input type="text" class="form-control" id="of_number" name="of_number" value="<?php echo htmlspecialchars($of_number ?? ''); ?>">
                 </div>
                 
                 <div class="flex-grow-1 flex-shrink-1" style="min-width: 80px;">
                     <label for="size" class="form-label">Size</label>
-                    <input type="text" class="form-control" id="size" name="size" value="">        
+                    <input type="text" class="form-control" id="size" name="size" value="<?php echo htmlspecialchars($size ?? ''); ?>">        
                 </div>
                 
                 <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
                     <label for="category" class="form-label">Category</label>
                     <select class="form-select" id="category" name="category">
-                        <option value="select" selected>All Categories</option>
-                        <option value="R">R</option>
-                        <option value="C">C</option>
-                        <option value="L">L</option>
-                        <option value="LL">LL</option>
-                        <option value="CC">CC</option>
-                        <option value="N">N</option>
+                        <option value="select" <?php echo (empty($category) || $category == 'select') ? 'selected' : ''; ?>>All Categories</option>
+                        <?php foreach($category_options as $option): ?>
+                            <option value="<?php echo $option; ?>" <?php echo ($category == $option) ? 'selected' : ''; ?>><?php echo $option; ?></option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
                 
                 <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
                     <label for="p_name" class="form-label">Piece Name</label>
                     <select class="form-select" id="p_name" name="p_name">
-                        <option value="select" selected>All Pieces</option>
-                        <option value="P">P</option>
-                        <option value="V">V</option>
-                        <option value="G">G</option>
-                        <option value="M">M</option>
+                        <option value="select" <?php echo (empty($p_name) || $p_name == 'select') ? 'selected' : ''; ?>>All Pieces</option>
+                        <?php foreach($p_name_options as $option): ?>
+                            <option value="<?php echo $option; ?>" <?php echo ($p_name == $option) ? 'selected' : ''; ?>><?php echo $option; ?></option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
                 
                 <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
                     <label for="stage" class="form-label">Stage</label>
                     <select class="form-select" id="stage" name="stage">
-                        <option value="select" selected>All Stages</option>
-                        <option value="Coupe">Coupe</option>
-                        <option value="V1">V1</option>
-                        <option value="V2">V2</option>
-                        <option value="V3">V3</option>
-                        <option value="Pantalon">Pantalon</option>
-                        <option value="Repassage">Repassage</option>
-                        <option value="P_ fini">P_ fini</option>
-                        <option value="Exported">Exported</option>
+                        <option value="select" <?php echo (empty($stage) || $stage == 'select') ? 'selected' : ''; ?>>All Stages</option>
+                        <?php foreach($stage_options as $option): ?>
+                            <option value="<?php echo $option; ?>" <?php echo ($stage == $option) ? 'selected' : ''; ?>><?php echo $option; ?></option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
                 
                 <div class="flex-grow-1 flex-shrink-1" style="min-width: 120px;">
                     <label for="date" class="form-label">Date</label>
-                    <input type="date" class="form-control" id="date" name="date" value="">
+                    <input type="date" class="form-control" id="date" name="date" value="<?php echo htmlspecialchars($date ?? date('Y-m-d')); ?>">
                 </div>
                 
                 <div class="flex-shrink-0">
@@ -192,6 +183,7 @@ require "scantoday_settings.php";
             </div>
         </form>
     </div>
+</div>
 
   
 </div>

@@ -177,7 +177,20 @@ require_once 'settings.php';
                     <span class="input-group-text">
                         <i class="fa-solid fa-hashtag"></i>
                     </span>
-                    <input type="number" class="form-control" id="of_number_search" name="of_number_search" placeholder="Enter OF number">
+                    <input type="text" class="form-control" id="of_number_search" name="of_number_search" 
+                           placeholder="Enter OF number" value="<?php echo htmlspecialchars($of_number_search); ?>">
+                </div>
+            </div>
+
+            <!-- Full Barcode Search -->
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <label for="full_barcode_search" class="form-label">Full Barcode</label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fa-solid fa-barcode"></i>
+                    </span>
+                    <input type="text" class="form-control" id="full_barcode_search" name="full_barcode_search" 
+                           placeholder="Enter barcode" value="<?php echo htmlspecialchars($full_barcode_search); ?>">
                 </div>
             </div>
 
@@ -188,7 +201,8 @@ require_once 'settings.php';
                     <span class="input-group-text">
                         <i class="fa-solid fa-ruler"></i>
                     </span>
-                    <input type="number" class="form-control" id="size_search" name="size_search" placeholder="Enter size">
+                    <input type="number" class="form-control" id="size_search" name="size_search" 
+                           placeholder="Enter size" value="<?php echo htmlspecialchars($size_search); ?>">
                 </div>
             </div>
 
@@ -201,12 +215,12 @@ require_once 'settings.php';
                     </span>
                     <select class="form-select" id="category_search" name="category_search">
                         <option value="">Category</option>
-                        <option value="R">R</option>
-                        <option value="C">C</option>
-                        <option value="L">L</option>
-                        <option value="LL">LL</option>
-                        <option value="CC">CC</option>
-                        <option value="N">N</option>
+                        <option value="R" <?php echo $category_search === 'R' ? 'selected' : ''; ?>>R</option>
+                        <option value="C" <?php echo $category_search === 'C' ? 'selected' : ''; ?>>C</option>
+                        <option value="L" <?php echo $category_search === 'L' ? 'selected' : ''; ?>>L</option>
+                        <option value="LL" <?php echo $category_search === 'LL' ? 'selected' : ''; ?>>LL</option>
+                        <option value="CC" <?php echo $category_search === 'CC' ? 'selected' : ''; ?>>CC</option>
+                        <option value="N" <?php echo $category_search === 'N' ? 'selected' : ''; ?>>N</option>
                     </select>
                 </div>
             </div>
@@ -220,10 +234,10 @@ require_once 'settings.php';
                     </span>
                     <select class="form-select" id="piece_name_search" name="piece_name_search">
                         <option value="">Piece Name</option>
-                        <option value="P">P</option>
-                        <option value="V">V</option>
-                        <option value="G">G</option>
-                        <option value="M">M</option>
+                        <option value="P" <?php echo $piece_name_search === 'P' ? 'selected' : ''; ?>>P</option>
+                        <option value="V" <?php echo $piece_name_search === 'V' ? 'selected' : ''; ?>>V</option>
+                        <option value="G" <?php echo $piece_name_search === 'G' ? 'selected' : ''; ?>>G</option>
+                        <option value="M" <?php echo $piece_name_search === 'M' ? 'selected' : ''; ?>>M</option>
                     </select>
                 </div>
             </div>
@@ -234,21 +248,21 @@ require_once 'settings.php';
                 <div class="input-group">
                     <span class="input-group-text">
                         <i class="fas fa-sort"></i>
-                        
                     </span>
-                    <input type="text" class="form-control" id="order_str_search" name="order_str_search" placeholder="Enter order">
+                    <input type="text" class="form-control" id="order_str_search" name="order_str_search" 
+                           placeholder="Enter order" value="<?php echo htmlspecialchars($order_str_search); ?>">
                 </div>
             </div>
 
-         
-        <!-- Date Filters (End Date) -->
+            <!-- Date Filter -->
             <div class="col-lg-3 col-md-6 col-sm-6">
-                <label for="date_to" class="form-label"> Date</label>
+                <label for="date_to" class="form-label">Date</label>
                 <div class="input-group">
                     <span class="input-group-text">
                         <i class="fas fa-calendar-alt"></i>
                     </span>
-                    <input type="datetime-local" class="form-control" id="date_to" name="date_to">
+                    <input type="date" class="form-control" id="date_to" name="date_to" 
+                           value="<?php echo htmlspecialchars($date_to); ?>">
                 </div>
             </div>
 
@@ -263,6 +277,15 @@ require_once 'settings.php';
                     </a>
                 </div>
             </div>
+
+            <!-- Pagination Info -->
+            <?php if ($total_barcodes > 0): ?>
+            <div class="col-12 mt-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <p class="mb-0">Showing <?php echo min(($page - 1) * $items_per_page + 1, $total_barcodes); ?> to <?php echo min($page * $items_per_page, $total_barcodes); ?> of <?php echo $total_barcodes; ?> records</p>
+                </div>
+            </div>
+            <?php endif; ?>
 
         </div>
     </form>

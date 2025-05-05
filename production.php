@@ -312,7 +312,7 @@ if (empty($chart_labels)) {
                                         <button type="submit" class="btn btn-primary flex-fill">
                                             <i class="fas fa-search me-2"></i> Search
                                         </button>
-                                        <a href="diagramme.php" class="btn btn-outline-secondary flex-fill">
+                                        <a href="production.php" class="btn btn-outline-secondary flex-fill">
                                             <i class="fas fa-redo me-2"></i> Reset
                                         </a>
                                     </div>

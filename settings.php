@@ -9,7 +9,6 @@ $piece_name_search = $_GET['piece_name_search'] ?? '';
 $category_search = $_GET['category_search'] ?? '';
 $order_str_search = $_GET['order_str_search'] ?? '';
 $size_search = $_GET['size_search'] ?? '';
-$date_from = $_GET['date_from'] ?? '';
 $date_to = $_GET['date_to'] ?? '';
 $page = $_GET['page'] ?? 1;
 $items_per_page = 5000;
@@ -60,11 +59,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $timestamp = !empty($_POST['last_update']) ? $_POST['last_update'] : date('Y-m-d H:i:s');
         
         // Update the full barcode name
-        $full_barcode_name = "$of_number-$size-";
+        $full_barcode_name = "$of_number-$size";
         if (!empty($category)) {
-            $full_barcode_name .= "$category-";
+            $full_barcode_name .= "$category";
         }
-        $full_barcode_name .= "$piece_name-$order_str";
+        $full_barcode_name .= "-$piece_name-$order_str";
         
         // Use provided timestamp instead of NOW()
         $update_sql = "UPDATE barcodes SET of_number = ?, size = ?, category = ?, piece_name = ?, 
@@ -157,7 +156,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!empty($category_search)) $search_params[] = "category_search=" . urlencode($category_search);
     if (!empty($order_str_search)) $search_params[] = "order_str_search=" . urlencode($order_str_search);
     if (!empty($size_search)) $search_params[] = "size_search=" . urlencode($size_search);
-    if (!empty($date_from)) $search_params[] = "date_from=" . urlencode($date_from);
     if (!empty($date_to)) $search_params[] = "date_to=" . urlencode($date_to);
     if (!empty($page) && $page > 1) $search_params[] = "page=" . $page;
     
@@ -172,7 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Function to get searched barcodes with pagination
-function getSearchedBarcodes($of_number_search, $full_barcode_search, $piece_name_search, $category_search, $order_str_search, $size_search, $date_from, $date_to, $page, $items_per_page) {
+function getSearchedBarcodes($of_number_search, $full_barcode_search, $piece_name_search, $category_search, $order_str_search, $size_search, $date_to, $page, $items_per_page) {
     $conn = connectDB();
     if (!$conn) return [];
 
@@ -218,17 +216,17 @@ function getSearchedBarcodes($of_number_search, $full_barcode_search, $piece_nam
         $types .= 'i';
     }
     
-    // Add date range filtering
-    if (!empty($date_from)) {
-        $where_clauses[] = "last_update >= ?";
-        $params[] = $date_from;
-        $types .= 's';
-    }
-    
+    // Filter by specific date
     if (!empty($date_to)) {
-        $where_clauses[] = "last_update <= ?";
-        $params[] = $date_to;
-        $types .= 's';
+        // Convert the input date to start and end of the day
+        $date_obj = new DateTime($date_to);
+        $start_date = $date_obj->format('Y-m-d 00:00:00');
+        $end_date = $date_obj->format('Y-m-d 23:59:59');
+        
+        $where_clauses[] = "last_update BETWEEN ? AND ?";
+        $params[] = $start_date;
+        $params[] = $end_date;
+        $types .= 'ss';
     }
     
     $where_clause = '';
@@ -260,7 +258,7 @@ function getSearchedBarcodes($of_number_search, $full_barcode_search, $piece_nam
 }
 
 // Get total count function for pagination
-function getTotalSearchedBarcodes($of_number_search, $full_barcode_search, $piece_name_search, $category_search, $order_str_search, $size_search, $date_from, $date_to) {
+function getTotalSearchedBarcodes($of_number_search, $full_barcode_search, $piece_name_search, $category_search, $order_str_search, $size_search, $date_to) {
     $conn = connectDB();
     if (!$conn) return 0;
     
@@ -304,17 +302,17 @@ function getTotalSearchedBarcodes($of_number_search, $full_barcode_search, $piec
         $types .= 'i';
     }
     
-    // Add date range filtering
-    if (!empty($date_from)) {
-        $where_clauses[] = "last_update >= ?";
-        $params[] = $date_from;
-        $types .= 's';
-    }
-    
+    // Filter by specific date
     if (!empty($date_to)) {
-        $where_clauses[] = "last_update <= ?";
-        $params[] = $date_to;
-        $types .= 's';
+        // Convert the input date to start and end of the day
+        $date_obj = new DateTime($date_to);
+        $start_date = $date_obj->format('Y-m-d 00:00:00');
+        $end_date = $date_obj->format('Y-m-d 23:59:59');
+        
+        $where_clauses[] = "last_update BETWEEN ? AND ?";
+        $params[] = $start_date;
+        $params[] = $end_date;
+        $types .= 'ss';
     }
     
     $where_clause = '';
@@ -350,7 +348,6 @@ function buildSearchUrl($params = []) {
         'category_search' => $GLOBALS['category_search'],
         'order_str_search' => $GLOBALS['order_str_search'],
         'size_search' => $GLOBALS['size_search'],
-        'date_from' => $GLOBALS['date_from'],
         'date_to' => $GLOBALS['date_to'],
         'page' => $GLOBALS['page']
     ];
@@ -442,8 +439,8 @@ function formatDatetimeForInput($datetime) {
 }
 
 // Load barcodes based on search criteria
-$barcodes = getSearchedBarcodes($of_number_search, $full_barcode_search, $piece_name_search, $category_search, $order_str_search, $size_search, $date_from, $date_to, $page, $items_per_page);
-$total_barcodes = getTotalSearchedBarcodes($of_number_search, $full_barcode_search, $piece_name_search, $category_search, $order_str_search, $size_search, $date_from, $date_to);
+$barcodes = getSearchedBarcodes($of_number_search, $full_barcode_search, $piece_name_search, $category_search, $order_str_search, $size_search, $date_to, $page, $items_per_page);
+$total_barcodes = getTotalSearchedBarcodes($of_number_search, $full_barcode_search, $piece_name_search, $category_search, $order_str_search, $size_search, $date_to);
 $total_pages = ceil($total_barcodes / $items_per_page);
 
 $status_options = getStatusOptions();
