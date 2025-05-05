@@ -21,6 +21,7 @@ if (!$is_localhost && !in_array($client_ip, $allowed_ips)) {
     <html lang="en">
     <head>
         <meta charset="UTF-8">
+        <link rel="icon" href="assets\stop.ico" type="image/png">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Access Denied</title>
         <style>
@@ -40,7 +41,10 @@ if (!$is_localhost && !in_array($client_ip, $allowed_ips)) {
                 background: linear-gradient(to bottom right, #eee, #aaa);
             }
             h1 {
-                margin: 40px 0 20px;
+                text-align: center;
+                margin: 20px 0 20px;
+            }
+            .linkss a{
             }
             .lock {
                 border-radius: 5px;
@@ -111,8 +115,18 @@ if (!$is_localhost && !in_array($client_ip, $allowed_ips)) {
         <div class="lock"><i class="fa-solid fa-lock"></i></div>
         
         <div class="message">
-            <h1>Access to this page is restricted</h1>
-            <p>You are not authorized to access this feature, contact the developer <br> +212 663655585</p>
+            <h1 >Oops! Access to this page is restricted</h1>
+            <p>You are not authorized to access this page. If you want full access to all services, contact the developer.
+            <br>
+            <br>
+            You are authorized to access the following pages: <br>
+
+            <div class="linkss">
+                <a href="scantoday.php">scanned today</a> <br>
+                <a href="production.php">production</a> <br>
+                <a href="scanner_system_download.php">scanner system download</a>
+            </div>
+
         </div>
     </body>
     </html>

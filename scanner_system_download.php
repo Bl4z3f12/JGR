@@ -132,7 +132,7 @@ requireLogin('login.php');
                                 <li>[...] and more</li>
                             </ul>
                             <div class="mt-3">
-                                <a href="#" id="down" class="btn btn-primary w-100 mb-2">
+                                <a href="downloads/tst.txt" download id="down" class="btn btn-primary w-100 mb-2">
                                     <i class="fas fa-download me-2"></i> Download (64-bit)
                                 </a>
                             </div>
@@ -290,20 +290,6 @@ requireLogin('login.php');
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Handle download button clicks
-            const downloadButtons = document.querySelectorAll('.btn-download');
-            downloadButtons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    alert('Download starting... Please wait.');
-                    // In a real application, this would redirect to the download file
-                    // window.location.href = this.href;
-                });
-            });
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
             // Mobile detection and button modification
             function isMobile() {
                 return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -320,15 +306,6 @@ requireLogin('login.php');
                     button.classList.remove('btn-primary');
                 });
             }
-
-            // Existing download button click handling (non-functional in original code)
-            const downloadButtons = document.querySelectorAll('.btn-download');
-            downloadButtons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    alert('Download starting... Please wait.');
-                });
-            });
         });
     </script>
     <script>

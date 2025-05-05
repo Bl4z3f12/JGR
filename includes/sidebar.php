@@ -42,7 +42,7 @@
                     This program is under development and improvement, the final version will be released soon
                       <br><br>
 
-                        Made with <i class="fa-solid fa-heart"></i>
+                        Made with <i title="love", class="fa-solid fa-heart"></i>
                     </div>
                 </div>
             </div>
@@ -93,7 +93,7 @@
                     This program is under development and improvement, the final version will be released soon
                       <br><br>
 
-                        Made with <i class="fa-solid fa-heart"></i>
+                        Made with <i title="love", class="fa-solid fa-heart"></i>
                     </div>
 
                   </div>
