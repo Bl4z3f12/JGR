@@ -2,8 +2,6 @@
 $current_view = 'scantoday.php'; // Add this line
 require_once 'auth_functions.php';
 
-// Redirect to login page if not logged in
-requireLogin('login.php');
 
 // Get the requested tab
 $requested_tab = $_GET['tab'] ?? 'summary';
@@ -133,74 +131,56 @@ require "scantoday_settings.php";
             <div class="d-flex flex-nowrap align-items-end overflow-auto gap-2">
                 <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
                     <label for="of_number" class="form-label">OF Number</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fa-solid fa-hashtag"></i></span>
-                        <input type="number" class="form-control" id="of_number" name="of_number" placeholder="Enter OF number" value="">
-                    </div>
+                    <input type="text" class="form-control" id="of_number" name="of_number" value="">
                 </div>
                 
                 <div class="flex-grow-1 flex-shrink-1" style="min-width: 80px;">
                     <label for="size" class="form-label">Size</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fa-solid fa-ruler"></i></span>
-                        <input type="number" class="form-control" id="size" name="size" placeholder="Enter size" value="">
-                    </div>     
+                    <input type="text" class="form-control" id="size" name="size" value="">        
                 </div>
                 
                 <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
                     <label for="category" class="form-label">Category</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fa-solid fa-tags"></i></span>
-                        <select class="form-select" id="category" name="category">
-                            <option value="select" selected>Category</option>
-                            <option value="R">R</option>
-                            <option value="C">C</option>
-                            <option value="L">L</option>
-                            <option value="LL">LL</option>
-                            <option value="CC">CC</option>
-                            <option value="N">N</option>
-                        </select>
-                    </div>
+                    <select class="form-select" id="category" name="category">
+                        <option value="select" selected>All Categories</option>
+                        <option value="R">R</option>
+                        <option value="C">C</option>
+                        <option value="L">L</option>
+                        <option value="LL">LL</option>
+                        <option value="CC">CC</option>
+                        <option value="N">N</option>
+                    </select>
                 </div>
                 
                 <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
                     <label for="p_name" class="form-label">Piece Name</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-puzzle-piece"></i></span>
-                        <select class="form-select" id="p_name" name="p_name">
-                            <option value="select" selected>Piece Name</option>
-                            <option value="P">P</option>
-                            <option value="V">V</option>
-                            <option value="G">G</option>
-                            <option value="M">M</option>
-                        </select>
-                    </div>
+                    <select class="form-select" id="p_name" name="p_name">
+                        <option value="select" selected>All Pieces</option>
+                        <option value="P">P</option>
+                        <option value="V">V</option>
+                        <option value="G">G</option>
+                        <option value="M">M</option>
+                    </select>
                 </div>
                 
                 <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
                     <label for="stage" class="form-label">Stage</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-tasks"></i></span>
-                        <select class="form-select" id="stage" name="stage">
-                            <option value="select" selected>All Stages</option>
-                            <option value="Coupe">Coupe</option>
-                            <option value="V1">V1</option>
-                            <option value="V2">V2</option>
-                            <option value="V3">V3</option>
-                            <option value="Pantalon">Pantalon</option>
-                            <option value="Repassage">Repassage</option>
-                            <option value="P_fini">P_fini</option>
-                            <option value="Exported">Exported</option>
-                        </select>
-                    </div>
+                    <select class="form-select" id="stage" name="stage">
+                        <option value="select" selected>All Stages</option>
+                        <option value="Coupe">Coupe</option>
+                        <option value="V1">V1</option>
+                        <option value="V2">V2</option>
+                        <option value="V3">V3</option>
+                        <option value="Pantalon">Pantalon</option>
+                        <option value="Repassage">Repassage</option>
+                        <option value="P_ fini">P_ fini</option>
+                        <option value="Exported">Exported</option>
+                    </select>
                 </div>
                 
                 <div class="flex-grow-1 flex-shrink-1" style="min-width: 120px;">
                     <label for="date" class="form-label">Date</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-calendar"></i></span>
-                        <input type="date" class="form-control" id="date" name="date" value="">
-                    </div>
+                    <input type="date" class="form-control" id="date" name="date" value="">
                 </div>
                 
                 <div class="flex-shrink-0">
@@ -212,7 +192,6 @@ require "scantoday_settings.php";
             </div>
         </form>
     </div>
-  
 
   
 </div>
@@ -221,7 +200,7 @@ require "scantoday_settings.php";
         <!-- Stage Summary -->
 <!-- Stage Summary - Improved Responsive Design -->
 
-<div class="card">
+    <div class="card">
     <div class="card-header">
         <h5>Stage Summary</h5>
     </div>
@@ -242,22 +221,7 @@ require "scantoday_settings.php";
         </div>
     </div>
 </div>
-<div class="export-button-container mb-3">
-    <form method="GET" action="export_excel.php">
-        <!-- Hidden inputs to pass all current filter values -->
-        <input type="hidden" name="export" value="excel">
-        <input type="hidden" name="of_number" value="<?php echo htmlspecialchars($of_number ?? ''); ?>">
-        <input type="hidden" name="size" value="<?php echo htmlspecialchars($size ?? ''); ?>">
-        <input type="hidden" name="category" value="<?php echo htmlspecialchars($category ?? ''); ?>">
-        <input type="hidden" name="p_name" value="<?php echo htmlspecialchars($p_name ?? ''); ?>">
-        <input type="hidden" name="stage" value="<?php echo htmlspecialchars($stage ?? ''); ?>">
-        <input type="hidden" name="date" value="<?php echo htmlspecialchars($date ?? date('Y-m-d')); ?>">
-        
-        <button type="submit" class="btn btn-success" <?php echo empty($grouped_results) ? 'disabled' : ''; ?>>
-            <i class="fas fa-file-excel"></i> Export to Excel
-        </button>
-    </form>
-</div>
+
         <!-- Results Table -->
         <div class="table-responsive">
             <table class="table table-striped table-hover">
@@ -320,6 +284,22 @@ require "scantoday_settings.php";
                     <?php endif; ?>
                 </tbody>
             </table>
+<div class="export-button-container">
+    <form method="GET" action="export_excel.php">
+        <!-- Hidden inputs to pass all current filter values -->
+        <input type="hidden" name="export" value="excel">
+        <input type="hidden" name="of_number" value="<?php echo htmlspecialchars($of_number ?? ''); ?>">
+        <input type="hidden" name="size" value="<?php echo htmlspecialchars($size ?? ''); ?>">
+        <input type="hidden" name="category" value="<?php echo htmlspecialchars($category ?? ''); ?>">
+        <input type="hidden" name="p_name" value="<?php echo htmlspecialchars($p_name ?? ''); ?>">
+        <input type="hidden" name="stage" value="<?php echo htmlspecialchars($stage ?? ''); ?>">
+        <input type="hidden" name="date" value="<?php echo htmlspecialchars($date ?? date('Y-m-d')); ?>">
+        
+        <button type="submit" class="btn btn-success">
+            <i class="fas fa-file-excel"></i> Export to Excel
+        </button>
+    </form>
+</div>
         </div>
     <?php endif; ?>
                     

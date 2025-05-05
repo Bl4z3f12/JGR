@@ -6,7 +6,7 @@ require_once 'auth_functions.php';
 requireLogin('login.php');
 
 // Enhanced IP detection
-$allowed_ips = ['127.0.0.1', '192.168.1.130', '::1', 'NEW_IP_HERE'];
+$allowed_ips = ['127.0.0.1', '192.168.1.130', '::1', '192.168.1.14' ,'NEW_IP_HERE'];
 $client_ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
 $client_ip = trim(explode(',', $client_ip)[0]);
 $is_localhost = in_array($client_ip, ['127.0.0.1', '::1']) || 
