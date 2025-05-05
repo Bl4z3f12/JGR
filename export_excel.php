@@ -51,6 +51,8 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
     $stage = $_GET['stage'] ?? '';
     $date = $_GET['date'] ?? date("Y-m-d");
 
+    // Instead of querying all records, we should retrieve only those visible in the table
+    // This follows the same logic as in scantoday.php to group and display data
     $query = "SELECT 
                 b.of_number, 
                 b.size, 
@@ -127,12 +129,60 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
     $stmt->execute($params);
     $results = $stmt->fetchAll();
 
+    // Process the results to match the table view (grouped by OF, size, category, piece_name)
+    $grouped_results = [];
+    
+    foreach ($results as $row) {
+        $key = $row['of_number'] . '_' . $row['size'] . '_' . $row['category'] . '_' . $row['p_name'];
+        
+        if (!isset($grouped_results[$key])) {
+            $grouped_results[$key] = [
+                'of_number' => $row['of_number'],
+                'size' => $row['size'],
+                'category' => $row['category'],
+                'p_name' => $row['p_name'],
+                'chef' => $row['chef'],
+                'stage' => $row['stage'],
+                'total_count' => $row['total_count'],
+                'total_stage_quantity' => $row['total_stage_quantity'] ?? 0,
+                'total_main_quantity' => $row['total_main_quantity'] ?? 0,
+                'solped_client' => $row['solped_client'] ?? '',
+                'pedido_client' => $row['pedido_client'] ?? '',
+                'color_tissus' => $row['color_tissus'] ?? '',
+                'principale_quantity' => $row['principale_quantity'] ?? 0,
+                'quantity_coupe' => $row['quantity_coupe'] ?? 0,
+                'manque' => $row['manque'] ?? 0,
+                'suv_plus' => $row['suv_plus'] ?? 0,
+                'latest_update' => $row['latest_update'] ?? ''
+            ];
+        } else {
+            // Add stage if not already included
+            if (!str_contains($grouped_results[$key]['stage'], $row['stage'])) {
+                $grouped_results[$key]['stage'] .= ', ' . $row['stage'];
+            }
+            
+            // Increment counts
+            $grouped_results[$key]['total_count'] += $row['total_count'];
+            
+            // Keep latest update date
+            if (!empty($row['latest_update'])) {
+                if (empty($grouped_results[$key]['latest_update']) || 
+                    strtotime($row['latest_update']) > strtotime($grouped_results[$key]['latest_update'])) {
+                    $grouped_results[$key]['latest_update'] = $row['latest_update'];
+                }
+            }
+        }
+    }
+    
+    // Convert back to indexed array for Excel export
+    $results_for_export = array_values($grouped_results);
+
     // Totals
     $total_items = 0;
     $total_stage_quantity = 0;
     $total_main_quantity = 0;
 
-    foreach ($results as $row) {
+    foreach ($results_for_export as $row) {
         $total_items += $row['total_count'];
         $total_stage_quantity += $row['total_stage_quantity'] ?? 0;
         $total_main_quantity += $row['total_main_quantity'] ?? 0;
@@ -151,11 +201,11 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
     $sheet = $spreadsheet->getActiveSheet();
     $sheet->setTitle('Export Data');
 
+    // Updated headers to match the table view
     $headers = [
-        'OF Number', 'Size', 'Category', 'Piece Name', 'Chef', 'Stage', 
-        'Total Count', 'Quantity Coupe', 'Principale Quantity', 
-        'SolPed Client', 'Pedido Client', 'Color Tissus', 
-        'Manque', 'Suv Plus', 'Latest Update'
+        'OF Number', 'Size', 'Category', 'Piece Name', 'Chef', 'Total Stage Quantity', 
+        'Total Main Quantity', 'Stages', 'Total Count', 'Solped Client', 'Pedido Client', 
+        'Color Tissus', 'Main Qty', 'Qty Coupe', 'Manque', 'Suv Plus', 'Latest Update'
     ];
 
     $headerStyle = [
@@ -184,27 +234,29 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
         $sheet->setCellValue($col . '1', $header);
         $sheet->getColumnDimension($col)->setAutoSize(true);
     }
-    $sheet->getStyle('A1:O1')->applyFromArray($headerStyle);
+    $sheet->getStyle('A1:Q1')->applyFromArray($headerStyle);
 
     $row = 2;
-    foreach ($results as $data) {
+    foreach ($results_for_export as $data) {
         $sheet->setCellValue('A' . $row, $data['of_number'] ?? '');
         $sheet->setCellValue('B' . $row, $data['size'] ?? '');
         $sheet->setCellValue('C' . $row, $data['category'] ?? '');
         $sheet->setCellValue('D' . $row, $data['p_name'] ?? '');
         $sheet->setCellValue('E' . $row, $data['chef'] ?? '');
-        $sheet->setCellValue('F' . $row, $data['stage'] ?? '');
-        $sheet->setCellValue('G' . $row, $data['total_count'] ?? 0);
-        $sheet->setCellValue('H' . $row, $data['total_stage_quantity'] ?? 0);
-        $sheet->setCellValue('I' . $row, $data['total_main_quantity'] ?? 0);
+        $sheet->setCellValue('F' . $row, $data['total_stage_quantity'] ?? 0);
+        $sheet->setCellValue('G' . $row, $data['total_main_quantity'] ?? 0);
+        $sheet->setCellValue('H' . $row, $data['stage'] ?? '');
+        $sheet->setCellValue('I' . $row, $data['total_count'] ?? 0);
         $sheet->setCellValue('J' . $row, $data['solped_client'] ?? '');
         $sheet->setCellValue('K' . $row, $data['pedido_client'] ?? '');
         $sheet->setCellValue('L' . $row, $data['color_tissus'] ?? '');
-        $sheet->setCellValue('M' . $row, $data['manque'] ?? 0);
-        $sheet->setCellValue('N' . $row, $data['suv_plus'] ?? 0);
-        $sheet->setCellValue('O' . $row, $data['latest_update'] ?? '');
+        $sheet->setCellValue('M' . $row, $data['principale_quantity'] ?? 0);
+        $sheet->setCellValue('N' . $row, $data['quantity_coupe'] ?? 0);
+        $sheet->setCellValue('O' . $row, $data['manque'] ?? 0);
+        $sheet->setCellValue('P' . $row, $data['suv_plus'] ?? 0);
+        $sheet->setCellValue('Q' . $row, $data['latest_update'] ?? '');
 
-        $sheet->getStyle('A' . $row . ':O' . $row)->applyFromArray([
+        $sheet->getStyle('A' . $row . ':Q' . $row)->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => Border::BORDER_THIN,
@@ -218,12 +270,13 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
 
     $totalRow = $row;
     $sheet->setCellValue('A' . $totalRow, 'TOTALS');
-    $sheet->mergeCells('A' . $totalRow . ':F' . $totalRow);
-    $sheet->setCellValue('G' . $totalRow, $total_items);
-    $sheet->setCellValue('H' . $totalRow, $total_stage_quantity);
-    $sheet->setCellValue('I' . $totalRow, $total_main_quantity);
+    $sheet->mergeCells('A' . $totalRow . ':E' . $totalRow);
+    $sheet->setCellValue('F' . $totalRow, $total_stage_quantity);
+    $sheet->setCellValue('G' . $totalRow, $total_main_quantity);
+    $sheet->mergeCells('H' . $totalRow . ':H' . $totalRow);
+    $sheet->setCellValue('I' . $totalRow, $total_items);
 
-    $sheet->getStyle('A' . $totalRow . ':O' . $totalRow)->applyFromArray([
+    $sheet->getStyle('A' . $totalRow . ':Q' . $totalRow)->applyFromArray([
         'font' => [
             'bold' => true,
         ],
@@ -242,7 +295,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
         ],
     ]);
 
-    $sheet->getStyle('G' . $totalRow . ':I' . $totalRow)->getNumberFormat()->setFormatCode('#,##0');
+    $sheet->getStyle('F' . $totalRow . ':I' . $totalRow)->getNumberFormat()->setFormatCode('#,##0');
 
     $writer = new Xlsx($spreadsheet);
     $writer->save($filepath);
@@ -295,7 +348,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
         <p>
             <strong>Filename:</strong> ' . htmlspecialchars($filename) . '<br>
             <strong>Path:</strong> ' . htmlspecialchars($filepath) . '<br>
-            <strong>Records:</strong> ' . count($results) . '
+            <strong>Records:</strong> ' . count($results_for_export) . '
         </p>
         
         <p>
