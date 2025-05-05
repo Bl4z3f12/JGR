@@ -167,94 +167,117 @@ require_once 'settings.php';
                 <?php endif; ?>
                 
                 <!-- Search Form -->
-
                 <div class="card-body">
-                    <form method="GET" action="barcode_settings.php" class="mb-4">
-                        <div class="row g-4">
-                            <!-- OF Number Input with # symbol -->
-                            <div class="class= col-lg-2 col-md-4 col-sm-6">
-                                <label for="of_number_search" class="input-label">OF Number</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="fa-solid fa-hashtag"></i>
-                                    </span>
-                                    <input type="number" class="form-control" id="of_number_search" name="of_number_search" placeholder="Enter OF number">
-                                </div>
-                            </div>
-                            
-                            <!-- Size Input with pencil symbol -->
-                            <div class="class= col-lg-2 col-md-4 col-sm-6">
-                                <label for="size_search" class="input-label">Size</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                    <i class="fa-solid fa-ruler"></i>
-                                    </span>
-                                    <input type="number" class="form-control" id="size_search" name="size_search" placeholder="Enter size">
-                                </div>
-                            </div>
-                            
-                            <!-- Category with tag symbol -->
-                            <div class="class= col-lg-2 col-md-4 col-sm-6">
-                                <label for="category_search" class="input-label">Category</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                    <i class="fa-solid fa-tags"></i>
-                                    </span>
-                                    <select class="form-select" id="category_search" name="category_search">
-                                        <option value="">Category</option>
-                                        <option value="R">R</option>
-                                        <option value="C">C</option>
-                                        <option value="L">L</option>
-                                        <option value="LL">LL</option>
-                                        <option value="CC">CC</option>
-                                        <option value="N">N</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <!-- Piece Name with puzzle piece symbol -->
-                            <div class="class= col-lg-2 col-md-4 col-sm-6">
-                                <label for="piece_name_search" class="input-label">Piece Name</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                    <i class="fa-solid fa-puzzle-piece"></i>
-                                    </span>
-                                    <select class="form-select" id="piece_name_search" name="piece_name_search">
-                                        <option value="">Piece Name</option>
-                                        <option value="P">P</option>
-                                        <option value="V">V</option>
-                                        <option value="G">G</option>
-                                        <option value="M">M</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <!-- Order Input -->
-                            <div class="class= col-lg-2 col-md-4 col-sm-6">
-                                <label for="order_str_search" class="input-label">Order</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="fas fa-sort"></i>
-                                    </span>
-                                    <input type="text" class="form-control" id="order_str_search" name="order_str_search" placeholder="Enter order">
-                                </div>
-                            </div>
-                            
-                            <!-- Buttons -->
-                            <div class="col-lg-2 col-md-4 col-sm-6 d-flex align-items-end">
-                                <div class="search-buttons w-100">
-                                    <button type="submit" class="btn btn-primary flex-grow-1">
-                                        <i class="fas fa-search"></i> Search
-                                    </button>
-                                    <a href="barcode_settings.php" class="btn btn-secondary flex-grow-1">
-                                        <i class="fas fa-broom"></i> Clear
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
+    <form method="GET" action="barcode_settings.php" class="mb-4">
+        <div class="row g-4">
+            <!-- OF Number Input with # symbol -->
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <label for="of_number_search" class="form-label">OF Number</label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fa-solid fa-hashtag"></i>
+                    </span>
+                    <input type="number" class="form-control" id="of_number_search" name="of_number_search" placeholder="Enter OF number">
                 </div>
-                                <!-- Barcodes Table -->
+            </div>
+
+            <!-- Size Input with ruler symbol -->
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <label for="size_search" class="form-label">Size</label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fa-solid fa-ruler"></i>
+                    </span>
+                    <input type="number" class="form-control" id="size_search" name="size_search" placeholder="Enter size">
+                </div>
+            </div>
+
+            <!-- Category with tag symbol -->
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <label for="category_search" class="form-label">Category</label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fa-solid fa-tags"></i>
+                    </span>
+                    <select class="form-select" id="category_search" name="category_search">
+                        <option value="">Category</option>
+                        <option value="R">R</option>
+                        <option value="C">C</option>
+                        <option value="L">L</option>
+                        <option value="LL">LL</option>
+                        <option value="CC">CC</option>
+                        <option value="N">N</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Piece Name with puzzle piece symbol -->
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <label for="piece_name_search" class="form-label">Piece Name</label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fa-solid fa-puzzle-piece"></i>
+                    </span>
+                    <select class="form-select" id="piece_name_search" name="piece_name_search">
+                        <option value="">Piece Name</option>
+                        <option value="P">P</option>
+                        <option value="V">V</option>
+                        <option value="G">G</option>
+                        <option value="M">M</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Order Input -->
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <label for="order_str_search" class="form-label">Order</label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fas fa-sort"></i>
+                    </span>
+                    <input type="text" class="form-control" id="order_str_search" name="order_str_search" placeholder="Enter order">
+                </div>
+            </div>
+
+            <!-- Date Filters (Start Date) -->
+            <div class="col-lg-3 col-md-6 col-sm-6">
+                <label for="date_from" class="form-label">From Date</label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fas fa-calendar-alt"></i>
+                    </span>
+                    <input type="datetime-local" class="form-control" id="date_from" name="date_from">
+                </div>
+            </div>
+
+            <!-- Date Filters (End Date) -->
+            <div class="col-lg-3 col-md-6 col-sm-6">
+                <label for="date_to" class="form-label">To Date</label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fas fa-calendar-alt"></i>
+                    </span>
+                    <input type="datetime-local" class="form-control" id="date_to" name="date_to">
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="col-lg-3 col-md-6 col-sm-12 d-flex align-items-end">
+                <div class="d-flex justify-content-between gap-2 w-100">
+                    <button type="submit" class="btn btn-primary w-50">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                    <a href="barcode_settings.php" class="btn btn-secondary w-50">
+                        <i class="fas fa-broom"></i> Clear
+                    </a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+                         <!-- Barcodes Table -->
                 <div class="card">
                     <div class="card-body">
                         <div class="mb-3">
