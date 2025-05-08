@@ -11,7 +11,7 @@ $order_str_search = $_GET['order_str_search'] ?? '';
 $size_search = $_GET['size_search'] ?? '';
 $date_to = $_GET['date_to'] ?? '';
 $page = $_GET['page'] ?? 1;
-$items_per_page = 5000;
+$items_per_page = 200;
 
 // Database connection function
 function connectDB() {

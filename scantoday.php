@@ -2,6 +2,7 @@
 $current_view = 'scantoday.php'; // Add this line
 require_once 'auth_functions.php';
 
+requireLogin('login.php');
 
 // Get the requested tab
 $requested_tab = $_GET['tab'] ?? 'summary';

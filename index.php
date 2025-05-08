@@ -2,19 +2,15 @@
 $current_view = 'dashboard';
 require_once 'auth_functions.php';
 
-// Redirect to login page if not logged in
 requireLogin('login.php');
 
-// Enhanced IP detection
-$allowed_ips = ['127.0.0.1', '192.168.1.130', '::1', '192.168.1.14' ,'NEW_IP_HERE'];
+$allowed_ips = ['127.0.0.1', '192.168.1.130', '::1', '192.168.0.120' ,'NEW_IP_HERE'];
 $client_ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
 $client_ip = trim(explode(',', $client_ip)[0]);
 $is_localhost = in_array($client_ip, ['127.0.0.1', '::1']) || 
                stripos($_SERVER['HTTP_HOST'], 'localhost') !== false;
 
-// Check authorization
 if (!$is_localhost && !in_array($client_ip, $allowed_ips)) {
-    // Show authorization message and stop execution
     die('
     <!DOCTYPE html>
     <html lang="en">
@@ -106,8 +102,6 @@ if (!$is_localhost && !in_array($client_ip, $allowed_ips)) {
                     transform: translateY(0px);
                 }
             }
-            
-
         </style>
     </head>
     <body>
@@ -132,7 +126,6 @@ if (!$is_localhost && !in_array($client_ip, $allowed_ips)) {
     ');
 }
 
-// Import the PHP logic file
 require_once 'barcode_system.php';
 $items_per_page = 200;
 
@@ -141,7 +134,6 @@ $items_per_page = 200;
 <html lang="en">
 <head>
     <?php include 'includes/head.php'; ?>
-    <!-- Add Bootstrap CSS if not already included in head.php -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <style>
@@ -173,8 +165,6 @@ $items_per_page = 200;
         font-size: 14px;
         border-radius: 4px;
     }
-    
-    /* PDF Modal Styles */
     #pdf-modal {
         display: none;
         position: fixed;
@@ -186,7 +176,6 @@ $items_per_page = 200;
         overflow: auto;
         background-color: rgba(0,0,0,0.4);
     }
-    
     #pdf-modal .modal-content {
         background-color: #fefefe;
         margin: 2% auto;
@@ -198,73 +187,61 @@ $items_per_page = 200;
         overflow-y: auto;
         border-radius: 8px;
     }
-    
     .pdf-card {
         transition: transform 0.2s;
         height: 100%;
     }
-    
     .pdf-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 10px 20px rgba(0,0,0,0.1);
     }
-    
     .pdf-icon {
         font-size: 3rem;
         color: #dc3545;
     }
-    
     .row-pdf {
         display: flex;
         flex-wrap: wrap;
         margin-right: -15px;
         margin-left: -15px;
     }
-    
     .pdf-col {
         flex: 0 0 20%;
         max-width: 20%;
         padding: 0 15px;
         margin-bottom: 30px;
     }
-    
     @media (max-width: 1200px) {
         .pdf-col {
             flex: 0 0 25%;
             max-width: 25%;
         }
     }
-    
     @media (max-width: 992px) {
         .pdf-col {
             flex: 0 0 33.333333%;
             max-width: 33.333333%;
         }
     }
-    
     @media (max-width: 768px) {
         .pdf-col {
             flex: 0 0 50%;
             max-width: 50%;
         }
     }
-    
     @media (max-width: 576px) {
         .pdf-col {
             flex: 0 0 100%;
             max-width: 100%;
         }
     }
-    
     .filter-buttons {
         display: flex;
         gap: 10px;
     }
-    
     .filter-buttons .btn {
         flex: 1;
     }
-    
     #pdf-modal-loader {
         text-align: center;
         padding: 40px;
@@ -301,14 +278,12 @@ $items_per_page = 200;
                         <span><i class="fa-solid fa-folder-open"></i></span> Open Path
                     </a>
                 </div>
-            </div>            
-
+            </div>  
 
             <form id="filter-form" class="filter-form card p-3 shadow-sm" action="" method="GET">
                 <input type="hidden" name="view" value="<?php echo $current_view; ?>">
                 <h5 class="mb-3"><i class="fa-solid fa-arrow-up-wide-short"></i> Filter Options</h5>
                 <div class="row mb-3 align-items-end">
-                    <!-- OF Number -->
                     <div class="col-md-2">
                         <label for="filter-of" class="form-label mb-2">OF Number</label>
                         <div class="input-group">
@@ -317,7 +292,6 @@ $items_per_page = 200;
                                 value="<?php echo htmlspecialchars($filter_of_number); ?>" placeholder="Enter OF number">
                         </div>
                     </div>
-                    <!-- Size -->
                     <div class="col-md-2">
                         <label for="filter-size" class="form-label mb-2">Size</label>
                         <div class="input-group">
@@ -326,9 +300,6 @@ $items_per_page = 200;
                                 value="<?php echo htmlspecialchars($filter_size); ?>" placeholder="Enter size">
                         </div>
                     </div>
-                    <!-- Date Filter -->
-               
-                    <!-- Category -->
                     <div class="col-md-2">
                         <label for="filter-category" class="form-label mb-2">Category</label>
 
@@ -345,7 +316,6 @@ $items_per_page = 200;
                             </select>
                         </div>
                     </div>
-                    <!-- Piece Name -->
                     <div class="col-md-2">
                         <label for="filter-piece-name" class="form-label mb-2">Piece Name</label>
                         <div class="input-group">
@@ -367,11 +337,10 @@ $items_per_page = 200;
                                 value="<?php echo htmlspecialchars($filter_date ?? ''); ?>" placeholder="Select date">
                         </div>
                     </div>
-                    <!-- Buttons -->
                     <div class="col-md-2">
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fa-solid fa-filter me-1"></i> Apply Filters
+                                <i class="fa-solid fa-filter me-1"></i> Filter
                             </button>
                             <button type="button" id="clear-filters" class="btn btn-outline-secondary">
                                 <i class="fa-solid fa-broom"></i> Clear
@@ -380,10 +349,8 @@ $items_per_page = 200;
                     </div>
                 </div>
             </form>
+        <div class="container-fluid py-3">
 
-
-            <div class="container-fluid py-3">
-        <!-- Desktop version (visible only on md screens and up) -->
         <div class="d-none d-md-block">
             <table class="table table-striped table-hover">
                 <thead class="table-light">
@@ -393,9 +360,9 @@ $items_per_page = 200;
                         <th>Category</th>
                         <th>Piece Name</th>
                         <th>Order</th>
+                        <th>Status</th>
                         <th>Stage</th>
                         <th>Chef</th>
-                        <th>Status</th>
                         <th>Full Barcode Name</th>
                         <th>Last Update</th>
                     </tr>
@@ -413,8 +380,7 @@ $items_per_page = 200;
                             <td><?php echo htmlspecialchars($barcode['category']); ?></td>
                             <td><?php echo htmlspecialchars($barcode['piece_name']); ?></td>
                             <td><?php echo htmlspecialchars($barcode['order_str']); ?></td>
-                            <td><?php echo htmlspecialchars($barcode['stage']); ?></td>
-                            <td><?php echo htmlspecialchars($barcode['chef']); ?></td>
+
                             <td>
                                 <?php 
                                 $statusClass = '';
@@ -446,6 +412,10 @@ $items_per_page = 200;
                                     <?php echo htmlspecialchars($barcode['status']); ?>
                                 </span>
                             </td>
+
+                            <td><?php echo htmlspecialchars($barcode['stage']); ?></td>
+                            <td><?php echo htmlspecialchars($barcode['chef']); ?></td>
+
                             <td><?php echo htmlspecialchars($barcode['full_barcode_name']); ?></td>
                             <td><?php echo htmlspecialchars($barcode['last_update']); ?></td>
                         </tr>
@@ -455,7 +425,6 @@ $items_per_page = 200;
             </table>
         </div>
         
-        <!-- Mobile version (visible only on screens smaller than md) -->
         <div class="d-md-none">
             <?php if (empty($barcodes)): ?>
                 <div class="alert alert-info text-center">No barcodes found</div>
@@ -544,7 +513,6 @@ $items_per_page = 200;
                 <?php endif; ?>
                 
                 <?php
-                // Display pagination buttons
                 $start_page = max(1, min($page - 1, $total_pages - 2));
                 $end_page = min($total_pages, max(3, $page + 1));
                 
@@ -565,10 +533,8 @@ $items_per_page = 200;
         </div>
     </div>
     
-    <!-- Create Barcode Modal -->
     <div class="modal <?php echo $show_modal ? 'show' : ''; ?>" id="barcode-modal">
         <div class="modal-content">
-            <!-- Add modal header with title -->
             <div class="modal-header">
                 <h5 class="modal-title">Create New Barcodes</h5>
                 <button type="button" class="btn-close" onclick="document.getElementById('barcode-modal').classList.remove('show')"></button>
@@ -581,7 +547,15 @@ $items_per_page = 200;
                 <div class="row mb-3">
                     <label for="barcode-prefix" class="col-sm-3 col-form-label">OF_ number</label>
                     <div class="col-sm-9">
-                        <input class="form-control ofinput" type="number" id="barcode-prefix" name="barcode_prefix" placeholder="Enter OF number" required>
+                    <input
+                        class="form-control ofinput"
+                        type="number"
+                        id="barcode-prefix"
+                        name="barcode_prefix"
+                        placeholder="Enter OF number"
+                        required
+                        autofocus
+                        >
                     </div>
                 </div>
                 
@@ -681,10 +655,13 @@ $items_per_page = 200;
 
                 <div class="row mb-3">
                     <div class="col-12 d-flex justify-content-center gap-2">
-                        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-qrcode"></i> Generate Barcodes</button>
+                        <button type="submit" class="btn btn-primary" id="generate-button">
+                            <i class="fa-solid fa-qrcode"></i> Generate Barcodes
+                            <span class="spinner-border spinner-border-sm ms-2 d-none" id="generate-spinner" role="status" aria-hidden="true"></span>
+                        </button>
                         <button type="button" class="btn btn-outline-danger" onclick="document.getElementById('barcode-modal').classList.remove('show')">Cancel</button>
                     </div>
-                </div>    
+                </div>   
 
                 <div class="row mb-3">
                     <div class="col-12">
@@ -716,7 +693,6 @@ $items_per_page = 200;
         </div>
     </div>
     
-    <!-- PDF Modal -->
     <div id="pdf-modal">
         <div class="modal-content">
             <div class="modal-header d-flex justify-content-between align-items-center">
@@ -737,13 +713,11 @@ $items_per_page = 200;
     <?php include 'includes/footer.php'; ?>
     
     <?php 
-    // Output the random button JavaScript
     echo $random_button_script;
     ?>
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Lost barcode checkbox functionality
             const lostBarcodeCheckbox = document.getElementById('lost-barcode');
             const lostBarcodeCount = document.getElementById('lost-barcode-count');
             const checkbox2pcs = document.getElementById('generate-costume-2pcs');
@@ -751,7 +725,6 @@ $items_per_page = 200;
             const rangeFrom = document.getElementById('range-from');
             const rangeTo = document.getElementById('range-to');
             
-            // Handle lost barcode checkbox
             if (lostBarcodeCheckbox) {
                 lostBarcodeCheckbox.addEventListener('change', function() {
                     lostBarcodeCount.disabled = !this.checked;
@@ -762,7 +735,6 @@ $items_per_page = 200;
                 });
             }
             
-            // Handle costume checkbox interactions
             if (checkbox2pcs && checkbox3pcs) {
                 checkbox2pcs.addEventListener('change', function() {
                     checkbox3pcs.disabled = this.checked;
@@ -773,7 +745,6 @@ $items_per_page = 200;
                 });
             }
             
-            // Handle clear filters button
             const clearFiltersBtn = document.getElementById('clear-filters');
             if (clearFiltersBtn) {
                 clearFiltersBtn.addEventListener('click', function() {
@@ -786,22 +757,28 @@ $items_per_page = 200;
                 });
             }
             
-            // Get the form element
             const barcodeForm = document.querySelector('#barcode-modal form');
+            const generateButton = document.getElementById('generate-button');
+            const generateSpinner = document.getElementById('generate-spinner');
             
-            // Modify form submission to prevent default form clearing
             if (barcodeForm) {
                 barcodeForm.addEventListener('submit', function(e) {
-                    // Store the current form values in session storage
+                    // Show the spinner when form is submitted
+                    if (generateSpinner) {
+                        generateSpinner.classList.remove('d-none');
+                    }
+                    
+                    // Disable the button to prevent multiple submissions
+                    if (generateButton) {
+                        generateButton.setAttribute('disabled', 'disabled');
+                    }
+                    
                     const formInputs = this.querySelectorAll('input:not([type="hidden"]), select');
                     formInputs.forEach(input => {
                         sessionStorage.setItem(input.name, input.value);
                     });
-                    
-                    // The form will continue with normal submission
                 });
                 
-                // Check if there are stored values to restore
                 if (window.sessionStorage) {
                     const formInputs = barcodeForm.querySelectorAll('input:not([type="hidden"]), select');
                     formInputs.forEach(input => {
@@ -812,8 +789,7 @@ $items_per_page = 200;
                     });
                 }
             }
-            
-            // PDF Modal functionality
+
             const openPathBtn = document.getElementById('open-path-btn');
             const pdfModal = document.getElementById('pdf-modal');
             
@@ -821,16 +797,13 @@ $items_per_page = 200;
                 openPathBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     
-                    // Show the modal
                     pdfModal.style.display = 'block';
                     
-                    // Load PDF content via AJAX
                     fetch('pdf.php')
                         .then(response => response.text())
                         .then(data => {
                             document.getElementById('pdf-modal-content').innerHTML = data;
                             
-                            // Initialize any events in the loaded content
                             initPdfModalEvents();
                         })
                         .catch(error => {
@@ -840,7 +813,6 @@ $items_per_page = 200;
                 });
             }
             
-            // Close the modal when clicking outside of it
             window.addEventListener('click', function(event) {
                 if (event.target === pdfModal) {
                     pdfModal.style.display = 'none';
@@ -848,9 +820,7 @@ $items_per_page = 200;
             });
         });
         
-        // Function to initialize events within the PDF modal
         function initPdfModalEvents() {
-            // Handle search form submission in the PDF modal
             const searchForm = document.getElementById('pdf-search-form');
             if (searchForm) {
                 searchForm.addEventListener('submit', function(e) {
@@ -859,7 +829,6 @@ $items_per_page = 200;
                     const formData = new FormData(this);
                     const searchParams = new URLSearchParams(formData);
                     
-                    // Show loader
                     document.getElementById('pdf-modal-content').innerHTML = `
                         <div id="pdf-modal-loader">
                             <div class="spinner-border text-primary" role="status">
@@ -869,7 +838,6 @@ $items_per_page = 200;
                         </div>
                     `;
                     
-                    // Fetch filtered results
                     fetch('pdf.php?' + searchParams.toString())
                         .then(response => response.text())
                         .then(data => {
@@ -882,12 +850,9 @@ $items_per_page = 200;
                         });
                 });
             }
-            
-            // Handle clear filter button
             const clearFilterBtn = document.getElementById('clear-pdf-filters');
             if (clearFilterBtn) {
                 clearFilterBtn.addEventListener('click', function() {
-                    // Reload the PDF content without filters
                     document.getElementById('pdf-modal-content').innerHTML = `
                         <div id="pdf-modal-loader">
                             <div class="spinner-border text-primary" role="status">
@@ -896,7 +861,6 @@ $items_per_page = 200;
                             <p class="mt-2">Loading PDF files...</p>
                         </div>
                     `;
-                    
                     fetch('pdf.php')
                         .then(response => response.text())
                         .then(data => {

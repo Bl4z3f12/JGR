@@ -512,7 +512,7 @@ requireLogin('login.php');
             <div class="col-md-6">
               <div class="version-card" data-version="repassage">
                 <div class="version-icon">
-                  <i class="fas fa-iron"></i>
+                  <i class="fa-solid fa-star"></i>
                 </div>
                 <div class="version-details">
                   <h6>REPASSAGE</h6>
@@ -524,10 +524,10 @@ requireLogin('login.php');
             <div class="col-md-6">
               <div class="version-card" data-version="p_fini">
                 <div class="version-icon">
-                  <i class="fas fa-check-circle"></i>
+                <i class="fa-solid fa-star"></i>
                 </div>
                 <div class="version-details">
-                  <h6>P_FINI</h6>
+                  <h6>P_ FINI</h6>
                   <span class="badge bg-info">v2.5.0</span>
                 </div>
               </div>
@@ -657,7 +657,30 @@ requireLogin('login.php');
     }
   });
 </script>
-
+<script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle "download button above" link click
+            document.querySelectorAll('.download-href').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetBtn = document.getElementById('down');
+                    
+                    if (targetBtn) {
+                        // Smooth scroll to the button
+                        targetBtn.scrollIntoView({ behavior: 'smooth', block: "center" });
+                        
+                        // Add flash effect
+                        targetBtn.classList.add('flash-effect');
+                        
+                        // Remove effect after animation completes
+                        setTimeout(() => {
+                            targetBtn.classList.remove('flash-effect');
+                        }, 3000); // Matches 3 iterations of 1s animation
+                    }
+                });
+            });
+        });
+    </script>
 
 
 

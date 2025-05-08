@@ -1,21 +1,16 @@
 <?php
-
 $current_view = 'barcode_settings.php';
 require_once 'auth_functions.php';
 
-// Redirect to login page if not logged in
 requireLogin('login.php');
 
-// Enhanced IP authorization check
 $allowed_ips = ['127.0.0.1', '192.168.1.130', '::1', '192.168.1.14' ,'NEW_IP_HERE'];
 $client_ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
 $client_ip = trim(explode(',', $client_ip)[0]);
 $is_localhost = in_array($client_ip, ['127.0.0.1', '::1']) || 
                stripos($_SERVER['HTTP_HOST'], 'localhost') !== false;
 
-               // Check authorization
 if (!$is_localhost && !in_array($client_ip, $allowed_ips)) {
-    // Show authorization message and stop execution
     die('
     <!DOCTYPE html>
     <html lang="en">
@@ -25,7 +20,6 @@ if (!$is_localhost && !in_array($client_ip, $allowed_ips)) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Access Denied</title>
         <style>
-              
             * {
                 position: relative;
                 margin: 0;
@@ -107,8 +101,6 @@ if (!$is_localhost && !in_array($client_ip, $allowed_ips)) {
                     transform: translateY(0px);
                 }
             }
-            
-
         </style>
     </head>
     <body>
@@ -133,8 +125,6 @@ if (!$is_localhost && !in_array($client_ip, $allowed_ips)) {
     ');
 }
 
-
-// Include PHP logic file
 require_once 'settings.php';
 ?>
 
@@ -166,133 +156,102 @@ require_once 'settings.php';
                     </div>
                 <?php endif; ?>
                 
-                <!-- Search Form -->
                 <div class="card-body">
-    <form method="GET" action="barcode_settings.php" class="mb-4">
-        <div class="row g-4">
-            <!-- OF Number Input with # symbol -->
-            <div class="col-lg-2 col-md-4 col-sm-6">
-                <label for="of_number_search" class="form-label">OF Number</label>
-                <div class="input-group">
-                    <span class="input-group-text">
-                        <i class="fa-solid fa-hashtag"></i>
-                    </span>
-                    <input type="text" class="form-control" id="of_number_search" name="of_number_search" 
-                           placeholder="Enter OF number" value="<?php echo htmlspecialchars($of_number_search); ?>">
+                    <form method="GET" action="barcode_settings.php" class="mb-4">
+                        <div class="row g-2">
+                            <div class="col">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-hashtag"></i>
+                                    </span>
+                                    <input type="number" class="form-control" id="of_number_search" name="of_number_search" 
+                                        placeholder="OF Number" value="<?php echo htmlspecialchars($of_number_search); ?>">
+                                </div>
+                            </div>
+
+                            <div class="col">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-ruler"></i>
+                                    </span>
+                                    <input type="number" class="form-control" id="size_search" name="size_search" 
+                                        placeholder="Size" value="<?php echo htmlspecialchars($size_search); ?>">
+                                </div>
+                            </div>
+
+                            <div class="col">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-tags"></i>
+                                    </span>
+                                    <select class="form-select" id="category_search" name="category_search">
+                                        <option value="">Category</option>
+                                        <option value="R" <?php echo $category_search === 'R' ? 'selected' : ''; ?>>R</option>
+                                        <option value="C" <?php echo $category_search === 'C' ? 'selected' : ''; ?>>C</option>
+                                        <option value="L" <?php echo $category_search === 'L' ? 'selected' : ''; ?>>L</option>
+                                        <option value="LL" <?php echo $category_search === 'LL' ? 'selected' : ''; ?>>LL</option>
+                                        <option value="CC" <?php echo $category_search === 'CC' ? 'selected' : ''; ?>>CC</option>
+                                        <option value="N" <?php echo $category_search === 'N' ? 'selected' : ''; ?>>N</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-puzzle-piece"></i>
+                                    </span>
+                                    <select class="form-select" id="piece_name_search" name="piece_name_search">
+                                        <option value="">Piece Name</option>
+                                        <option value="P" <?php echo $piece_name_search === 'P' ? 'selected' : ''; ?>>P</option>
+                                        <option value="V" <?php echo $piece_name_search === 'V' ? 'selected' : ''; ?>>V</option>
+                                        <option value="G" <?php echo $piece_name_search === 'G' ? 'selected' : ''; ?>>G</option>
+                                        <option value="M" <?php echo $piece_name_search === 'M' ? 'selected' : ''; ?>>M</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-sort"></i>
+                                    </span>
+                                    <input type="text" class="form-control" id="order_str_search" name="order_str_search" 
+                                        placeholder="Order" value="<?php echo htmlspecialchars($order_str_search); ?>">
+                                </div>
+                            </div>
+
+                            <div class="col">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </span>
+                                    <input type="date" class="form-control" id="date_to" name="date_to" 
+                                        value="<?php echo htmlspecialchars($date_to); ?>">
+                                </div>
+                            </div>
+
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-primary h-100">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                            </div>
+
+                            <div class="col-auto">
+                                <a href="barcode_settings.php" class="btn btn-secondary h-100">
+                                    <i class="fas fa-broom"></i> Clear
+                                </a>
+                            </div>
+                        </div>
+
+                        <?php if ($total_barcodes > 0): ?>
+                        <div class="mt-2">
+                            <p class="mb-0 small text-muted">Showing <?php echo min(($page - 1) * $items_per_page + 1, $total_barcodes); ?> to <?php echo min($page * $items_per_page, $total_barcodes); ?> of <?php echo $total_barcodes; ?> records</p>
+                        </div>
+                        <?php endif; ?>
+                    </form>
                 </div>
-            </div>
 
-            <!-- Full Barcode Search -->
-            <div class="col-lg-2 col-md-4 col-sm-6">
-                <label for="full_barcode_search" class="form-label">Full Barcode</label>
-                <div class="input-group">
-                    <span class="input-group-text">
-                        <i class="fa-solid fa-barcode"></i>
-                    </span>
-                    <input type="text" class="form-control" id="full_barcode_search" name="full_barcode_search" 
-                           placeholder="Enter barcode" value="<?php echo htmlspecialchars($full_barcode_search); ?>">
-                </div>
-            </div>
-
-            <!-- Size Input with ruler symbol -->
-            <div class="col-lg-2 col-md-4 col-sm-6">
-                <label for="size_search" class="form-label">Size</label>
-                <div class="input-group">
-                    <span class="input-group-text">
-                        <i class="fa-solid fa-ruler"></i>
-                    </span>
-                    <input type="number" class="form-control" id="size_search" name="size_search" 
-                           placeholder="Enter size" value="<?php echo htmlspecialchars($size_search); ?>">
-                </div>
-            </div>
-
-            <!-- Category with tag symbol -->
-            <div class="col-lg-2 col-md-4 col-sm-6">
-                <label for="category_search" class="form-label">Category</label>
-                <div class="input-group">
-                    <span class="input-group-text">
-                        <i class="fa-solid fa-tags"></i>
-                    </span>
-                    <select class="form-select" id="category_search" name="category_search">
-                        <option value="">Category</option>
-                        <option value="R" <?php echo $category_search === 'R' ? 'selected' : ''; ?>>R</option>
-                        <option value="C" <?php echo $category_search === 'C' ? 'selected' : ''; ?>>C</option>
-                        <option value="L" <?php echo $category_search === 'L' ? 'selected' : ''; ?>>L</option>
-                        <option value="LL" <?php echo $category_search === 'LL' ? 'selected' : ''; ?>>LL</option>
-                        <option value="CC" <?php echo $category_search === 'CC' ? 'selected' : ''; ?>>CC</option>
-                        <option value="N" <?php echo $category_search === 'N' ? 'selected' : ''; ?>>N</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Piece Name with puzzle piece symbol -->
-            <div class="col-lg-2 col-md-4 col-sm-6">
-                <label for="piece_name_search" class="form-label">Piece Name</label>
-                <div class="input-group">
-                    <span class="input-group-text">
-                        <i class="fa-solid fa-puzzle-piece"></i>
-                    </span>
-                    <select class="form-select" id="piece_name_search" name="piece_name_search">
-                        <option value="">Piece Name</option>
-                        <option value="P" <?php echo $piece_name_search === 'P' ? 'selected' : ''; ?>>P</option>
-                        <option value="V" <?php echo $piece_name_search === 'V' ? 'selected' : ''; ?>>V</option>
-                        <option value="G" <?php echo $piece_name_search === 'G' ? 'selected' : ''; ?>>G</option>
-                        <option value="M" <?php echo $piece_name_search === 'M' ? 'selected' : ''; ?>>M</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Order Input -->
-            <div class="col-lg-2 col-md-4 col-sm-6">
-                <label for="order_str_search" class="form-label">Order</label>
-                <div class="input-group">
-                    <span class="input-group-text">
-                        <i class="fas fa-sort"></i>
-                    </span>
-                    <input type="text" class="form-control" id="order_str_search" name="order_str_search" 
-                           placeholder="Enter order" value="<?php echo htmlspecialchars($order_str_search); ?>">
-                </div>
-            </div>
-
-            <!-- Date Filter -->
-            <div class="col-lg-3 col-md-6 col-sm-6">
-                <label for="date_to" class="form-label">Date</label>
-                <div class="input-group">
-                    <span class="input-group-text">
-                        <i class="fas fa-calendar-alt"></i>
-                    </span>
-                    <input type="date" class="form-control" id="date_to" name="date_to" 
-                           value="<?php echo htmlspecialchars($date_to); ?>">
-                </div>
-            </div>
-
-            <!-- Buttons -->
-            <div class="col-lg-3 col-md-6 col-sm-12 d-flex align-items-end">
-                <div class="d-flex gap-2 w-100 justify-content-start">
-                    <button type="submit" class="btn btn-primary" style="min-width: 150px;">
-                        <i class="fas fa-search"></i> Search
-                    </button>
-                    <a href="barcode_settings.php" class="btn btn-secondary" style="min-width: 150px;">
-                        <i class="fas fa-broom"></i> Clear
-                    </a>
-                </div>
-            </div>
-
-            <!-- Pagination Info -->
-            <?php if ($total_barcodes > 0): ?>
-            <div class="col-12 mt-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <p class="mb-0">Showing <?php echo min(($page - 1) * $items_per_page + 1, $total_barcodes); ?> to <?php echo min($page * $items_per_page, $total_barcodes); ?> of <?php echo $total_barcodes; ?> records</p>
-                </div>
-            </div>
-            <?php endif; ?>
-
-        </div>
-    </form>
-</div>
-
-
-                         <!-- Barcodes Table -->
                 <div class="card">
                     <div class="card-body">
                         <div class="mb-3">
@@ -316,7 +275,6 @@ require_once 'settings.php';
                             </div>
                         </div>
                         
-                        <!-- Bulk Edit Form (Initially Hidden) -->
                         <div id="bulkEditForm" class="card mb-3" style="display: none;">
                             <div class="card-body">
                                 <h5 class="card-title">Edit Selected Barcodes</h5>
@@ -333,7 +291,6 @@ require_once 'settings.php';
                                             <select class="form-select" id="bulk_status" name="bulk_status" disabled>
                                                 <option value="">Select Status</option>
                                                 <?php 
-                                                // Updated status options array with new values
                                                 $status_options = ['Completed', 'In Progress', 'Pending',]; 
                                                 foreach ($status_options as $option): 
                                                 ?>
@@ -363,7 +320,6 @@ require_once 'settings.php';
                                             <select class="form-select" id="bulk_chef" name="bulk_chef" disabled>
                                                 <option value="">Select Chef</option>
                                                 <?php 
-                                                // Updated chef options array with new values
                                                 $chef_options = ['Abdelkarim', 'Abderazaq', 'Aziz Berdigue', 'Bouchra',
                                                                     'Driss Khairani', 'Fadwa', 'Farah', 'Fouad',
                                                                     'Fouad Laakawi', 'Habib Douiba', 'Hada', 'Hana Hajouji',
@@ -399,86 +355,84 @@ require_once 'settings.php';
                             </div>
                         </div>
                         
-                        <!-- Delete Confirmation Form (Initially Hidden) -->
                         <div id="deleteForm" class="card mb-3" style="display: none;">
                             <div class="card-body">
-                                <h5 class="card-title text-danger">Delete Selected Barcodes</h5>
-                                <p>Are you sure you want to delete the selected barcodes? This action cannot be undone.</p>
+                                <h5 class="card-title text-danger mb-0">Delete Selected Barcodes</h5>
                                 <form action="barcode_settings.php" method="POST">
                                     <input type="hidden" name="action" value="delete">
                                     <div id="delete_barcodes_container"></div>
                                     
-                                    <div class="d-flex justify-content-end mt-3">
-                                        <button type="button" id="cancelDeleteBtn" class="btn btn-secondary me-2">Cancel</button>
-                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    <div class="d-flex justify-content-between align-items-center mt-0">
+                                        <p class="mb-0">Are you sure you want to delete the selected barcodes? This action cannot be undone.</p>
+                                        <div>
+                                            <button type="button" id="cancelDeleteBtn" class="btn btn-secondary me-2">Cancel</button>
+                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                        </div>
                                     </div>
                                 </form>
                             </div>
                         </div>
                         
-                        <!-- Main Table -->
                         <div class="table-responsive">
-    <table class="table table-striped table-hover">
-        <thead class="table-primary">
-            <tr>
-                <th width="40px"><input type="checkbox" id="checkAll" class="form-check-input"></th>
-                <th>OF Number</th>
-                <th>Size</th>
-                <th>Category</th>
-                <th>Piece</th>
-                <th>Order</th>
-                <th>Stage</th>
-                <th>Chef</th>
-                <th>Status</th>
-                <th>Last Update</th>
-                <th width="80px">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php if (!isset($_GET['of_number_search']) && !isset($_GET['size_search']) && !isset($_GET['category_search']) && !isset($_GET['piece_name_search']) && !isset($_GET['order_str_search'])): ?>
-                <tr>
-                    <td colspan="11" class="text-center">Please use the search form above to display results</td>
-                </tr>
-            <?php elseif (empty($barcodes)): ?>
-                <tr>
-                    <td colspan="11" class="text-center">No barcodes found for your search criteria</td>
-                </tr>
-            <?php else: ?>
-                <?php foreach ($barcodes as $barcode): ?>
-                    <tr>
-                        <td>
-                            <input type="checkbox" value="<?php echo $barcode['id']; ?>" class="form-check-input barcode-checkbox" 
-                                   data-of-number="<?php echo htmlspecialchars($barcode['of_number']); ?>">
-                        </td>
-                        <td><?php echo htmlspecialchars($barcode['of_number']); ?></td>
-                        <td><?php echo htmlspecialchars($barcode['size']); ?></td>
-                        <td><?php echo htmlspecialchars($barcode['category']); ?></td>
-                        <td><?php echo htmlspecialchars($barcode['piece_name']); ?></td>
-                        <td><?php echo htmlspecialchars($barcode['order_str']); ?></td>
-                        <td><?php echo htmlspecialchars($barcode['stage']); ?></td>
-                        <td><?php echo htmlspecialchars($barcode['chef']); ?></td>
-                        <td>
-                            <?php if (!empty($barcode['status'])): ?>
-                                <span class="badge bg-<?php echo strtolower($barcode['status']) === 'completed' ? 'success' : 'warning'; ?>">
-                                    <?php echo htmlspecialchars($barcode['status']); ?>
-                                </span>
-                            <?php endif; ?>
-                        </td>
-                        <td><?php echo htmlspecialchars($barcode['last_update']); ?></td>
-                        <td>
-                            <a href="<?php echo buildSearchUrl(['edit' => $barcode['id']]); ?>" class="btn btn-sm btn-primary">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </tbody>
-    </table>
-</div>
-    
+                            <table class="table table-striped table-hover">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th width="40px"><input type="checkbox" id="checkAll" class="form-check-input"></th>
+                                        <th>OF Number</th>
+                                        <th>Size</th>
+                                        <th>Category</th>
+                                        <th>Piece</th>
+                                        <th>Order</th>
+                                        <th>Stage</th>
+                                        <th>Chef</th>
+                                        <th>Status</th>
+                                        <th>Last Update</th>
+                                        <th width="80px">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php if (!isset($_GET['of_number_search']) && !isset($_GET['size_search']) && !isset($_GET['category_search']) && !isset($_GET['piece_name_search']) && !isset($_GET['order_str_search'])): ?>
+                                        <tr>
+                                            <td colspan="11" class="text-center">Please use the search form above to display results</td>
+                                        </tr>
+                                    <?php elseif (empty($barcodes)): ?>
+                                        <tr>
+                                            <td colspan="11" class="text-center">No barcodes found for your search criteria</td>
+                                        </tr>
+                                    <?php else: ?>
+                                        <?php foreach ($barcodes as $barcode): ?>
+                                            <tr>
+                                                <td>
+                                                    <input type="checkbox" value="<?php echo $barcode['id']; ?>" class="form-check-input barcode-checkbox" 
+                                                        data-of-number="<?php echo htmlspecialchars($barcode['of_number']); ?>">
+                                                </td>
+                                                <td><?php echo htmlspecialchars($barcode['of_number']); ?></td>
+                                                <td><?php echo htmlspecialchars($barcode['size']); ?></td>
+                                                <td><?php echo htmlspecialchars($barcode['category']); ?></td>
+                                                <td><?php echo htmlspecialchars($barcode['piece_name']); ?></td>
+                                                <td><?php echo htmlspecialchars($barcode['order_str']); ?></td>
+                                                <td><?php echo htmlspecialchars($barcode['stage']); ?></td>
+                                                <td><?php echo htmlspecialchars($barcode['chef']); ?></td>
+                                                <td>
+                                                    <?php if (!empty($barcode['status'])): ?>
+                                                        <span class="badge bg-<?php echo strtolower($barcode['status']) === 'completed' ? 'success' : 'warning'; ?>">
+                                                            <?php echo htmlspecialchars($barcode['status']); ?>
+                                                        </span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td><?php echo htmlspecialchars($barcode['last_update']); ?></td>
+                                                <td>
+                                                    <a href="<?php echo buildSearchUrl(['edit' => $barcode['id']]); ?>" class="btn btn-sm btn-primary">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+                        </div>
 
-                        <!-- Pagination -->
                         <?php if ($total_pages > 1): ?>
                             <nav aria-label="Page navigation">
                                 <ul class="pagination">
@@ -530,7 +484,6 @@ require_once 'settings.php';
         </div>
     </div>
 
-    <!-- Edit Barcode Modal -->
     <?php if ($edit_barcode): ?>
     <div class="modal fade show" style="display: block; background-color: rgba(0,0,0,0.5);" tabindex="-1" aria-labelledby="editModalLabel">
         <div class="modal-dialog modal-lg">
@@ -544,7 +497,6 @@ require_once 'settings.php';
                         <input type="hidden" name="action" value="edit">
                         <input type="hidden" name="barcode_id" value="<?php echo $edit_barcode['id']; ?>">
                         
-                        <!-- Barcode Identification Fields (Read-only) -->
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="edit_of_number" class="form-label">OF Number</label>
@@ -582,7 +534,6 @@ require_once 'settings.php';
                                 <div class="form-control" style="background-color: #f8f9fa;">
                                     <span id="barcode_preview">
                                     <?php 
-                                    // Updated format to match requested format: "19200-40R-P-10"
                                     $preview = $edit_barcode['of_number'] . '-' . $edit_barcode['size'];
                                     if (!empty($edit_barcode['category'])) {
                                         $preview .= $edit_barcode['category'];
@@ -595,18 +546,15 @@ require_once 'settings.php';
                             </div>
                         </div>
                         
-                        <!-- Separation Line -->
                         <hr class="my-4 border-2">
                         <h6 class="mb-3 text-secondary">Editable Fields</h6>
                         
-                        <!-- Editable Fields -->
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="edit_status" class="form-label">Status</label>
                                 <select class="form-select" id="edit_status" name="status">
                                     <option value="">None</option>
                                     <?php 
-                                    // Updated status options array with new values
                                     $status_options = ['Completed', 'In Progress', 'Pending',]; 
                                     foreach ($status_options as $option): 
                                     ?>
@@ -646,7 +594,6 @@ require_once 'settings.php';
                                 <select class="form-select" id="edit_chef" name="chef">
                                     <option value="">None</option>
                                     <?php 
-                                    // Updated chef options array with new values
                                     $chef_options = 
                                     [
                                         "Abdelkarim",
@@ -672,7 +619,6 @@ require_once 'settings.php';
                                         "Saadi Zhiliga",
                                         "Souad",
                                         "Yassin",
-                                        "Youssef",
                                         "Ztouti"
                                     ];
                                     foreach ($chef_options as $option): 

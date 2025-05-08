@@ -240,8 +240,11 @@ if (empty($chart_labels)) {
     </style>
 </head>
 <body class="bg-light">
+
     <?php include 'includes/sidebar.php'; ?>
+
     <div class="main-content">
+
         <?php include 'includes/header.php'; ?>
         
         <!-- Debug Information (hidden in HTML comments) -->
