@@ -25,61 +25,6 @@ require "scantoday_settings.php";
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <style>
-        .tab-content {
-            padding: 20px 0;
-        }
-        .card {
-            margin-bottom: 20px;
-        }
-        .alert {
-            margin-top: 15px;
-        }
-        .stage-badge {
-            margin-right: 5px;
-        }
-        .table-responsive {
-            overflow-x: auto;
-        }
-        .search-container {
-            display: flex;
-            align-items: flex-end;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .search-field {
-            flex-grow: 1;
-            min-width: 160px;
-        }
-        .button-group {
-            display: flex;
-            gap: 8px;
-            align-self: flex-end;
-        }
-        .form-label {
-            margin-bottom: 4px;
-        }
-        .search-inline-container {
-            display: flex;
-            align-items: flex-end;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        .search-field {
-            flex-grow: 1;
-            min-width: 200px;
-            max-width: 400px;
-        }
-        .button-group {
-            display: flex;
-            gap: 8px;
-            align-self: flex-end;
-        }
-        .form-label {
-            margin-bottom: 4px;
-        }
-    </style>
 </head>
 <body>
     <?php include 'includes/sidebar.php'; ?>

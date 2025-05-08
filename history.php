@@ -502,122 +502,29 @@ function displayBarcodeData($result) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>History Records</title>
-    <link rel="stylesheet" href="assets/index.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-
-    <style>
-        /* Layout styles for fixed header and sidebar with scrollable content */
-        html, body {
-            height: 100%;
-            overflow: hidden;
-        }
-        
-        .main-content {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        
-        .content-area {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-        }
-        
-        /* Responsive table styles */
-        .table-responsive {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-            
-        /* Enhanced modals for mobile */
-        .modal-dialog {
-            max-width: 95%;
-            margin: 10px auto;
-        }
-        
-        @media (min-width: 768px) {
-            .modal-dialog {
-                max-width: 700px;
-            }
-        }
-        
-        /* Responsive styling for different screen sizes */
-        @media (max-width: 768px) {
-            .card-body {
-                padding: 0.75rem;
-            }
-            
-            .table th, .table td {
-                padding: 0.5rem;
-                font-size: 0.875rem;
-            }
-            
-            .form-label {
-                font-size: 0.875rem;
-            }
-            
-            .btn-sm {
-                padding: 0.25rem 0.5rem;
-                font-size: 0.75rem;
-            }
-            
-            /* Ensure horizontal scrolling works nicely on mobile */
-            .table-responsive {
-                margin-bottom: 1rem;
-            }
-        }
-        
-        /* Fix for sticky table headers */
-        .table-responsive thead th {
-            position: sticky;
-            top: 0;
-            background-color: #212529;
-            z-index: 10;
-        }
-                /* Custom styles to improve responsiveness */
-        .search-form-container {
-            max-width: 100%;
-            margin: 0 auto;
-        }
-        
-        @media (max-width: 767px) {
-            .search-actions {
-                display: flex;
-                justify-content: space-between;
-                width: 100%;
-                margin-top: 15px;
-            }
-            
-            .search-actions .btn {
-                flex: 1;
-                margin: 0 5px;
-            }
-        }
-    </style>
     <?php include 'includes/head.php'; ?>
 </head>
-<body>
+
+<body class="vh-100 overflow-hidden bg-white">
     <?php include 'includes/sidebar.php'; ?>
 
-    <div class="main-content">
+    <div class="d-flex flex-column h-100  bg-white" >
         <?php include 'includes/header.php'; ?>
         
         <!-- Scrollable content area -->
-        <div class="content-area">
+        <div class="flex-grow-1 overflow-auto p-3">
             <div class="container-fluid">
-                <h2 class="mb-4" style="font-size: 18px;">History Records</h2>
+                <h2 class="mb-4 fs-4">History Records</h2>
                 
-                <div class="alert alert-warning text-left m-3" role="alert">
-                    <i class="fa-solid fa-triangle-exclamation"></i> <span style="font-weight: bold;">Please Note:</span> History records (logs) are removed from our server after 3 months.
+                <div class="alert alert-warning text-start m-3" role="alert">
+                    <i class="fa-solid fa-triangle-exclamation"></i> <span class="fw-bold">Please Note:</span> History records (logs) are removed from our server after 3 months.
                 </div>
                 <!-- Search Form -->
 
                 <div class="container py-4">
-                    <div class="card mb-4 search-form-container">
+                    <div class="card mb-4">
                         <div class="card-header bg-white">
                             <h5 class="mb-0">Search History</h5>
                         </div>
@@ -712,9 +619,9 @@ function displayBarcodeData($result) {
                                     </div>
                                 </div>
                                 
-                                <!-- Buttons - Full width on mobile, aligned right on larger screens -->
-                                <div class="col-12 mt-3">
-                                    <div class="d-flex flex-column flex-md-row gap-2 justify-content-md-start">
+                                <!-- Buttons - Responsive alignment -->
+                                <div class="col-12">
+                                    <div class="d-flex flex-column flex-md-row gap-2 bg-white">
                                         <button type="submit" name="search" class="btn btn-primary">
                                             <i class="fa-solid fa-magnifying-glass"></i> Search
                                         </button>
@@ -849,7 +756,7 @@ function displayBarcodeData($result) {
         </div>
     </div>
     
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
 

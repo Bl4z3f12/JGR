@@ -1,0 +1,110 @@
+.main-content {
+    overflow-y: auto;
+    height: auto;
+    padding-bottom: 20px;
+}
+html, body {
+    height: 100%;
+}
+.main-content {
+    overflow-y: auto;
+    min-height: 100vh;
+}        
+.stat-item {
+    display: inline-block;
+    width: 32%;
+    text-align: center;
+    padding: 8px 0;
+}
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+.stat-label {
+    font-size: 0.875rem;
+    opacity: 0.8;
+}
+.progress-container {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+.progress-bar-incoming {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.8);
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: 4px;
+}
+.progress-bar-outgoing {
+    height: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: 4px;
+}
+.progress-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+}
+.chart-container {
+    height: 300px;
+}
+.stage-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+.mood-emoji {
+    font-size: 20px;
+}
+.accordion-button::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='white' stroke='%23dddddd' stroke-width='0.5'/%3E%3Cpath d='M7 10l5 5 5-5' stroke='%23888888' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+    width: 24px !important;
+    height: 24px !important;
+    background-size: 18px !important;
+}
+.accordion-button:not(.collapsed)::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='white' stroke='%23dddddd' stroke-width='0.5'/%3E%3Cpath d='M7 14l5-5 5 5' stroke='%23888888' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+    transform: none !important; /* Prevent default rotation */
+    width: 24px !important;
+    height: 24px !important;
+    background-size: 18px !important;
+}
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(3px);
+}
+
+.loading-content {
+    text-align: center;
+    padding: 2rem;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid #dee2e6;
+    max-width: 700px;
+}
+
+.loading-content p {
+    color: #6c757d;
+    margin-top: 0.5rem;
+}
+.deleteddb{
+    font-size: 2.3rem;
+    margin-right: 0.5rem;
+}

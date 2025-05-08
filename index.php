@@ -12,117 +12,66 @@ $is_localhost = in_array($client_ip, ['127.0.0.1', '::1']) ||
 
 if (!$is_localhost && !in_array($client_ip, $allowed_ips)) {
     die('
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <link rel="icon" href="assets\stop.ico" type="image/png">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Access Denied</title>
-        <style>
-              
-            * {
-                position: relative;
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }
-            body {
-                height: 100vh;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                background: linear-gradient(to bottom right, #eee, #aaa);
-            }
-            h1 {
-                text-align: center;
-                margin: 20px 0 20px;
-            }
-            .linkss a{
-            }
-            .lock {
-                border-radius: 5px;
-                width: 55px;
-                height: 45px;
-                background-color: #333;
-                animation: dip 1s;
-                animation-delay: 1.5s;
-            }
-            .lock::before, .lock::after {
-                content: "";
-                position: absolute;
-                border-left: 5px solid #333;
-                height: 20px;
-                width: 15px;
-                left: calc(50% - 12.5px);
-            }
-            .lock::before {
-                top: -30px;
-                border: 5px solid #333;
-                border-bottom-color: transparent;
-                border-radius: 15px 15px 0 0;
-                height: 30px;
-                animation: lock 2s, spin 2s;
-            }
-            .lock::after {
-                top: -10px;
-                border-right: 5px solid transparent;
-                animation: spin 2s;
-            }
-            @keyframes lock {
-                0% {
-                    top: -45px;
-                }
-                65% {
-                    top: -45px;
-                }
-                100% {
-                    top: -30px;
-                }
-            }
-            @keyframes spin {
-                0% {
-                    transform: scaleX(-1);
-                    left: calc(50% - 30px);
-                }
-                65% {
-                    transform: scaleX(1);
-                    left: calc(50% - 12.5px);
-                }
-            }
-            @keyframes dip {
-                0% {
-                    transform: translateY(0px);
-                }
-                50% {
-                    transform: translateY(10px);
-                }
-                100% {
-                    transform: translateY(0px);
-                }
-            }
-        </style>
-    </head>
-    <body>
-        <div class="lock"><i class="fa-solid fa-lock"></i></div>
-        
-        <div class="message">
-            <h1 >Oops! Access to this page is restricted</h1>
-            <p>You are not authorized to access this page. If you want full access to all services, contact the developer.
-            <br>
-            <br>
-            You are authorized to access the following pages: <br>
-
-            <div class="linkss">
-                <a href="scantoday.php">scanned today</a> <br>
-                <a href="production.php">production</a> <br>
-                <a href="scanner_system_download.php">scanner system download</a>
+   <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Denied</title>
+    <link rel="icon" href="assets/stop.ico" type="image/png">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- AdminLTE CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css" rel="stylesheet">
+</head>
+<body class="bg-light d-flex flex-column justify-content-center align-items-center vh-100">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 mx-auto text-center">
+                <div class="card shadow">
+                    <div class="card-body p-5">
+                        <!-- Lock Icon -->
+                        <div class="mb-4">
+                            <i class="fas fa-lock fa-4x text-danger"></i>
+                        </div>
+                        
+                        <!-- Message -->
+                        <div class="message">
+                            <h1 class="mb-4">Oops! Access to this page is restricted</h1>
+                            <p class="mb-4">You are not authorized to access this page. If you want full access to all services, contact the developer.</p>
+                            
+                            <div class="alert alert-info">
+                                <h5><i class="fas fa-info-circle me-2"></i>You are authorized to access the following pages:</h5>
+                                <div class="list-group mt-3">
+                                    <a href="scantoday.php" class="list-group-item list-group-item-action">
+                                        <i class="fas fa-file-alt me-2"></i>Scanned Today
+                                    </a>
+                                    <a href="production.php" class="list-group-item list-group-item-action">
+                                        <i class="fas fa-industry me-2"></i>Production
+                                    </a>
+                                    <a href="scanner_system_download.php" class="list-group-item list-group-item-action">
+                                        <i class="fas fa-download me-2"></i>Scanner System Download
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3 text-muted">
+                    <small>Please contact support if you need assistance</small>
+                </div>
             </div>
-
         </div>
-    </body>
-    </html>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <!-- AdminLTE JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/js/adminlte.min.js"></script>
+</body>
+</html>
     ');
 }
 
@@ -136,117 +85,6 @@ $items_per_page = 200;
     <?php include 'includes/head.php'; ?>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<style>
-    #costume-options {
-        display: flex;
-        flex: 0 0 auto;
-        width: 100%;
-        flex-direction: column;
-        align-items: center;
-    }
-    .status-in-progress {
-        color: black;
-        background-color: #f1c40f;
-        padding: 0px 1px;
-        font-size: 14px;
-        border-radius: 4px;
-    }
-    .status-badge.status-completed {
-        background-color: #4CAF50; /* Green */
-        color: white;
-        padding: 0px 1px;
-        font-size: 14px;
-        border-radius: 4px;
-    }
-    .status-badge.status-pending {
-        background-color: #f44336; /* Red */
-        color: white;
-        padding: 0px 1px;
-        font-size: 14px;
-        border-radius: 4px;
-    }
-    #pdf-modal {
-        display: none;
-        position: fixed;
-        z-index: 9999;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0,0,0,0.4);
-    }
-    #pdf-modal .modal-content {
-        background-color: #fefefe;
-        margin: 2% auto;
-        padding: 20px;
-        border: 1px solid #888;
-        width: 90%;
-        max-width: 1200px;
-        max-height: 90vh;
-        overflow-y: auto;
-        border-radius: 8px;
-    }
-    .pdf-card {
-        transition: transform 0.2s;
-        height: 100%;
-    }
-    .pdf-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    }
-    .pdf-icon {
-        font-size: 3rem;
-        color: #dc3545;
-    }
-    .row-pdf {
-        display: flex;
-        flex-wrap: wrap;
-        margin-right: -15px;
-        margin-left: -15px;
-    }
-    .pdf-col {
-        flex: 0 0 20%;
-        max-width: 20%;
-        padding: 0 15px;
-        margin-bottom: 30px;
-    }
-    @media (max-width: 1200px) {
-        .pdf-col {
-            flex: 0 0 25%;
-            max-width: 25%;
-        }
-    }
-    @media (max-width: 992px) {
-        .pdf-col {
-            flex: 0 0 33.333333%;
-            max-width: 33.333333%;
-        }
-    }
-    @media (max-width: 768px) {
-        .pdf-col {
-            flex: 0 0 50%;
-            max-width: 50%;
-        }
-    }
-    @media (max-width: 576px) {
-        .pdf-col {
-            flex: 0 0 100%;
-            max-width: 100%;
-        }
-    }
-    .filter-buttons {
-        display: flex;
-        gap: 10px;
-    }
-    .filter-buttons .btn {
-        flex: 1;
-    }
-    #pdf-modal-loader {
-        text-align: center;
-        padding: 40px;
-    }
-</style>
 <body>
     <?php include 'includes/sidebar.php'; ?>
 
