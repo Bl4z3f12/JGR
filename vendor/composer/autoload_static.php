@@ -23,9 +23,9 @@ class ComposerStaticInit2935297e8b139be28baf73bd528cdad6
         array (
             'Matrix\\' => 7,
         ),
-        'H' => 
+        'I' => 
         array (
-            'Hamza\\Jgr\\' => 10,
+            'It\\Jgr\\' => 7,
         ),
         'C' => 
         array (
@@ -64,7 +64,7 @@ class ComposerStaticInit2935297e8b139be28baf73bd528cdad6
         array (
             0 => __DIR__ . '/..' . '/markbaker/matrix/classes/src',
         ),
-        'Hamza\\Jgr\\' => 
+        'It\\Jgr\\' => 
         array (
             0 => __DIR__ . '/../..' . '/src',
         ),

@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
-        'name' => 'hamza/jgr',
+        'name' => 'it/jgr',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '3eaab06ece28c4b343ae74ad762bf4328e6d8e08',
+        'reference' => '134ed90e1a4f1b77849b85c9a5a53e92bdef4615',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -19,10 +19,10 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-        'hamza/jgr' => array(
+        'it/jgr' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '3eaab06ece28c4b343ae74ad762bf4328e6d8e08',
+            'reference' => '134ed90e1a4f1b77849b85c9a5a53e92bdef4615',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

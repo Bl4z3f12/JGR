@@ -1,5 +1,5 @@
 <?php
-$current_view = 'z';
+$current_view = 'production.php';
 $host = "localhost";
 $dbname = "jgr";
 $username = "root";
@@ -8,9 +8,7 @@ $password = "";
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
     $filter_date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
-    
     $display_stages = [
         'Coupe' => [
             'icon' => '<i class="fas fa-cut"></i>',
@@ -53,7 +51,6 @@ try {
             'emoji' => '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAADzklEQVR4nO2bV2gUQRjHx94VEXvQYEPxRYkvvlkSRCSgsYMNxBJBRXxQLBgE0Ygvglhe1AcRFSOiDyKWBBRBUNAHG1gwYsUWuyT6k4nfxnGZvdtN7nLJzv3gg7uZuW92/js75ds5pbJkyZIKgHbAPGCpz3RaOxV3gFkEM0vFHWBkAgFGqLgDtABeWRr/WucpFwCOWwQ4plwBWGERoFi5AjAM+G00Xn8eplwCyAfeiuUrFwGeaFOuQlYAdA/4DmwC2irXAHYAX2QgPKlcAGgDTARay/eOQLmIkKfiDlAojZ1hpBVL2nwVd4BR0tiLQAfpAZckbYxyAeCkNPiTmDtjgEaP+MBm2QBpdjoRC/ADHBIBcpWL4LIAQA/gsghQqFwByAMOAF992+F7wGqgk4obQFcJfN4iOVUi0EgVo7v9mfpxFZjprRqbBUB7uegLpI7nQAnQSzVVgOGyuXlH+vgJnGhyARSgFTCokS2zCydgQAYaHWQDMhXMaCo0fliNJiyAXlkCHxrgrwZYHkWASqAnUGZxdkrydBk/M4AiS3pUf34BxgU07LvMTncseVckT9t5YEIUAcolTU9Vfkokz4v6mOSK+YnqL6wAteWARZa8goY8AuUxEGCb6wJcc12AaqCLywJoJrkuwI64C/BG8m1Tr+Z63AVANm06KHsYeAg8MuytCwJUAJ1DNzSkABUhLrgiggBR/UURALnbBcabKu+oXlHomAP/C1AlP75pqeyG5OkyfnT8oNSSHtVfVAES9cwfwIaoAmSaIAHe+55x01YHCOAxJw4ClIS4kbZHE9lsNc9je/wT4KzlSK5p64zzCTb6qOYI4caAMOTGVYAa4Jl082qXBPgIrNGv5Yyy3XT0x3hTXT8B+Lu6miLP1nigZZKA6gJgYTpUDhDgKTBY8gdK3YuBIZLWF7ibVAAgx5hK1kvaaOCxZb6udQDsAvrL563SBT1+ecEIoB/wIMHUFdZeWLp87ekTYIuv2+vP2+UQ91DgWzIBcg2nvfUeOiDep7mue4IXw5feEcQyKXOE1FMmvvVdD2KllNkftgecke9LklReF1wE7icod0/KTEtBD/DbXPF9O0H9L6VMgfG7nDDP2+4kAqwy3h7p7h7Er3QvPCQqnIju9XG6MYnT2UZZ2x8lPCpT3WDLteq7GkRVooFbJRnRbRsdZLlct/WUASiIjSrNAGsT1F/aEMdFxnE3D323x1pOiZ62VF7WGGcAZEA+aqn/XINftvJ3btVT3EE9PZqLDUvZqcA+YG8mzgcBk4E9MuJPb7abnixZsmRRjcQfk5uigB3FlTsAAAAASUVORK5CYII=" alt="external-cargo-logistics-delivery-icongeek26-glyph-icongeek26" style="width:50px;">'
         ]
     ];
-    
     $targets = [
         'Coupe' => 100,
         'V1' => 100,
@@ -64,7 +61,6 @@ try {
         'P_ fini' => 1000,
         'Exported' => 100
     ];
-    
     $daily_stage_stats = [];
     foreach ($display_stages as $stage => $props) {
         $daily_stage_stats[$stage] = [
@@ -75,33 +71,26 @@ try {
             'to_stages' => []
         ];
     }
-    
-    // Get current stage counts for the given date
-    $daily_items_query = "
-        SELECT 
-            h.stage,
-            COUNT(DISTINCT h.full_barcode_name) as count
-        FROM 
-            jgr_barcodes_history h
-        JOIN
-            barcodes b ON h.full_barcode_name = b.full_barcode_name
-        WHERE 
-            DATE(h.last_update) = :date
-            AND h.action_type IN ('INSERT', 'UPDATE')
-            AND h.last_update = (
-                SELECT MAX(h2.last_update)
-                FROM jgr_barcodes_history h2
-                WHERE h2.full_barcode_name = h.full_barcode_name
-                AND DATE(h2.last_update) <= :date
-            )
-        GROUP BY h.stage
-    ";
-    
-    $daily_params = [':date' => $filter_date];
-    
-    $daily_items_stmt = $pdo->prepare($daily_items_query);
-    $daily_items_stmt->execute($daily_params);
-    $daily_items = $daily_items_stmt->fetchAll(PDO::FETCH_ASSOC);
+$daily_items_query = "SELECT 
+    b.stage,
+    COUNT(DISTINCT b.full_barcode_name) as count
+FROM barcodes b
+LEFT JOIN jgr_barcodes_history h ON h.full_barcode_name = b.full_barcode_name
+WHERE h.full_barcode_name IS NOT NULL
+    AND DATE(h.last_update) = :date
+    AND h.action_type IN ('INSERT', 'UPDATE')
+    AND h.last_update = (
+        SELECT MAX(h2.last_update)
+        FROM jgr_barcodes_history h2
+        WHERE h2.full_barcode_name = h.full_barcode_name
+        AND DATE(h2.last_update) <= :date
+    )
+GROUP BY b.stage";
+
+$daily_params = [':date' => $filter_date];
+$daily_items_stmt = $pdo->prepare($daily_items_query);
+$daily_items_stmt->execute($daily_params);
+$daily_items = $daily_items_stmt->fetchAll(PDO::FETCH_ASSOC);
     
     foreach ($daily_items as $row) {
         $stage = $row['stage'];
@@ -236,21 +225,23 @@ try {
         if ($count >= 700) return '👍';
         return '⚠️';
     }
-    
     // Helper function to get badge color
     function getBadgeColor($count) {
         if ($count > 900) return 'bg-success';
         if ($count >= 700) return 'bg-warning';
         return 'bg-danger';
     }
-    
     // New helper function to get emoji face based on the value
     function getFaceEmoji($count) {
-        if ($count > 900) return '😄'; // Smile if value > 900
-        if ($count >= 700 && $count <= 900) return '😐'; // Normal if value between 700 and 900
-        return '😠'; // Angry if value < 500
+        if ($count > 900) {
+            return '<i class="fas fa-smile text-success fa-2x"></i>'; // Happy green face for > 900
+        } elseif ($count >= 700 && $count <= 900) {
+            return '<i class="fas fa-meh text-warning fa-2x"></i>'; // Neutral face for 700-900
+        } else {
+            return '<i class="fas fa-angry text-danger fa-2x"></i>'; // Angry face for < 700
+        }
     }
-    
+
 } catch(PDOException $e) {
     echo "Connection failed: " . $e->getMessage();
     exit;
@@ -264,11 +255,10 @@ try {
     <title>Production Stage Dashboard</title>
     
     <?php include 'includes/head.php'; ?>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
-
+    <!-- Moved Chart.js script after Bootstrap to avoid potential conflicts -->
 </head>
 <body class="bg-light">
 
@@ -306,45 +296,47 @@ try {
         
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card-body">
-                    <h1 class="mb-4" style="font-size: 18px;">Production Stage</h1>
+                <div class="card"><!-- Added missing card element -->
+                    <div class="card-body">
+                        <h1 class="mb-4" style="font-size: 18px;">Production Stage</h1>
 
-                    <div class="filter-section">
-                        <form method="GET" class="row g-2 align-items-center" id="filterForm">
-                            
-                            <!-- Label -->
-                            <div class="col-auto">
-                                <label for="date" class="form-label mb-0">Date:</label>
-                            </div>
-                            
-                            <!-- Prev/Next + Date Picker -->
-                            <div class="col-auto">
-                                <div class="input-group">
-                                    <button type="button" class="btn btn-outline-secondary" id="prevDay">
-                                        <i class="fas fa-chevron-left"></i>
-                                    </button>
-                                    <input
-                                        type="date"
-                                        class="form-control"
-                                        id="date"
-                                        name="date"
-                                        value="<?php echo htmlspecialchars($filter_date ?? date('Y-m-d')); ?>"
-                                        >
-                                    <button type="button" class="btn btn-outline-secondary" id="nextDay">
-                                        <i class="fas fa-chevron-right"></i>
-                                    </button>
+                        <div class="filter-section">
+                            <form method="GET" class="row g-2 align-items-center" id="filterForm">
+                                
+                                <!-- Label -->
+                                <div class="col-auto">
+                                    <label for="date" class="form-label mb-0">Date:</label>
                                 </div>
-                            </div>
-                            
-                            <!-- Submit / Reset -->
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-filter"></i> Apply Filter</button>
-                                <a href="<?php echo $_SERVER['PHP_SELF']; ?>" class="btn btn-secondary ms-2"><i class="fa-solid fa-broom"></i> Reset</a>
-                            </div>
+                                
+                                <!-- Prev/Next + Date Picker -->
+                                <div class="col-auto">
+                                    <div class="input-group">
+                                        <button type="button" class="btn btn-outline-secondary" id="prevDay">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </button>
+                                        <input
+                                            type="date"
+                                            class="form-control"
+                                            id="date"
+                                            name="date"
+                                            value="<?php echo isset($filter_date) ? htmlspecialchars($filter_date) : date('Y-m-d'); ?>"
+                                            >
+                                        <button type="button" class="btn btn-outline-secondary" id="nextDay">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Submit / Reset -->
+                                <div class="col-auto">
+                                    <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Apply Filter</button>
+                                    <a href="<?php echo $_SERVER['PHP_SELF']; ?>" class="btn btn-secondary ms-2"><i class="fas fa-broom"></i> Reset</a>
+                                </div>
 
-                        </form>
+                            </form>
+                        </div>
+
                     </div>
-
                 </div>
             </div>
         </div>
@@ -353,15 +345,17 @@ try {
             <div class="col-12">
                 <div class="card shadow-sm">
                     <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0">Selected Date: <?php echo htmlspecialchars(date('d/m/Y', strtotime($filter_date))); ?></h4>
+                        <h4 class="mb-0">Selected Date: <?php echo isset($filter_date) ? htmlspecialchars(date('d/m/Y', strtotime($filter_date))) : htmlspecialchars(date('d/m/Y')); ?></h4>
                     </div>
                     <div class="card-body">
                         <?php
                         $has_data = false;
-                        foreach ($daily_stage_stats as $stage => $stats) {
-                            if ($stats['current'] > 0 || $stats['in'] > 0 || $stats['out'] > 0) {
-                                $has_data = true;
-                                break;
+                        if (isset($daily_stage_stats) && is_array($daily_stage_stats)) {
+                            foreach ($daily_stage_stats as $stage => $stats) {
+                                if ($stats['current'] > 0 || $stats['in'] > 0 || $stats['out'] > 0) {
+                                    $has_data = true;
+                                    break;
+                                }
                             }
                         }
                         
@@ -369,48 +363,50 @@ try {
                         ?>
                         <div class="no-data-message">
                             <div class="alert alert-info">
-                                <h5><i class="fas fa-info-circle me-2"></i> No production data available for <?php echo htmlspecialchars($filter_date); ?></h5>
+                                <h5><i class="fas fa-info-circle me-2"></i> No production data available for <?php echo htmlspecialchars($filter_date ?? date('Y-m-d')); ?></h5>
                                 <p>Try selecting a different date.</p>
                             </div>
                         </div>
                         <?php else: ?>
                         
                         <div class="row g-4">
-                            <?php foreach ($display_stages as $stage => $properties): 
-                                $current = isset($daily_stage_stats[$stage]) ? $daily_stage_stats[$stage]['current'] : 0;
-                                $target = isset($targets[$stage]) ? $targets[$stage] : 100;
+                            <?php 
+                            if (isset($display_stages) && is_array($display_stages)):
+                                foreach ($display_stages as $stage => $properties): 
+                                    $current = isset($daily_stage_stats[$stage]) ? $daily_stage_stats[$stage]['current'] : 0;
+                                    $target = isset($targets[$stage]) ? $targets[$stage] : 100;
+                                    
+                                    $items_in = isset($daily_stage_stats[$stage]) ? $daily_stage_stats[$stage]['in'] : 0;
+                                    $items_out = isset($daily_stage_stats[$stage]) ? $daily_stage_stats[$stage]['out'] : 0;
+                                    
+                                    // Calculate percentages
+                                    $in_percent = (isset($total_count) && $total_count > 0) ? round(($items_in / $total_count) * 100) : 0;
+                                    $out_percent = (isset($total_count) && $total_count > 0) ? round(($items_out / $total_count) * 100) : 0;
+                                    $current_percent = (isset($total_count) && $total_count > 0) ? round(($current / $total_count) * 100) : 0;
+                                    
+                                    $from_stages = isset($daily_stage_stats[$stage]['from_stages']) ? $daily_stage_stats[$stage]['from_stages'] : [];
+                                    $to_stages = isset($daily_stage_stats[$stage]['to_stages']) ? $daily_stage_stats[$stage]['to_stages'] : [];
+                                    
+                                    // Get the mood emoji based on the current value - Replace custom function with if-else logic
+                                    if($current > 900) {
+                                        $moodEmoji = '<i class="fas fa-smile text-success fa-2x"></i>'; // Excellent
+                                    } elseif($current >= 700) {
+                                        $moodEmoji = '<i class="fas fa-meh text-warning fa-2x"></i>'; // Good
+                                    } else {
+                                        $moodEmoji = '<i class="fas fa-angry text-danger fa-2x"></i>'; // Below Target
+                                    }
                                 
-                                $items_in = isset($daily_stage_stats[$stage]) ? $daily_stage_stats[$stage]['in'] : 0;
-                                $items_out = isset($daily_stage_stats[$stage]) ? $daily_stage_stats[$stage]['out'] : 0;
-                                
-                                // Calculate percentages
-                                $in_percent = ($total_count > 0) ? round(($items_in / $total_count) * 100) : 0;
-                                $out_percent = ($total_count > 0) ? round(($items_out / $total_count) * 100) : 0;
-                                $current_percent = ($total_count > 0) ? round(($current / $total_count) * 100) : 0;
-                                
-                                $from_stages = isset($daily_stage_stats[$stage]['from_stages']) ? $daily_stage_stats[$stage]['from_stages'] : [];
-                                $to_stages = isset($daily_stage_stats[$stage]['to_stages']) ? $daily_stage_stats[$stage]['to_stages'] : [];
-                                
-                                // Get the mood emoji based on the current value - Replace custom function with if-else logic
-                                if($current > 900) {
-                                    $moodEmoji = "😄"; // Excellent
-                                } elseif($current >= 700) {
-                                    $moodEmoji = "🙂"; // Good
-                                } else {
-                                    $moodEmoji = "😟"; // Below Target
-                                }
-                                
-                                // Replace getBadgeColor function with if-else logic
-                                if($current > 900) {
-                                    $badgeClass = "bg-success";
-                                } elseif($current >= 700) {
-                                    $badgeClass = "bg-primary";
-                                } else {
-                                    $badgeClass = "bg-warning text-dark";
-                                }
+                                    // Replace getBadgeColor function with if-else logic
+                                    if($current > 900) {
+                                        $badgeClass = "bg-success";
+                                    } elseif($current >= 700) {
+                                        $badgeClass = "bg-primary";
+                                    } else {
+                                        $badgeClass = "bg-warning text-dark";
+                                    }
                             ?>
                                 <div class="col-xl-3 col-lg-4 col-md-6">
-                                    <div class="card h-100 bg-<?php echo $properties['color']; ?> text-white">
+                                    <div class="card h-100 bg-<?php echo htmlspecialchars($properties['color']); ?> text-white">
                                         <div class="card-body">
                                             <div class="d-flex justify-content-between align-items-center mb-3">
                                                 <h5 class="card-title mb-0">
@@ -437,25 +433,23 @@ try {
                                                 </div>
                                             </div>
                                             
-                                            <div class="mt-3">
-                                                <p class="mb-1 small">Items In</p>
-                                                <div class="progress mb-2" style="height: 10px;">
-                                                    <div class="progress-bar bg-info" role="progressbar" 
-                                                         style="width: <?php echo min(100, ($items_in/$target)*100); ?>%;" 
-                                                         aria-valuenow="<?php echo $items_in; ?>" 
-                                                         aria-valuemin="0" 
-                                                         aria-valuemax="<?php echo $target; ?>"></div>
+                                                <?php
+                                                $in_percentage = ($target > 0) ? min(100, ($items_in / $target) * 100) : 0;
+                                                $out_percentage = ($target > 0) ? min(100, ($items_out / $target) * 100) : 0;
+                                                $current_percentage = max(0, $in_percentage - $out_percentage);
+                                                ?>
+
+                                                <div class="mt-3">
+                                                    <!-- Single progress bar -->
+                                                    <div class="progress bg-dark rounded-pill" style="height: 20px;">
+                                                        <div class="progress-bar bg-light text-dark rounded-pill" role="progressbar"
+                                                            style="width: <?= $current_percentage; ?>%;"
+                                                            aria-valuenow="<?= $current_percentage; ?>" aria-valuemin="0" aria-valuemax="100">
+                                                        </div>
+                                                    </div>
+                                                 
                                                 </div>
-                                                
-                                                <p class="mb-1 small">Items Out</p>
-                                                <div class="progress mb-2" style="height: 10px;">
-                                                    <div class="progress-bar bg-warning" role="progressbar" 
-                                                         style="width: <?php echo min(100, ($items_out/$target)*100); ?>%;" 
-                                                         aria-valuenow="<?php echo $items_out; ?>" 
-                                                         aria-valuemin="0" 
-                                                         aria-valuemax="<?php echo $target; ?>"></div>
-                                                </div>
-                                            </div>
+
                                             
                                             <div class="d-flex justify-content-between text-white-50 small mb-3">
                                                 <span>In: <?php echo $in_percent; ?>%</span>
@@ -486,7 +480,8 @@ try {
                                                             </button>
                                                         </h2>
                                                         <div id="collapse-in-<?php echo str_replace(' ', '_', $stage); ?>" class="accordion-collapse collapse" 
-                                                             aria-labelledby="heading-in-<?php echo str_replace(' ', '_', $stage); ?>">
+                                                             aria-labelledby="heading-in-<?php echo str_replace(' ', '_', $stage); ?>"
+                                                             data-bs-parent="#accordion-<?php echo str_replace(' ', '_', $stage); ?>-in">
                                                             <div class="accordion-body p-2">
                                                                 <div>
                                                                     <?php if (empty($from_stages)): ?>
@@ -507,7 +502,9 @@ try {
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    
+                                                </div>
+
+                                                <div class="accordion mt-2" id="accordion-<?php echo str_replace(' ', '_', $stage); ?>-out">
                                                     <div class="accordion-item bg-transparent border-0">
                                                         <h2 class="accordion-header" id="heading-out-<?php echo str_replace(' ', '_', $stage); ?>">
                                                             <button class="accordion-button collapsed py-1 bg-transparent text-white" type="button" data-bs-toggle="collapse" 
@@ -517,7 +514,8 @@ try {
                                                             </button>
                                                         </h2>
                                                         <div id="collapse-out-<?php echo str_replace(' ', '_', $stage); ?>" class="accordion-collapse collapse" 
-                                                             aria-labelledby="heading-out-<?php echo str_replace(' ', '_', $stage); ?>">
+                                                             aria-labelledby="heading-out-<?php echo str_replace(' ', '_', $stage); ?>"
+                                                             data-bs-parent="#accordion-<?php echo str_replace(' ', '_', $stage); ?>-out">
                                                             <div class="accordion-body p-2">
                                                                 <div>
                                                                     <?php if (empty($to_stages)): ?>
@@ -543,7 +541,10 @@ try {
                                         </div>
                                     </div>
                                 </div>
-                            <?php endforeach; ?>
+                            <?php 
+                                endforeach;
+                            endif;
+                            ?>
                         </div>
                         <?php endif; ?>
                     </div>
@@ -551,7 +552,7 @@ try {
             </div>
         </div>
         
-        <?php if ($has_data): ?>
+        <?php if (isset($has_data) && $has_data): ?>
         <!-- Charts Row -->
         <div class="row g-4">
             <div class="col-lg-6">
@@ -581,6 +582,7 @@ try {
         </div>
         <?php endif; ?>
     </div>
+    </div><!-- Added missing closing div for main-content -->
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
@@ -609,15 +611,15 @@ try {
             filterForm.submit();
         });
         
-        <?php if ($has_data): ?>
+        <?php if (isset($has_data) && $has_data && isset($chart_data)): ?>
         // Pie Chart
         const pieCtx = document.getElementById('pieChart').getContext('2d');
         const pieChart = new Chart(pieCtx, {
             type: 'pie',
             data: {
-                labels: <?php echo json_encode($chart_data['labels']); ?>,
+                labels: <?php echo json_encode($chart_data['labels'] ?? []); ?>,
                 datasets: [{
-                    data: <?php echo json_encode($chart_data['current']); ?>,
+                    data: <?php echo json_encode($chart_data['current'] ?? []); ?>,
                     backgroundColor: [
                         '#007bff', '#28a745', '#dc3545', '#ffc107', 
                         '#17a2b8', '#6c757d', '#343a40', '#6610f2'
@@ -645,16 +647,16 @@ try {
         const barChart = new Chart(barCtx, {
             type: 'bar',
             data: {
-                labels: <?php echo json_encode($chart_data['labels']); ?>,
+                labels: <?php echo json_encode($chart_data['labels'] ?? []); ?>,
                 datasets: [{
                     label: 'Items In',
-                    data: <?php echo json_encode($chart_data['in']); ?>,
+                    data: <?php echo json_encode($chart_data['in'] ?? []); ?>,
                     backgroundColor: 'rgba(54, 162, 235, 0.7)',
                     borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 1
                 }, {
                     label: 'Items Out',
-                    data: <?php echo json_encode($chart_data['out']); ?>,
+                    data: <?php echo json_encode($chart_data['out'] ?? []); ?>,
                     backgroundColor: 'rgba(255, 99, 132, 0.7)',
                     borderColor: 'rgba(255, 99, 132, 1)',
                     borderWidth: 1

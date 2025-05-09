@@ -134,7 +134,7 @@ $items_per_page = 200;
                         <label for="filter-size" class="form-label mb-2">Size</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fa-solid fa-ruler"></i></span>
-                            <input type="number" class="form-control" id="filter-size" name="filter_size"
+                            <input type="text" class="form-control" id="filter-size" name="filter_size"
                                 value="<?php echo htmlspecialchars($filter_size); ?>" placeholder="Enter size">
                         </div>
                     </div>
@@ -400,7 +400,7 @@ $items_per_page = 200;
                 <div class="row mb-3">
                     <label for="barcode-size" class="col-sm-3 col-form-label">Size</label>
                     <div class="col-sm-9">
-                        <input type="number" id="barcode-size" name="barcode_size" min="1" step="1" class="form-control ofinput" placeholder="Enter size number" required>
+                        <input type="text" id="barcode-size" name="barcode_size" class="form-control ofinput" placeholder="Enter size number" required>
                     </div>
                 </div>
 

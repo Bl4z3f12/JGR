@@ -55,7 +55,7 @@ function getBarcodes($view, $page, $items_per_page, $filter_of = '', $filter_siz
         $params[] = $filter_of_param;
     }
     if (!empty($filter_size)) {
-        $types .= "i";
+        $types .= "s"; // Changed from 'i' to 's' to handle string sizes
         $params[] = $filter_size;
     }
     if (!empty($filter_category)) {
@@ -129,7 +129,7 @@ function getTotalBarcodes($view, $filter_of = '', $filter_size = '', $filter_cat
         $params[] = $filter_of_param;
     }
     if (!empty($filter_size)) {
-        $types .= "i";
+        $types .= "s"; // Changed from 'i' to 's' to handle string sizes
         $params[] = $filter_size;
     }
     if (!empty($filter_category)) {
@@ -249,7 +249,7 @@ function barcodeExists($conn, $full_barcode_name) {
 }
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'create_barcode') {
     $of_number = $_POST['barcode_prefix'] ?? '';
-    $size = (int)($_POST['barcode_size'] ?? 0);
+    $size = $_POST['barcode_size'] ?? '';
     $category = $_POST['barcode_category'] ?? '';
     $piece_name = $_POST['barcode_piece_name'] ?? '';
     $form_view = $_POST['view'] ?? 'dashboard';
@@ -260,7 +260,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
     $errors = [];
     $duplicates = [];
     if (!$of_number) $errors[] = "OF number is required";
-    if ($size <= 0) $errors[] = "Size must be positive";
     if (!$generate_costume_2pcs && !$generate_costume_3pcs && !$piece_name) {
         $errors[] = "Piece name is required";
     }
@@ -305,7 +304,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
                             continue;
                         }
                         $stmt = $conn->prepare("INSERT INTO barcodes (of_number, size, category, piece_name, order_str, full_barcode_name, status, stage) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL)");
-                        $stmt->bind_param("sissss", $of_number, $size, $category, $piece_name, $formatted_number, $full_barcode_name);
+                        $stmt->bind_param("ssssss", $of_number, $size, $category, $piece_name, $formatted_number, $full_barcode_name); // Changed type 'i' to 's' for size parameter
                         $stmt->execute();
                         $successCount++;
                     }
@@ -333,7 +332,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
                                 continue;
                             }
                             $stmt = $conn->prepare("INSERT INTO barcodes (of_number, size, category, piece_name, order_str, full_barcode_name, status, stage) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL)");
-                            $stmt->bind_param("sissss", $of_number, $size, $category, $current_piece, $i, $full_barcode_name);
+                            $stmt->bind_param("ssssss", $of_number, $size, $category, $current_piece, $i, $full_barcode_name); // Changed type 'i' to 's' for size parameter
                             $stmt->execute();
                             $successCount++;
                         }
@@ -360,7 +359,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
                             continue;
                         }
                         $stmt = $conn->prepare("INSERT INTO barcodes (of_number, size, category, piece_name, order_str, full_barcode_name, status, stage) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL)");
-                        $stmt->bind_param("sissss", $of_number, $size, $category, $piece_name, $i, $full_barcode_name);
+                        $stmt->bind_param("ssssss", $of_number, $size, $category, $piece_name, $i, $full_barcode_name); // Changed type 'i' to 's' for size parameter
                         $stmt->execute();
                         $successCount++;
                     }
