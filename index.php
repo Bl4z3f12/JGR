@@ -112,9 +112,14 @@ $items_per_page = 200;
                     <a href="?view=<?php echo $current_view; ?>&modal=create" class="btn-create">
                         <span><i class="fa-solid fa-gears"></i></span> Create New Barcodes
                     </a>
-                    <a href="#" class="btn-create" id="open-path-btn">
-                        <span><i class="fa-solid fa-folder-open"></i></span> Open Path
+                    <a href="#" 
+                        class="btn btn-outline-primary d-inline-flex align-items-center" 
+                        id="open-path-btn" 
+                        role="button">
+                        <i class="fa-solid fa-folder-open me-2"></i> 
+                        Open Path
                     </a>
+
                 </div>
             </div>  
 

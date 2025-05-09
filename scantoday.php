@@ -82,7 +82,7 @@ require "scantoday_settings.php";
                 
                 <div class="flex-grow-1 flex-shrink-1" style="min-width: 80px;">
                     <label for="size" class="form-label">Size</label>
-                    <input type="number" class="form-control" id="size" name="size" value="<?php echo htmlspecialchars($size ?? ''); ?>">        
+                    <input type="text" class="form-control" id="size" name="size" value="<?php echo htmlspecialchars($size ?? ''); ?>">        
                 </div>
                 
                 <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
@@ -262,7 +262,7 @@ require "scantoday_settings.php";
                                         
                                         <div class="col-md-6">
                                             <label for="size" class="form-label">Size</label>
-                                            <input type="number" class="form-control" id="size" name="size" 
+                                            <input type="text" class="form-control" id="size" name="size" 
                                                    value="<?php echo htmlspecialchars($barcode_data['size']); ?>" required>
                                         </div>
                                         

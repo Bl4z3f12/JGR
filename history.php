@@ -547,7 +547,7 @@ function displayBarcodeData($result) {
                                     <label for="size" class="form-label">Size</label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fa-solid fa-ruler"></i></span>
-                                        <input type="number" class="form-control" id="size" name="size" placeholder="Enter Size" 
+                                        <input type="text" class="form-control" id="size" name="size" placeholder="Enter Size" 
                                             value="<?php echo htmlspecialchars($size ?? ''); ?>">
                                     </div>
                                 </div>

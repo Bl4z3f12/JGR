@@ -87,14 +87,6 @@ body {
     display: flex;
     gap: 10px;
 }
-
-#open-path-btn {
-    background-color: #1f618d;
-}
-
-#open-path-btn:hover {
-    background-color: #0b7dda;
-}
 .barcode-card {
     background-color: white;
     border-radius: 5px;

@@ -281,24 +281,25 @@ $daily_items = $daily_items_stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php include 'includes/header.php'; ?>
         </div>
 
-        <div class="row">
-            <div class="col-12">
-                <div class="alert alert-info d-flex align-items-center mb-0" role="alert">
-                    <i class="bi bi-database-fill-lock me-2"></i>
-                    <div>
-                        <strong>Data Retention Notice:</strong> Production history records are automatically archived and permanently deleted 30 days after creation. Once purged, this data cannot be retrieved or reconstructed through any means.
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div class="container-fluid">
         
-        <div class="row mb-4">
+        <div class="row mb-0">
             <div class="col-12">
                 <div class="card"><!-- Added missing card element -->
                     <div class="card-body">
-                        <h1 class="mb-4" style="font-size: 18px;">Production Stage</h1>
+                        <h1 class="mb-0" style="font-size: 18px;">Production Stage</h1>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="alert alert-info d-flex align-items-center mt-2 mb-2" role="alert">
+                                    <i class="bi bi-database-fill-lock me-2"></i>
+                                    <div>
+                                        <strong>Data Retention Notice:</strong> Production history records are automatically archived and permanently deleted 30 days after creation. Once purged, this data cannot be retrieved or reconstructed through any means.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
 
                         <div class="filter-section">
                             <form method="GET" class="row g-2 align-items-center" id="filterForm">
