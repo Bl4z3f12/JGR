@@ -397,39 +397,51 @@ require "scantoday_settings.php";
                                     <form method="POST" action="?tab=quantity_coupe" class="row g-3">
                                         <div class="col-md-6">
                                             <label for="of_number" class="form-label">OF Number</label>
-                                            <input type="number" class="form-control" id="of_number" name="of_number" 
-                                            
-                                                   value="<?php echo htmlspecialchars($barcode_data['of_number']); ?>" required>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fa-solid fa-hashtag"></i></span>
+                                                <input type="number" class="form-control" id="of_number" name="of_number" placeholder="Enter Of number"
+                                                    value="<?php echo htmlspecialchars($barcode_data['of_number']); ?>" required>
+                                            </div>
                                         </div>
+
                                         
                                         <div class="col-md-6">
                                             <label for="size" class="form-label">Size</label>
-                                            <input type="text" class="form-control" id="size" name="size" 
-                                                   value="<?php echo htmlspecialchars($barcode_data['size']); ?>" required>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fa-solid fa-ruler"></i></span>
+                                                <input type="text" class="form-control" id="size" name="size" placeholder="Enter Size"
+                                                    value="<?php echo htmlspecialchars($barcode_data['size']); ?>" required>
+                                            </div>
                                         </div>
                                         
                                         <div class="col-md-6">
                                             <label for="category" class="form-label">Category</label>
-                                            <?php $category_options = ['R', 'C', 'L', 'LL', 'CC', 'N']; ?>
-                                            <select class="form-control" id="category" name="category">
-                                                <option value="">Select Category</option>
-                                                <?php foreach($category_options as $option): ?>
-                                                    <option value="<?php echo $option; ?>" <?php echo (isset($barcode_data['category']) && $barcode_data['category'] === $option) ? 'selected' : ''; ?>><?php echo $option; ?></option>
-                                                <?php endforeach; ?>
-                                            </select>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fa-solid fa-tags"></i></span>
+                                                <?php $category_options = ['R', 'C', 'L', 'LL', 'CC', 'N']; ?>
+                                                <select class="form-select" id="category" name="category">
+                                                    <option value="">Select Category</option>
+                                                    <?php foreach($category_options as $option): ?>
+                                                        <option value="<?php echo $option; ?>" <?php echo (isset($barcode_data['category']) && $barcode_data['category'] === $option) ? 'selected' : ''; ?>><?php echo $option; ?></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
                                         </div>
 
                                         <div class="col-md-6">
                                             <label for="piece_name" class="form-label">Piece Name</label>
-                                            <?php $piece_name_options = ['P', 'V', 'G', 'M']; ?>
-                                            <select class="form-control" id="piece_name" name="piece_name" required>
-                                                <option value="">Select Piece Name</option>
-                                                <?php foreach($piece_name_options as $option): ?>
-                                                    <option value="<?php echo $option; ?>" <?php echo (isset($barcode_data['piece_name']) && $barcode_data['piece_name'] === $option) ? 'selected' : ''; ?>><?php echo $option; ?></option>
-                                                <?php endforeach; ?>
-                                            </select>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fa-solid fa-puzzle-piece"></i></span>
+                                                <?php $piece_name_options = ['P', 'V', 'G', 'M']; ?>
+                                                <select class="form-select" id="piece_name" name="piece_name" required>
+                                                    <option value="">Select Piece Name</option>
+                                                    <?php foreach($piece_name_options as $option): ?>
+                                                        <option value="<?php echo $option; ?>" <?php echo (isset($barcode_data['piece_name']) && $barcode_data['piece_name'] === $option) ? 'selected' : ''; ?>><?php echo $option; ?></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
                                         </div>
-                                        
+
                                         <div class="col-12">
                                             <button type="submit" name="check_barcode" class="btn btn-primary">Check Barcode <i class="fa-solid fa-microscope"></i></button>
                                         </div>
@@ -522,7 +534,7 @@ require "scantoday_settings.php";
                                 <div class="search-inline-container">
                                     <div class="search-field">
                                         <label for="of_number" class="form-label">OF Number</label>
-                                        <input type="number" class="form-control" id="of_number" name="of_number" value="">
+                                        <input type="number" class="form-control" id="of_number" name="of_number" placeholder="Enter OF number" value="">
                                     </div>
                                     
                                     <div class="button-group">
