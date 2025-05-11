@@ -196,7 +196,8 @@ if (!$isAjaxRequest) {
         font-size: 0.9rem;
         margin-bottom: 0.5rem;
     }
-
+    #confirmPassword,
+    #password,
     .form-control {
         background: rgba(255, 255, 255, 0.15);
         border: 1px solid rgba(255, 255, 255, 0.2);
@@ -247,11 +248,6 @@ if (!$isAjaxRequest) {
     .password-toggle:focus {
         outline: none;
     }
-    
-    .password-toggle i{
-        color: black;
-    }
-
     .btn-primary {
         background: var(--primary);
         border: none;
@@ -281,7 +277,7 @@ if (!$isAjaxRequest) {
     }
 
     .footer-link a {
-        color: var(--primary);
+        color: #86d2ff;
         text-decoration: none;
         font-weight: 500;
         transition: all 0.2s ease;
@@ -292,6 +288,10 @@ if (!$isAjaxRequest) {
         text-decoration: underline;
     }
 
+    .footer-link span{
+        color: var(--light);
+        font-weight: 500;
+    }
     .alert-translucent {
         background: rgba(255, 255, 255, 0.15);
         backdrop-filter: blur(5px);
@@ -313,6 +313,7 @@ if (!$isAjaxRequest) {
 
     /* Enhanced password toggle interaction */
     .password-toggle .bi {
+        color: white;
         transition: all 0.3s ease;
     }
     
@@ -329,15 +330,16 @@ if (!$isAjaxRequest) {
 </style>
 
 <body>
+    
     <div class="animated-bg">
         <div class="floating-circles">
-            <?php for($i=0; $i<15; $i++): ?>
+            <?php for($i=0; $i<40; $i++): ?>
             <div style="
                 width: <?= rand(80, 200) ?>px;
                 height: <?= rand(80, 200) ?>px;
                 left: <?= rand(0, 100) ?>%;
                 top: <?= rand(110, 150) ?>%;
-                animation-duration: <?= rand(15, 30) ?>s;
+                animation-duration: <?= rand(8, 8) ?>s;
                 animation-delay: <?= rand(0, 10) ?>s;"></div>
             <?php endfor; ?>
         </div>

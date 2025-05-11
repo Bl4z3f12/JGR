@@ -76,37 +76,50 @@ html, body {
     height: 24px !important;
     background-size: 18px !important;
 }
-.loading-overlay {
+.dbico{
+    margin-right: 1.2rem;
+    font-size: 2rem;
+}
+/* Loading Overlay Styles */
+#loadingOverlay {
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.9); /* Slightly transparent white */
     z-index: 9999;
-    display: flex;
-    align-items: center;
     justify-content: center;
-    backdrop-filter: blur(3px);
+    align-items: center;
 }
-.loading-content {
-    text-align: center;
+
+#loadingOverlay .d-flex.flex-column {
+    gap: 0.5rem;
+    max-width: 600px; /* Added max-width */
     padding: 2rem;
     background: white;
     border-radius: 10px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    border: 1px solid #dee2e6;
-    max-width: 700px;
+    text-align: center;
 }
 
-.loading-content p {
-    color: #6c757d;
-    margin-top: 0.5rem;
+#loadingOverlay .spinner-border {
+    width: 3rem;
+    height: 3rem;
 }
-.deleteddb{
-    font-size: 2.3rem;
-    margin-right: 0.5rem;
+
+#loadingOverlay h5 {
+    font-size: 1.25rem;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--bs-dark);
+    text-align: center;
 }
-.datbasewarning{
-    font-size: 2rem;
+
+#loadingOverlay p {
+    line-height: 1.4;
+    color: var(--bs-secondary-color);
+    text-align: center;
+    margin: 0 auto;
 }

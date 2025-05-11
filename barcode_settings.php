@@ -1,10 +1,11 @@
 <?php
 $current_view = 'barcode_settings.php';
 require_once 'auth_functions.php';
+date_default_timezone_set('Africa/Casablanca'); // Add this at the top
 
 requireLogin('login.php');
 
-$allowed_ips = ['127.0.0.1', '192.168.1.130', '::1', '192.168.1.14' ,'NEW_IP_HERE'];
+$allowed_ips = ['127.0.0.1', '192.168.1.130', '::1', 'NEW_IP_HERE'];
 $client_ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
 $client_ip = trim(explode(',', $client_ip)[0]);
 $is_localhost = in_array($client_ip, ['127.0.0.1', '::1']) || 
@@ -131,6 +132,7 @@ require_once 'settings.php';
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <title>Barcode Settings</title>
     <?php include 'includes/head.php'; ?>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
@@ -174,7 +176,7 @@ require_once 'settings.php';
                                     <span class="input-group-text">
                                         <i class="fa-solid fa-ruler"></i>
                                     </span>
-                                    <input type="number" class="form-control" id="size_search" name="size_search" 
+                                    <input type="text" class="form-control" id="size_search" name="size_search" 
                                         placeholder="Size" value="<?php echo htmlspecialchars($size_search); ?>">
                                 </div>
                             </div>
@@ -274,7 +276,7 @@ require_once 'settings.php';
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div id="bulkEditForm" class="card mb-3" style="display: none;">
                             <div class="card-body">
                                 <h5 class="card-title">Edit Selected Barcodes</h5>
@@ -282,79 +284,76 @@ require_once 'settings.php';
                                     <input type="hidden" name="action" value="bulk_edit">
                                     <div id="selected_barcodes_container"></div>
                                     
-                                    <div class="row g-3">
-                                        <div class="col-md-4">
-                                            <div class="form-check mb-2">
-                                                <input class="form-check-input" type="checkbox" id="update_status" name="update_status">
-                                                <label class="form-check-label" for="update_status">Update Status</label>
-                                            </div>
-                                            <select class="form-select" id="bulk_status" name="bulk_status" disabled>
+                                    <!-- Hidden checkboxes (always checked) -->
+                                    <input type="hidden" name="update_status" value="1" checked>
+                                    <input type="hidden" name="update_stage" value="1" checked>
+                                    <input type="hidden" name="update_chef" value="1" checked>
+                                    <input type="hidden" name="update_timestamp" value="1" checked>
+                                    
+                                    <div class="row g-3 align-items-center">
+                                        <!-- Status Field -->
+                                        <div class="col-md-3">
+                                            <label class="form-label mb-0">Status</label>
+                                            <select class="form-select form-select-sm" id="bulk_status" name="bulk_status">
                                                 <option value="">Select Status</option>
                                                 <?php 
-                                                $status_options = ['Completed', 'In Progress', 'Pending',]; 
+                                                $status_options = ['Completed', 'In Progress', 'Pending']; 
                                                 foreach ($status_options as $option): 
                                                 ?>
                                                     <option value="<?php echo htmlspecialchars($option); ?>"><?php echo htmlspecialchars($option); ?></option>
                                                 <?php endforeach; ?>
                                             </select>
                                         </div>
-                                        <div class="col-md-4">
-                                            <div class="form-check mb-2">
-                                                <input class="form-check-input" type="checkbox" id="update_stage" name="update_stage">
-                                                <label class="form-check-label" for="update_stage">Update Stage</label>
-                                            </div>
-                                            <select class="form-select" id="bulk_stage" name="bulk_stage" disabled>
+
+                                        <!-- Stage Field -->
+                                        <div class="col-md-3">
+                                            <label class="form-label mb-0">Stage</label>
+                                            <select class="form-select form-select-sm" id="bulk_stage" name="bulk_stage">
                                                 <option value="">Select Stage</option>
                                                 <?php
-                                                  $stage_options = ['Coupe', 'V1', 'V2', 'V3', 'Pantalon', 'Repassage', 'P_ fini','Exported'];
-                                                 foreach ($stage_options as $option): ?>
+                                                $stage_options = ['Coupe', 'V1', 'V2', 'V3', 'Pantalon', 'Repassage', 'P_ fini','Exported'];
+                                                foreach ($stage_options as $option): ?>
                                                     <option value="<?php echo htmlspecialchars($option); ?>"><?php echo htmlspecialchars($option); ?></option>
                                                 <?php endforeach; ?>
                                             </select>
                                         </div>
-                                        <div class="col-md-4">
-                                            <div class="form-check mb-2">
-                                                <input class="form-check-input" type="checkbox" id="update_chef" name="update_chef">
-                                                <label class="form-check-label" for="update_chef">Update Chef</label>
-                                            </div>
-                                            <select class="form-select" id="bulk_chef" name="bulk_chef" disabled>
+
+                                        <!-- Chef Field -->
+                                        <div class="col-md-3">
+                                            <label class="form-label mb-0">Chef</label>
+                                            <select class="form-select form-select-sm" id="bulk_chef" name="bulk_chef">
                                                 <option value="">Select Chef</option>
                                                 <?php 
                                                 $chef_options = ['Abdelkarim', 'Abderazaq', 'Aziz Berdigue', 'Bouchra',
-                                                                    'Driss Khairani', 'Fadwa', 'Farah', 'Fouad',
-                                                                    'Fouad Laakawi', 'Habib Douiba', 'Hada', 'Hana Hajouji',
-                                                                    'Hanan Khomassi', 'Hassan Nassiri', 'Khadija', 'Miloud',
-                                                                    'Mohamed', 'Naaima Elakiwi', 'Rahma Belmokhtar', 'Rakiya',
-                                                                    'Saaid Kahlaoui', 'Saadi Zhiliga', 'Souad', 'Yassin',
-                                                                    'Youssef', 'Ztouti', 'Zouhair'
-                                                                ]; 
+                                                                'Driss Khairani', 'Fadwa', 'Farah', 'Fouad',
+                                                                'Fouad Laakawi', 'Habib Douiba', 'Hada', 'Hana Hajouji',
+                                                                'Hanan Khomassi', 'Hassan Nassiri', 'Khadija', 'Miloud',
+                                                                'Mohamed', 'Naaima Elakiwi', 'Rahma Belmokhtar', 'Rakiya',
+                                                                'Saaid Kahlaoui', 'Saadi Zhiliga', 'Souad', 'Yassin',
+                                                                'Youssef', 'Ztouti', 'Zouhair'];
                                                 foreach ($chef_options as $option): 
                                                 ?>
                                                     <option value="<?php echo htmlspecialchars($option); ?>"><?php echo htmlspecialchars($option); ?></option>
                                                 <?php endforeach; ?>
                                             </select>
                                         </div>
-                                    </div>
-                                    
-                                    <div class="row mt-3">
-                                        <div class="col-md-4">
-                                            <div class="form-check mb-2">
-                                                <input class="form-check-input" type="checkbox" id="update_timestamp" name="update_timestamp">
-                                                <label class="form-check-label" for="update_timestamp">Update Timestamp</label>
-                                            </div>
-                                            <input type="datetime-local" class="form-control" id="bulk_timestamp" name="bulk_timestamp" 
-                                                   value="<?php echo formatDatetimeForInput(date('Y-m-d H:i:s')); ?>" disabled>
+
+                                        <!-- Timestamp Field -->
+                                        <div class="col-md-3">
+                                            <label class="form-label mb-0">Timestamp</label>
+                                            <input type="date" class="form-control form-control-sm" id="bulk_timestamp" name="bulk_timestamp" 
+                                                value="<?php echo formatDatetimeForInput(date('Y-m-d H:i:s')); ?>">
                                         </div>
                                     </div>
                                     
                                     <div class="d-flex justify-content-end mt-3">
-                                        <button type="button" id="cancelBulkEditBtn" class="btn btn-secondary me-2">Cancel</button>
-                                        <button type="submit" id="saveBulkEditBtn" class="btn btn-primary">Save Changes</button>
+                                        <button type="button" id="cancelBulkEditBtn" class="btn btn-secondary btn-sm me-2">Cancel</button>
+                                        <button type="submit" id="saveBulkEditBtn" class="btn btn-primary btn-sm">Save Changes</button>
                                     </div>
                                 </form>
                             </div>
                         </div>
-                        
+
                         <div id="deleteForm" class="card mb-3" style="display: none;">
                             <div class="card-body">
                                 <h5 class="card-title text-danger mb-0">Delete Selected Barcodes</h5>
@@ -420,7 +419,7 @@ require_once 'settings.php';
                                                         </span>
                                                     <?php endif; ?>
                                                 </td>
-                                                <td><?php echo htmlspecialchars($barcode['last_update']); ?></td>
+                                                <td><?php echo htmlspecialchars(substr($barcode['last_update'], 0, 10)); ?></td>
                                                 <td>
                                                     <a href="<?php echo buildSearchUrl(['edit' => $barcode['id']]); ?>" class="btn btn-sm btn-primary">
                                                         <i class="fas fa-edit"></i>
@@ -631,8 +630,8 @@ require_once 'settings.php';
                             </div>
                             <div class="col-md-6">
                                 <label for="last_update" class="form-label">Last Update</label>
-                                <input type="datetime-local" class="form-control" id="last_update" name="last_update" 
-                                    value="<?php echo formatDatetimeForInput($edit_barcode['last_update']); ?>">
+                                <input type="date" class="form-control" id="last_update" name="last_update" 
+                                    value="<?php echo formatDateForInput($edit_barcode['last_update']); ?>">
                             </div>
                         </div>
                         
@@ -648,9 +647,44 @@ require_once 'settings.php';
     <?php endif; ?>
 
     <?php include 'includes/footer.php'; ?>
+
     <script src="assets/index.js"></script>
     <script src="assets/app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectAllBtn = document.getElementById('selectAllBtn');
+            const deselectAllBtn = document.getElementById('deselectAllBtn');
+            const checkAll = document.getElementById('checkAll');
+            const checkboxes = document.querySelectorAll('.barcode-checkbox');
+
+            // Select All button
+            selectAllBtn.addEventListener('click', function() {
+                checkboxes.forEach(checkbox => checkbox.checked = true);
+                checkAll.checked = true;
+            });
+
+            // Deselect All button
+            deselectAllBtn.addEventListener('click', function() {
+                checkboxes.forEach(checkbox => checkbox.checked = false);
+                checkAll.checked = false;
+            });
+
+            // Header checkbox functionality
+            checkAll.addEventListener('change', function() {
+                const isChecked = this.checked;
+                checkboxes.forEach(checkbox => checkbox.checked = isChecked);
+            });
+
+            // Update header checkbox when individual checkboxes change
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const allChecked = [...checkboxes].every(c => c.checked);
+                    checkAll.checked = allChecked;
+                });
+            });
+        });
+    </script>
 </body>
 </html>

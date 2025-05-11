@@ -82,6 +82,7 @@ $items_per_page = 200;
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <title>Dashboard</title>
     <?php include 'includes/head.php'; ?>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>

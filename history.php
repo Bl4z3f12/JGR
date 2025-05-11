@@ -507,23 +507,23 @@ function displayBarcodeData($result) {
     <?php include 'includes/head.php'; ?>
 </head>
 
-<body class="vh-100 overflow-hidden bg-white">
+<body>
     <?php include 'includes/sidebar.php'; ?>
 
-    <div class="d-flex flex-column h-100  bg-white" >
+    <div class="main-content" >
         <?php include 'includes/header.php'; ?>
         
         <!-- Scrollable content area -->
-        <div class="flex-grow-1 overflow-auto p-3">
-            <div class="container-fluid">
-                <h2 class="mb-4 fs-4">History Records</h2>
+        <div class="content">
+            <h1 class="mb-4" style="font-size: 18px;">Scanned Today</h1>
+            
                 
                 <div class="alert alert-warning text-start m-3" role="alert">
                     <i class="fa-solid fa-triangle-exclamation"></i> <span class="fw-bold">Please Note:</span> History records (logs) are removed from our server after 3 months.
                 </div>
                 <!-- Search Form -->
 
-                <div class="container py-4">
+                <div class="container11">
                     <div class="card mb-4">
                         <div class="card-header bg-white">
                             <h5 class="mb-0">Search History</h5>
@@ -752,7 +752,6 @@ function displayBarcodeData($result) {
                         ?>
                     </div>
                 </div>
-            </div>
         </div>
     </div>
     

@@ -1,7 +1,6 @@
 <?php
 $current_view = 'scantoday.php'; // Add this line
 require_once 'auth_functions.php';
-
 requireLogin('login.php');
 
 // Get the requested tab
@@ -11,17 +10,13 @@ $requested_tab = $_GET['tab'] ?? 'summary';
 if ($requested_tab == 'quantity_coupe') {
     requireLogin('login.php');
 }
-
-
 require "scantoday_settings.php";
-// Import any additional PHP logic files here
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <title>Scanned Today</title>
     <?php include 'includes/head.php'; ?>
-    <!-- Bootstrap for styling -->
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -66,99 +61,154 @@ require "scantoday_settings.php";
                 <!-- Summary Tab -->
                 <?php if($active_tab == 'summary'): ?>
 
-    <div class="card">
-    <div class="card-header">
-        <h5>Search</h5>
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Search</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="GET" action="">
+                                <input type="hidden" name="tab" value="summary">
+                                
+                                <div class="d-flex flex-nowrap align-items-end overflow-auto gap-2">
+                                    <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
+                                        <label for="of_number" class="form-label">OF Number</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
+                                            <input type="number" class="form-control" id="of_number" name="of_number" placeholder="Enter OF number" value="<?php echo htmlspecialchars($of_number ?? ''); ?>">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex-grow-1 flex-shrink-1" style="min-width: 80px;">
+                                        <label for="size" class="form-label">Size</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-ruler"></i></span>
+                                            <input type="text" class="form-control" id="size" name="size" placeholder="Enter Size" value="<?php echo htmlspecialchars($size ?? ''); ?>">
+                                        </div>        
+                                    </div>
+                                    
+                                    <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
+                                        <label for="category" class="form-label">Category</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-tags"></i></span>
+                                            <select class="form-select" id="category" name="category">
+                                                <option value="select" <?php echo (empty($category) || $category == 'select') ? 'selected' : ''; ?>>All Categories</option>
+                                                <?php foreach($category_options as $option): ?>
+                                                    <option value="<?php echo $option; ?>" <?php echo ($category == $option) ? 'selected' : ''; ?>><?php echo $option; ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
+                                        <label for="p_name" class="form-label">Piece Name</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-puzzle-piece"></i></span>
+                                            <select class="form-select" id="p_name" name="p_name">
+                                                <option value="select" <?php echo (empty($p_name) || $p_name == 'select') ? 'selected' : ''; ?>>All Pieces</option>
+                                                <?php foreach($p_name_options as $option): ?>
+                                                    <option value="<?php echo $option; ?>" <?php echo ($p_name == $option) ? 'selected' : ''; ?>><?php echo $option; ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
+                                        <label for="stage" class="form-label">Stage</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-tasks"></i></span>
+                                            <select class="form-select" id="stage" name="stage">
+                                                <option value="select" <?php echo (empty($stage) || $stage == 'select') ? 'selected' : ''; ?>>All Stages</option>
+                                                <?php foreach($stage_options as $option): ?>
+                                                    <option value="<?php echo $option; ?>" <?php echo ($stage == $option) ? 'selected' : ''; ?>><?php echo $option; ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex-grow-1 flex-shrink-1" style="min-width: 120px;">
+                                        <label for="date" class="form-label">Date</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                                            <input type="date" class="form-control" id="date" name="date" value="<?php echo htmlspecialchars($date ?? date('Y-m-d')); ?>">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex-shrink-0">
+                                        <div class="d-flex gap-2">
+                                            <button type="submit" name="search" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+                                            <a href="?tab=summary" class="btn btn-secondary"><i class="fa-solid fa-broom"></i> Reset</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>        
+        
+                    <!-- Stage Summary - Enhanced Design -->
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i> Stage Summary</h5>
+        <span class="badge bg-light text-dark rounded-pill" data-bs-toggle="tooltip" data-bs-placement="top" title="Total items across all stages">
+            Total: <?php echo array_sum($stage_summary); ?>
+        </span>
     </div>
     <div class="card-body">
-        <form method="GET" action="">
-            <input type="hidden" name="tab" value="summary">
-            
-            <div class="d-flex flex-nowrap align-items-end overflow-auto gap-2">
-                <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
-                    <label for="of_number" class="form-label">OF Number</label>
-                    <input type="number" class="form-control" id="of_number" name="of_number" value="<?php echo htmlspecialchars($of_number ?? ''); ?>">
-                </div>
-                
-                <div class="flex-grow-1 flex-shrink-1" style="min-width: 80px;">
-                    <label for="size" class="form-label">Size</label>
-                    <input type="text" class="form-control" id="size" name="size" value="<?php echo htmlspecialchars($size ?? ''); ?>">        
-                </div>
-                
-                <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
-                    <label for="category" class="form-label">Category</label>
-                    <select class="form-select" id="category" name="category">
-                        <option value="select" <?php echo (empty($category) || $category == 'select') ? 'selected' : ''; ?>>All Categories</option>
-                        <?php foreach($category_options as $option): ?>
-                            <option value="<?php echo $option; ?>" <?php echo ($category == $option) ? 'selected' : ''; ?>><?php echo $option; ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                
-                <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
-                    <label for="p_name" class="form-label">Piece Name</label>
-                    <select class="form-select" id="p_name" name="p_name">
-                        <option value="select" <?php echo (empty($p_name) || $p_name == 'select') ? 'selected' : ''; ?>>All Pieces</option>
-                        <?php foreach($p_name_options as $option): ?>
-                            <option value="<?php echo $option; ?>" <?php echo ($p_name == $option) ? 'selected' : ''; ?>><?php echo $option; ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                
-                <div class="flex-grow-1 flex-shrink-1" style="min-width: 100px;">
-                    <label for="stage" class="form-label">Stage</label>
-                    <select class="form-select" id="stage" name="stage">
-                        <option value="select" <?php echo (empty($stage) || $stage == 'select') ? 'selected' : ''; ?>>All Stages</option>
-                        <?php foreach($stage_options as $option): ?>
-                            <option value="<?php echo $option; ?>" <?php echo ($stage == $option) ? 'selected' : ''; ?>><?php echo $option; ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                
-                <div class="flex-grow-1 flex-shrink-1" style="min-width: 120px;">
-                    <label for="date" class="form-label">Date</label>
-                    <input type="date" class="form-control" id="date" name="date" value="<?php echo htmlspecialchars($date ?? date('Y-m-d')); ?>">
-                </div>
-                
-                <div class="flex-shrink-0">
-                    <div class="d-flex gap-2">
-                        <button type="submit" name="search" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
-                        <a href="?tab=summary" class="btn btn-secondary"><i class="fa-solid fa-broom"></i> Reset</a>
-                    </div>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
+        <div class="row g-3">
+            <?php foreach($stage_options as $s): ?>
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="card h-100 <?php echo $stage_summary[$s] > 0 ? 'border-primary' : 'border-light'; ?> shadow-sm">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
 
-  
-</div>
-        
-        
-        <!-- Stage Summary -->
-<!-- Stage Summary - Improved Responsive Design -->
-
-    <div class="card">
-    <div class="card-header">
-        <h5>Stage Summary</h5>
-    </div>
-    <div class="card-body">
-        <div class="d-flex justify-content-center">
-            <div class="d-flex flex-nowrap overflow-auto">
-                <?php foreach($stage_options as $s): ?>
-                    <div class="card mx-2" style="min-width: 130px; width: auto;">
-                        <div class="card-body text-center p-3">
-                            <h5 class="mb-2"><?php echo htmlspecialchars($s); ?></h5>
-                            <span class="badge bg-primary fs-5 d-block py-2">
-                                <?php echo $stage_summary[$s] ?? "0"; ?>
-                            </span>
+                                    <div class="stage-icon rounded-circle d-flex align-items-center justify-content-center 
+                                        <?php echo $stage_summary[$s] > 0 ? 'bg-primary text-white' : 'bg-light text-muted'; ?>">
+                                        <?php
+                                        // Choose appropriate icon for each stage
+                                        $icon = 'fa-clipboard-list';
+                                        switch($s) {
+                                            case 'Coupe': $icon = 'fa-cut'; break;
+                                            case 'V1': case 'V2': case 'V3': $icon = 'fa-shirt'; break;
+                                            case 'Pantalon': $icon = 'fa-socks'; break;
+                                            case 'Repassage': $icon = 'fa-screwdriver-wrench'; break;
+                                            case 'P_ fini': $icon = 'fa-medal'; break;
+                                            case 'Exported': $icon = 'fa-shipping-fast'; break;
+                                        }
+                                        ?>
+                                        <i class="fas <?php echo $icon; ?>"></i>
+                                    </div>
+                                    
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="fw-bold mb-0"><?php echo htmlspecialchars($s); ?></h6>
+                                    <div class="mt-2">
+                                        <span class="badge fs-6 <?php echo $stage_summary[$s] > 0 ? 'bg-primary' : 'bg-secondary'; ?> d-block py-2">
+                                            <?php echo $stage_summary[$s]; ?>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer p-2 bg-transparent">
+                            <div class="progress" style="height: 5px;">
+                                <?php 
+                                $total = array_sum($stage_summary);
+                                $percentage = $total > 0 ? ($stage_summary[$s] / $total) * 100 : 0;
+                                ?>
+                                <div class="progress-bar bg-primary" role="progressbar" 
+                                     style="width: <?php echo $percentage; ?>%" 
+                                     aria-valuenow="<?php echo $percentage; ?>" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100"></div>
+                            </div>
                         </div>
                     </div>
-                <?php endforeach; ?>
-            </div>
+                </div>
+            <?php endforeach; ?>
         </div>
     </div>
 </div>
+
 
     <div class="export-button-container">
         <form method="GET" action="export_excel.php">
@@ -171,7 +221,7 @@ require "scantoday_settings.php";
             <input type="hidden" name="stage" value="<?php echo htmlspecialchars($stage ?? ''); ?>">
             <input type="hidden" name="date" value="<?php echo htmlspecialchars($date ?? date('Y-m-d')); ?>">
             
-            <button type="submit" class="btn btn-success mb-2">
+            <button type="submit" class="btn btn-success mb-2" <?php echo empty($grouped_results) ? 'disabled' : ''; ?>>
                 <i class="fas fa-file-excel"></i> Export to Excel
             </button>
         </form>
@@ -450,9 +500,44 @@ require "scantoday_settings.php";
         </div>
     </div>
     
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay">
+        <div class="d-flex flex-column bg-white align-items-center">
+            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
+            <h5 class="mt-3 mb-2 text-center text-dark" style="font-size: 1.25rem;">
+                Processing Your Request...
+            </h5>
+            <p class="text-muted text-center" style="max-width: 300px; line-height: 1.4;">
+                This may take a moment depending on data size.
+            </p>
+        </div>
+    </div>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
+    <!-- Loading Screen Script -->
+        
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show loading overlay on page load
+            document.getElementById('loadingOverlay').style.display = 'flex';
+
+            // Hide when page is fully loaded
+            window.addEventListener('load', function() {
+                document.getElementById('loadingOverlay').style.display = 'none';
+            });
+
+            // Existing code for forms and reset buttons
+            document.querySelectorAll('form').forEach(form => {
+                form.addEventListener('submit', () => document.getElementById('loadingOverlay').style.display = 'flex');
+            });
+            document.querySelectorAll('a.btn-secondary').forEach(link => {
+                link.addEventListener('click', () => document.getElementById('loadingOverlay').style.display = 'flex');
+            });
+        });
+    </script>
+
     <!-- Auto-Calculate Script -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -495,6 +580,17 @@ require "scantoday_settings.php";
     });
     </script>
     
+        
+    <!-- Initialize tooltips - add to your script section -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+
     <?php include 'includes/footer.php'; ?>
 </body>
 </html>

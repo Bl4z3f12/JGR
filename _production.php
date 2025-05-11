@@ -1,14 +1,9 @@
 <?php
 $current_view = 'production.php';
-
 $host = "localhost";
 $dbname = "jgr";
 $username = "root";
 $password = "";
-
-require_once 'auth_functions.php';
-
-requireLogin('login.php');
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
@@ -257,7 +252,7 @@ $daily_items = $daily_items_stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Production Stage</title>
+    <title>Production Stage Dashboard</title>
     
     <?php include 'includes/head.php'; ?>
 
@@ -267,20 +262,18 @@ $daily_items = $daily_items_stmt->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body class="bg-light">
 
-<!-- Loading Overlay -->
-<div id="loadingOverlay">
-        <div class="d-flex flex-column bg-white align-items-center">
-            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
-            <div class="txt">
-                <h5 class="mt-3 mb-2 text-center text-dark" style="font-size: 1.25rem;">
-                    Processing Your Request...
-                </h5>
-                <p class="text-muted text-center" >
-                    This may take a moment depending on data size.
-                </p>
-            </div>
+<div id="loadingOverlay" class="position-fixed top-0 start-0 w-100 h-100 bg-white bg-opacity-75 d-none align-items-center justify-content-center" style="z-index: 9999;">
+    <div class="text-center p-4 bg-white rounded shadow">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
         </div>
+        <h5 class="mt-3">Processing your request...</h5>
+        <p>
+            Please wait while we update the production data. <br>
+            This may take some time depending on the size of the data.
+        </p>
     </div>
+</div>
 
 <?php include 'includes/sidebar.php'; ?>
     <div class="main-content position-relative">
@@ -292,52 +285,59 @@ $daily_items = $daily_items_stmt->fetchAll(PDO::FETCH_ASSOC);
         
         <div class="row mb-0">
             <div class="col-12">
-                <div class="card-body">
-                    <h1 class="mb-0" style="font-size: 18px;">Production Stage</h1>
+                <div class="card"><!-- Added missing card element -->
+                    <div class="card-body">
+                        <h1 class="mb-0" style="font-size: 18px;">Production Stage</h1>
 
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="alert alert-info d-flex align-items-center mt-2 mb-2" role="alert">
-                                <i class="bi bi-database-fill-lock dbico"></i>
-                                <div>
-                                    <strong>Data Retention Notice:</strong> Production history records are automatically archived and permanently deleted 30 days after creation. Once purged, this data cannot be retrieved or reconstructed through any means.
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="alert alert-info d-flex align-items-center mt-2 mb-2" role="alert">
+                                    <i class="bi bi-database-fill-lock me-2"></i>
+                                    <div>
+                                        <strong>Data Retention Notice:</strong> Production history records are automatically archived and permanently deleted 30 days after creation. Once purged, this data cannot be retrieved or reconstructed through any means.
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
                         
 
-                    <div class="filter-section">
-                        <form method="GET" class="row g-2 align-items-center" id="filterForm">
-                            
-                            <!-- Label -->
-                            <div class="col-auto">
-                                <label for="date" class="form-label mb-0">Date:</label>
-                            </div>
-                            
-                            <!-- Prev/Next + Date Picker -->
-                            <!-- Date Picker -->
-                            <div class="col-auto">
-                                <div class="input-group">
-                                    <input
-                                        type="date"
-                                        class="form-control"
-                                        id="date"
-                                        name="date"
-                                        value="<?php echo isset($filter_date) ? htmlspecialchars($filter_date) : date('Y-m-d'); ?>"
-                                        >
+                        <div class="filter-section">
+                            <form method="GET" class="row g-2 align-items-center" id="filterForm">
+                                
+                                <!-- Label -->
+                                <div class="col-auto">
+                                    <label for="date" class="form-label mb-0">Date:</label>
                                 </div>
-                            </div>
-                            
-                            <!-- Submit / Reset -->
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Apply Filter</button>
-                                <a href="<?php echo $_SERVER['PHP_SELF']; ?>" class="btn btn-secondary ms-2"><i class="fas fa-broom"></i> Reset</a>
-                            </div>
+                                
+                                <!-- Prev/Next + Date Picker -->
+                                <div class="col-auto">
+                                    <div class="input-group">
+                                        <button type="button" class="btn btn-outline-secondary" id="prevDay">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </button>
+                                        <input
+                                            type="date"
+                                            class="form-control"
+                                            id="date"
+                                            name="date"
+                                            value="<?php echo isset($filter_date) ? htmlspecialchars($filter_date) : date('Y-m-d'); ?>"
+                                            >
+                                        <button type="button" class="btn btn-outline-secondary" id="nextDay">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Submit / Reset -->
+                                <div class="col-auto">
+                                    <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Apply Filter</button>
+                                    <a href="<?php echo $_SERVER['PHP_SELF']; ?>" class="btn btn-secondary ms-2"><i class="fas fa-broom"></i> Reset</a>
+                                </div>
 
-                        </form>
+                            </form>
+                        </div>
+
                     </div>
-
                 </div>
             </div>
         </div>
@@ -346,7 +346,7 @@ $daily_items = $daily_items_stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="col-12">
                 <div class="card shadow-sm">
                     <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0">Production Date: <?php echo isset($filter_date) ? htmlspecialchars(date('d/m/Y', strtotime($filter_date))) : htmlspecialchars(date('d/m/Y')); ?></h4>
+                        <h4 class="mb-0">Selected Date: <?php echo isset($filter_date) ? htmlspecialchars(date('d/m/Y', strtotime($filter_date))) : htmlspecialchars(date('d/m/Y')); ?></h4>
                     </div>
                     <div class="card-body">
                         <?php
@@ -398,19 +398,14 @@ $daily_items = $daily_items_stmt->fetchAll(PDO::FETCH_ASSOC);
                                     }
                                 
                                     // Replace getBadgeColor function with if-else logic
-                                    
                                     if($current > 900) {
                                         $badgeClass = "bg-success";
-                                        $moodEmoji = '<i class="fas fa-smile text-success fa-2x"></i>';
                                     } elseif($current >= 700) {
-                                        $badgeClass = "bg-warning";
-                                        $moodEmoji = '<i class="fas fa-meh text-warning fa-2x"></i>';
+                                        $badgeClass = "bg-primary";
                                     } else {
-                                        $badgeClass = "bg-danger";
-                                        $moodEmoji = '<i class="fas fa-angry text-danger fa-2x"></i>';
+                                        $badgeClass = "bg-warning text-dark";
                                     }
-                                    ?>
-
+                            ?>
                                 <div class="col-xl-3 col-lg-4 col-md-6">
                                     <div class="card h-100 bg-<?php echo htmlspecialchars($properties['color']); ?> text-white">
                                         <div class="card-body">
@@ -420,7 +415,7 @@ $daily_items = $daily_items_stmt->fetchAll(PDO::FETCH_ASSOC);
                                                     <?php echo htmlspecialchars($stage); ?>
                                                 </h5>
                                                 <div>
-                                                    <span class="fs-5"><?php echo $moodEmoji; ?></span>
+                                                    <span class="fs-4"><?php echo $moodEmoji; ?></span>
                                                 </div>
                                             </div>
                                             
@@ -592,23 +587,45 @@ $daily_items = $daily_items_stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
-
     <script>
-        <?php if (isset($has_data) && $has_data): ?>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterForm = document.getElementById('filterForm');
+        const dateInput = document.getElementById('date');
+        const prevDayBtn = document.getElementById('prevDay');
+        const nextDayBtn = document.getElementById('nextDay');
+        
+        dateInput.addEventListener('change', function() {
+            filterForm.submit();
+        });
+        
+        prevDayBtn.addEventListener('click', function() {
+            const currentDate = new Date(dateInput.value);
+            currentDate.setDate(currentDate.getDate() - 1);
+            dateInput.value = currentDate.toISOString().split('T')[0];
+            filterForm.submit();
+        });
+        
+        nextDayBtn.addEventListener('click', function() {
+            const currentDate = new Date(dateInput.value);
+            currentDate.setDate(currentDate.getDate() + 1);
+            dateInput.value = currentDate.toISOString().split('T')[0];
+            filterForm.submit();
+        });
+        
+        <?php if (isset($has_data) && $has_data && isset($chart_data)): ?>
         // Pie Chart
         const pieCtx = document.getElementById('pieChart').getContext('2d');
-        new Chart(pieCtx, {
+        const pieChart = new Chart(pieCtx, {
             type: 'pie',
             data: {
-                labels: <?php echo json_encode($chart_data['labels']); ?>,
+                labels: <?php echo json_encode($chart_data['labels'] ?? []); ?>,
                 datasets: [{
-                    data: <?php echo json_encode($chart_data['current']); ?>,
+                    data: <?php echo json_encode($chart_data['current'] ?? []); ?>,
                     backgroundColor: [
-                        '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', 
-                        '#e74a3b', '#858796', '#5a5c69', '#3a3b45'
+                        '#007bff', '#28a745', '#dc3545', '#ffc107', 
+                        '#17a2b8', '#6c757d', '#343a40', '#6610f2'
                     ],
-                    hoverBorderColor: "rgba(255, 255, 255, 1)",
+                    borderWidth: 1
                 }]
             },
             options: {
@@ -616,98 +633,65 @@ $daily_items = $daily_items_stmt->fetchAll(PDO::FETCH_ASSOC);
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: 'bottom'
+                        position: 'right',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Current Items by Stage'
                     }
                 }
             }
         });
-
+        
         // Bar Chart
         const barCtx = document.getElementById('barChart').getContext('2d');
-        new Chart(barCtx, {
+        const barChart = new Chart(barCtx, {
             type: 'bar',
             data: {
-                labels: <?php echo json_encode($chart_data['labels']); ?>,
-                datasets: [
-                    {
-                        label: 'Items In',
-                        data: <?php echo json_encode($chart_data['in']); ?>,
-                        backgroundColor: '#1cc88a',
-                    },
-                    {
-                        label: 'Items Out {prod}',
-                        data: <?php echo json_encode($chart_data['out']); ?>,
-                        backgroundColor: '#e74a3b',
-                    }
-                ]
+                labels: <?php echo json_encode($chart_data['labels'] ?? []); ?>,
+                datasets: [{
+                    label: 'Items In',
+                    data: <?php echo json_encode($chart_data['in'] ?? []); ?>,
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'Items Out',
+                    data: <?php echo json_encode($chart_data['out'] ?? []); ?>,
+                    backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    x: {
-                        stacked: false,
-                    },
                     y: {
-                        stacked: false,
                         beginAtZero: true
                     }
                 },
                 plugins: {
-                    legend: {
-                        position: 'top'
+                    title: {
+                        display: true,
+                        text: 'Items In vs Items Out by Stage'
                     }
                 }
             }
         });
         <?php endif; ?>
-    </script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const filterForm = document.getElementById('filterForm');
-            const dateInput = document.getElementById('date');
-            const loadingOverlay = document.getElementById('loadingOverlay');
-            const resetButton = document.querySelector('a.btn-secondary');
+        // Show loading overlay for any filter action
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.remove('d-none');
+            document.getElementById('loadingOverlay').classList.add('d-flex');
+        }
 
-            // Show loading overlay function
-            function showLoading() {
-                loadingOverlay.classList.remove('d-none');
-                loadingOverlay.classList.add('d-flex');
-            }
-
-            // Date picker change
-            dateInput.addEventListener('change', function() {
-                showLoading();
-                filterForm.submit();
-            });
-
-            // Form submit
-            filterForm.addEventListener('submit', showLoading);
-
-            // Reset button click
-            resetButton.addEventListener('click', function(e) {
-                showLoading();
-                // Add slight delay to ensure overlay shows before reload
-                setTimeout(() => true, 50);
-            });
-
-            // Hide loading when page fully loads
-            window.addEventListener('load', () => {
-                loadingOverlay.classList.add('d-none');
-                loadingOverlay.classList.remove('d-flex');
-            });
-            // Add production nav link handler
-            const productionNavLink = document.getElementById('productionNavLink');
-            if (productionNavLink) {
-                productionNavLink.addEventListener('click', showLoading);
-            }
-
-            function showLoading() {
-                document.getElementById('loadingOverlay').classList.remove('d-none');
-                document.getElementById('loadingOverlay').classList.add('d-flex');
-            }
-        });
+        // Attach to all filter actions
+        prevDayBtn.addEventListener('click', showLoading);
+        nextDayBtn.addEventListener('click', showLoading);
+        filterForm.addEventListener('submit', showLoading);
+    });
     </script>
 
     <?php include 'includes/footer.php'; ?>

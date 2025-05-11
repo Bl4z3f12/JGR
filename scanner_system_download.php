@@ -8,6 +8,7 @@ requireLogin('login.php');
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <title>Download Scanner System</title>
     <?php include 'includes/head.php'; ?>
 </head>
 <body>

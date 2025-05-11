@@ -50,3 +50,64 @@
 .form-label {
     margin-bottom: 4px;
 }
+/* Loading Overlay Styles */
+#loadingOverlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgb(255, 255, 255);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+#loadingOverlay .spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+#loadingOverlay h5 {
+    font-size: 1.25rem;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--bs-dark);
+    text-align: center;
+}
+
+#loadingOverlay p {
+    max-width: 300px;
+    line-height: 1.4;
+    color: var(--bs-secondary-color);
+    text-align: center;
+    margin: 0 auto;
+}
+
+/* Ensures proper spacing for the loading content */
+#loadingOverlay .d-flex.flex-column {
+    gap: 0.5rem;
+}
+
+.stage-icon {
+    width: 40px;
+    height: 40px;
+}
+
+/* Fix for missing iron icon (if font-awesome doesn't have it) */
+.fa-iron:before {
+    content: "\f06e";  /* Using an eye icon as fallback */
+}
+
+.progress-bar {
+    transition: width 1s ease-in-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767.98px) {
+    .stage-icon {
+        width: 35px;
+        height: 35px;
+    }
+}
