@@ -177,15 +177,9 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
         $total_main_quantity += $row['total_main_quantity'] ?? 0;
     }
 
-    // Excel directory
-    $excel_dir = __DIR__ . '/excel';
-    if (!file_exists($excel_dir)) {
-        mkdir($excel_dir, 0777, true);
-    }
-
+    // Excel file preparation
     $filename = 'export_data_' . date('Y-m-d_H-i-s') . '.xlsx';
-    $filepath = $excel_dir . '/' . $filename;
-
+    
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
     $sheet->setTitle('Export Data');
@@ -286,67 +280,31 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
 
     $sheet->getStyle('F' . $totalRow . ':I' . $totalRow)->getNumberFormat()->setFormatCode('#,##0');
 
+    // Create a temporary file
+    $temp_file = tempnam(sys_get_temp_dir(), 'excel_');
+    
+    // Save the spreadsheet to the temporary file
     $writer = new Xlsx($spreadsheet);
-    $writer->save($filepath);
-
-    // Output HTML
-    echo '<!DOCTYPE html>
-    <html>
-    <head>
-        <title>Export Successful</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                line-height: 1.6;
-                margin: 20px;
-            }
-            .success-box {
-                background-color: #d4edda;
-                border: 1px solid #c3e6cb;
-                color: #155724;
-                padding: 15px;
-                border-radius: 5px;
-                margin-bottom: 20px;
-            }
-            .btn {
-                display: inline-block;
-                padding: 8px 16px;
-                background-color: #007bff;
-                color: white;
-                text-decoration: none;
-                border-radius: 4px;
-                margin-right: 10px;
-            }
-            .btn:hover {
-                background-color: #0069d9;
-            }
-            .btn-secondary {
-                background-color: #6c757d;
-            }
-            .btn-secondary:hover {
-                background-color: #5a6268;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="success-box">
-            Excel file has been saved successfully in XLSX format.
-        </div>
-        
-        <h3>File details:</h3>
-        <p>
-            <strong>Filename:</strong> ' . htmlspecialchars($filename) . '<br>
-            <strong>Path:</strong> ' . htmlspecialchars($filepath) . '<br>
-            <strong>Records:</strong> ' . count($results_for_export) . '
-        </p>
-        
-        <p>
-            <a href="excel/' . htmlspecialchars($filename) . '" download class="btn">Download Excel File</a>
-            <a href="javascript:history.back()" class="btn btn-secondary">Go Back</a>
-        </p>
-    </body>
-    </html>';
-
+    $writer->save($temp_file);
+    
+    // Output headers for direct download
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Content-Length: ' . filesize($temp_file));
+    header('Cache-Control: max-age=0');
+    
+    // Clear the output buffer
+    if (ob_get_level()) {
+        ob_end_clean();
+    }
+    
+    // Output the file
+    readfile($temp_file);
+    
+    // Delete the temporary file
+    unlink($temp_file);
+    
+    // Stop script execution
     exit;
 }
 ?>

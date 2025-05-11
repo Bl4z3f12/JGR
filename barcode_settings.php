@@ -277,7 +277,7 @@ require_once 'settings.php';
                                             <select class="form-select form-select-sm" id="bulk_stage" name="bulk_stage">
                                                 <option value="">Select Stage</option>
                                                 <?php
-                                                $stage_options = ['Coupe', 'V1', 'V2', 'V3', 'Pantalon', 'Repassage', 'P_ fini','Exported'];
+                                                $stage_options = ['Coupe', 'V1', 'V2', 'V3', 'Pantalon', 'AMF', 'Repassage', 'P_ fini','Exported'];
                                                 foreach ($stage_options as $option): ?>
                                                     <option value="<?php echo htmlspecialchars($option); ?>"><?php echo htmlspecialchars($option); ?></option>
                                                 <?php endforeach; ?>

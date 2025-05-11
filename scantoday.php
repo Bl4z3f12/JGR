@@ -261,6 +261,7 @@ require "scantoday_settings.php";
                                             case 'Coupe': $icon = 'fa-cut'; break;
                                             case 'V1': case 'V2': case 'V3': $icon = 'fa-shirt'; break;
                                             case 'Pantalon': $icon = 'fa-socks'; break;
+                                            case 'AMF': $icon = 'bi-stoplights-fill'; break;
                                             case 'Repassage': $icon = 'fa-screwdriver-wrench'; break;
                                             case 'P_ fini': $icon = 'fa-medal'; break;
                                             case 'Exported': $icon = 'fa-shipping-fast'; break;
@@ -621,12 +622,46 @@ require "scantoday_settings.php";
 
             // Existing code for forms and reset buttons
             document.querySelectorAll('form').forEach(form => {
-                form.addEventListener('submit', () => document.getElementById('loadingOverlay').style.display = 'flex');
+                form.addEventListener('submit', function(e) {
+                    // Check if it's the Excel export form
+                    if (form.action && form.action.includes('export_excel.php')) {
+                        // For Excel export, show the overlay but hide it after a short delay
+                        document.getElementById('loadingOverlay').style.display = 'flex';
+                        setTimeout(function() {
+                            document.getElementById('loadingOverlay').style.display = 'none';
+                        }, 3000); // Hide after 3 seconds, assuming download has started
+                    } else {
+                        // For regular forms
+                        document.getElementById('loadingOverlay').style.display = 'flex';
+                    }
+                });
             });
+            
+            // Add specific handling for export to Excel button
+            document.querySelectorAll('button[type="submit"][name="export"]').forEach(button => {
+                button.addEventListener('click', function() {
+                    document.getElementById('loadingOverlay').style.display = 'flex';
+                    setTimeout(function() {
+                        document.getElementById('loadingOverlay').style.display = 'none';
+                    }, 3000); // Hide after 3 seconds, assuming download has started
+                });
+            });
+            
+            // Add specific handling for Export to Excel link in the form
+            document.querySelectorAll('form[action="export_excel.php"]').forEach(form => {
+                form.addEventListener('submit', function() {
+                    document.getElementById('loadingOverlay').style.display = 'flex';
+                    setTimeout(function() {
+                        document.getElementById('loadingOverlay').style.display = 'none';
+                    }, 3000); // Hide after 3 seconds, assuming download has started
+                });
+            });
+            
             document.querySelectorAll('a.btn-secondary').forEach(link => {
                 link.addEventListener('click', () => document.getElementById('loadingOverlay').style.display = 'flex');
             });
         });
+
     </script>
 
     <!-- Auto-Calculate Script -->

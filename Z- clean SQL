@@ -1,16 +1,10 @@
--- phpMyAdmin SQL Dump
--- version 5.2.1
--- https://www.phpmyadmin.net/
---
--- Hôte : 127.0.0.1
--- Généré le : ven. 09 mai 2025 à 17:41
--- Version du serveur : 10.4.32-MariaDB
--- Version de PHP : 8.2.12
+-- Clean SQL Database Structure for JGR
+-- Version: 1.0
+-- Date: May 11, 2025
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
-
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -18,14 +12,15 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Base de données : `jgr`
+-- Database: `jgr`
 --
 
 DELIMITER $$
 --
--- Procédures
+-- Procedures
 --
-CREATE DEFINER=`root`@`localhost` PROCEDURE `get_all_stage_statistics` ()   BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `get_all_stage_statistics` ()   
+BEGIN
     -- Define the stages
     SET @stages = 'Coupe,V1,V2,V3,Pantalon,Repassage,P_fini,Exported';
     
@@ -78,7 +73,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `get_all_stage_statistics` ()   BEGI
     DROP TEMPORARY TABLE temp_stage_stats;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `get_stage_statistics` (IN `stage_name` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `get_stage_statistics` (IN `stage_name` VARCHAR(100))   
+BEGIN
     -- Current count in this stage
     SELECT COUNT(*) INTO @current 
     FROM barcodes 
@@ -106,13 +102,14 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `get_stage_statistics` (IN `stage_na
         END AS completion_percentage;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_cleanup_history_tables` ()   BEGIN
-    -- Delete records older than 3 months from both history tables
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_cleanup_history_tables` ()   
+BEGIN
+    -- Delete records older than 30 days from both history tables
     DELETE FROM jgr_quantity_coupe_history
-    WHERE action_time < DATE_SUB(NOW(), INTERVAL 3 MONTH);
+    WHERE action_time < DATE_SUB(NOW(), INTERVAL 30 DAY);
    
     DELETE FROM jgr_barcodes_history
-    WHERE action_time < DATE_SUB(NOW(), INTERVAL 3 MONTH);
+    WHERE action_time < DATE_SUB(NOW(), INTERVAL 30 DAY);
    
     -- Optional: Log the cleanup operation
     SELECT CONCAT('History tables cleaned up at ', NOW()) AS cleanup_log;
@@ -123,7 +120,7 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
--- Structure de la table `barcodes`
+-- Table structure for `barcodes`
 --
 
 CREATE TABLE `barcodes` (
@@ -141,20 +138,23 @@ CREATE TABLE `barcodes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Déclencheurs `barcodes`
+-- Triggers for table `barcodes`
 --
 DELIMITER $$
-CREATE TRIGGER `tr_barcode_stage_change` AFTER UPDATE ON `barcodes` FOR EACH ROW BEGIN
+CREATE TRIGGER `tr_barcode_stage_change` AFTER UPDATE ON `barcodes` FOR EACH ROW 
+BEGIN
     -- Only record if the stage has changed
     IF OLD.stage != NEW.stage THEN
         INSERT INTO barcode_movements (barcode_id, from_stage, to_stage, user_id)
-        VALUES (NEW.id, OLD.stage, NEW.stage, NULL); -- User ID would be set in your application
+        VALUES (NEW.id, OLD.stage, NEW.stage, NULL);
     END IF;
 END
 $$
 DELIMITER ;
+
 DELIMITER $$
-CREATE TRIGGER `tr_barcodes_delete` AFTER DELETE ON `barcodes` FOR EACH ROW BEGIN
+CREATE TRIGGER `tr_barcodes_delete` AFTER DELETE ON `barcodes` FOR EACH ROW 
+BEGIN
     INSERT INTO jgr_barcodes_history (
         action_type, id, of_number, size, category, piece_name,
         order_str, status, stage, chef, full_barcode_name, last_update
@@ -166,8 +166,10 @@ CREATE TRIGGER `tr_barcodes_delete` AFTER DELETE ON `barcodes` FOR EACH ROW BEGI
 END
 $$
 DELIMITER ;
+
 DELIMITER $$
-CREATE TRIGGER `tr_barcodes_insert` AFTER INSERT ON `barcodes` FOR EACH ROW BEGIN
+CREATE TRIGGER `tr_barcodes_insert` AFTER INSERT ON `barcodes` FOR EACH ROW 
+BEGIN
     INSERT INTO jgr_barcodes_history (
         action_type, id, of_number, size, category, piece_name,
         order_str, status, stage, chef, full_barcode_name, last_update
@@ -179,8 +181,10 @@ CREATE TRIGGER `tr_barcodes_insert` AFTER INSERT ON `barcodes` FOR EACH ROW BEGI
 END
 $$
 DELIMITER ;
+
 DELIMITER $$
-CREATE TRIGGER `tr_barcodes_update` AFTER UPDATE ON `barcodes` FOR EACH ROW BEGIN
+CREATE TRIGGER `tr_barcodes_update` AFTER UPDATE ON `barcodes` FOR EACH ROW 
+BEGIN
     INSERT INTO jgr_barcodes_history (
         action_type, id, of_number, size, category, piece_name,
         order_str, status, stage, chef, full_barcode_name, last_update
@@ -196,7 +200,7 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
--- Structure de la table `barcode_movements`
+-- Table structure for `barcode_movements`
 --
 
 CREATE TABLE `barcode_movements` (
@@ -211,7 +215,7 @@ CREATE TABLE `barcode_movements` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `jgr_barcodes_history`
+-- Table structure for `jgr_barcodes_history`
 --
 
 CREATE TABLE `jgr_barcodes_history` (
@@ -234,7 +238,7 @@ CREATE TABLE `jgr_barcodes_history` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `jgr_quantity_coupe_history`
+-- Table structure for `jgr_quantity_coupe_history`
 --
 
 CREATE TABLE `jgr_quantity_coupe_history` (
@@ -259,7 +263,7 @@ CREATE TABLE `jgr_quantity_coupe_history` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `quantity_coupe`
+-- Table structure for `quantity_coupe`
 --
 
 CREATE TABLE `quantity_coupe` (
@@ -279,10 +283,11 @@ CREATE TABLE `quantity_coupe` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Déclencheurs `quantity_coupe`
+-- Triggers for table `quantity_coupe`
 --
 DELIMITER $$
-CREATE TRIGGER `tr_quantity_coupe_delete` AFTER DELETE ON `quantity_coupe` FOR EACH ROW BEGIN
+CREATE TRIGGER `tr_quantity_coupe_delete` AFTER DELETE ON `quantity_coupe` FOR EACH ROW 
+BEGIN
     INSERT INTO jgr_quantity_coupe_history (
         action_type, id, of_number, size, category, piece_name,
         solped_client, pedido_client, color_tissus, principale_quantity,
@@ -296,8 +301,10 @@ CREATE TRIGGER `tr_quantity_coupe_delete` AFTER DELETE ON `quantity_coupe` FOR E
 END
 $$
 DELIMITER ;
+
 DELIMITER $$
-CREATE TRIGGER `tr_quantity_coupe_insert` AFTER INSERT ON `quantity_coupe` FOR EACH ROW BEGIN
+CREATE TRIGGER `tr_quantity_coupe_insert` AFTER INSERT ON `quantity_coupe` FOR EACH ROW 
+BEGIN
     INSERT INTO jgr_quantity_coupe_history (
         action_type, id, of_number, size, category, piece_name,
         solped_client, pedido_client, color_tissus, principale_quantity,
@@ -311,8 +318,10 @@ CREATE TRIGGER `tr_quantity_coupe_insert` AFTER INSERT ON `quantity_coupe` FOR E
 END
 $$
 DELIMITER ;
+
 DELIMITER $$
-CREATE TRIGGER `tr_quantity_coupe_update` AFTER UPDATE ON `quantity_coupe` FOR EACH ROW BEGIN
+CREATE TRIGGER `tr_quantity_coupe_update` AFTER UPDATE ON `quantity_coupe` FOR EACH ROW 
+BEGIN
     INSERT INTO jgr_quantity_coupe_history (
         action_type, id, of_number, size, category, piece_name,
         solped_client, pedido_client, color_tissus, principale_quantity,
@@ -330,7 +339,7 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
--- Structure de la table `users`
+-- Table structure for `users`
 --
 
 CREATE TABLE `users` (
@@ -343,18 +352,11 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Déchargement des données de la table `users`
---
-
-INSERT INTO `users` (`id`, `username`, `password_hash`, `is_active`, `last_login`, `created_at`) VALUES
-(1, 'BL4Z3', '$2y$10$n1wVx/ulr3aJo0b57oMpduxYEM8Z2C2dM6Fv8V/TMH1RQEZvAE4Gi', 1, '2025-05-09 12:34:21', '2025-05-06 14:52:33');
-
---
--- Index pour les tables déchargées
+-- Indexes for dumped tables
 --
 
 --
--- Index pour la table `barcodes`
+-- Indexes for table `barcodes`
 --
 ALTER TABLE `barcodes`
   ADD PRIMARY KEY (`id`),
@@ -362,7 +364,7 @@ ALTER TABLE `barcodes`
   ADD KEY `idx_barcode_fields` (`of_number`,`size`,`category`,`piece_name`);
 
 --
--- Index pour la table `barcode_movements`
+-- Indexes for table `barcode_movements`
 --
 ALTER TABLE `barcode_movements`
   ADD PRIMARY KEY (`id`),
@@ -371,100 +373,102 @@ ALTER TABLE `barcode_movements`
   ADD KEY `idx_movements_stages` (`from_stage`,`to_stage`);
 
 --
--- Index pour la table `jgr_barcodes_history`
+-- Indexes for table `jgr_barcodes_history`
 --
 ALTER TABLE `jgr_barcodes_history`
   ADD PRIMARY KEY (`history_id`);
 
 --
--- Index pour la table `jgr_quantity_coupe_history`
+-- Indexes for table `jgr_quantity_coupe_history`
 --
 ALTER TABLE `jgr_quantity_coupe_history`
   ADD PRIMARY KEY (`history_id`);
 
 --
--- Index pour la table `quantity_coupe`
+-- Indexes for table `quantity_coupe`
 --
 ALTER TABLE `quantity_coupe`
   ADD PRIMARY KEY (`id`),
   ADD KEY `fk_quantity_coupe_barcode` (`of_number`,`size`,`category`,`piece_name`);
 
 --
--- Index pour la table `users`
+-- Indexes for table `users`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `username` (`username`);
 
 --
--- AUTO_INCREMENT pour les tables déchargées
+-- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT pour la table `barcodes`
+-- AUTO_INCREMENT for table `barcodes`
 --
 ALTER TABLE `barcodes`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1204;
 
 --
--- AUTO_INCREMENT pour la table `barcode_movements`
+-- AUTO_INCREMENT for table `barcode_movements`
 --
 ALTER TABLE `barcode_movements`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
--- AUTO_INCREMENT pour la table `jgr_barcodes_history`
+-- AUTO_INCREMENT for table `jgr_barcodes_history`
 --
 ALTER TABLE `jgr_barcodes_history`
   MODIFY `history_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT pour la table `jgr_quantity_coupe_history`
+-- AUTO_INCREMENT for table `jgr_quantity_coupe_history`
 --
 ALTER TABLE `jgr_quantity_coupe_history`
   MODIFY `history_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT pour la table `quantity_coupe`
+-- AUTO_INCREMENT for table `quantity_coupe`
 --
 ALTER TABLE `quantity_coupe`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT pour la table `users`
+-- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- Contraintes pour les tables déchargées
+-- Constraints for dumped tables
 --
 
 --
--- Contraintes pour la table `barcode_movements`
+-- Constraints for table `barcode_movements`
 --
 ALTER TABLE `barcode_movements`
   ADD CONSTRAINT `barcode_movements_ibfk_1` FOREIGN KEY (`barcode_id`) REFERENCES `barcodes` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `barcode_movements_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
--- Contraintes pour la table `quantity_coupe`
+-- Constraints for table `quantity_coupe`
 --
 ALTER TABLE `quantity_coupe`
   ADD CONSTRAINT `fk_quantity_coupe_barcode` FOREIGN KEY (`of_number`,`size`,`category`,`piece_name`) REFERENCES `barcodes` (`of_number`, `size`, `category`, `piece_name`) ON UPDATE CASCADE;
 
 DELIMITER $$
 --
--- Évènements
+-- Events
 --
-CREATE DEFINER=`root`@`localhost` EVENT `evt_cleanup_quantity_coupe_history` ON SCHEDULE EVERY 1 MONTH STARTS '2025-05-07 15:49:33' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
+CREATE DEFINER=`root`@`localhost` EVENT `evt_cleanup_quantity_coupe_history` ON SCHEDULE EVERY 1 MONTH STARTS '2025-05-11 00:00:00' ON COMPLETION NOT PRESERVE ENABLE DO 
+BEGIN
     DELETE FROM jgr_quantity_coupe_history
-    WHERE action_time < DATE_SUB(NOW(), INTERVAL 3 MONTH);
+    WHERE action_time < DATE_SUB(NOW(), INTERVAL 30 DAY);
 END$$
 
-CREATE DEFINER=`root`@`localhost` EVENT `evt_cleanup_barcodes_history` ON SCHEDULE EVERY 1 MONTH STARTS '2025-05-07 15:49:33' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
+CREATE DEFINER=`root`@`localhost` EVENT `evt_cleanup_barcodes_history` ON SCHEDULE EVERY 1 MONTH STARTS '2025-05-11 00:00:00' ON COMPLETION NOT PRESERVE ENABLE DO 
+BEGIN
     DELETE FROM jgr_barcodes_history
-    WHERE action_time < DATE_SUB(NOW(), INTERVAL 3 MONTH);
+    WHERE action_time < DATE_SUB(NOW(), INTERVAL 30 DAY);
 END$$
 
 DELIMITER ;

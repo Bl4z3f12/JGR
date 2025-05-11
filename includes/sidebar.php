@@ -12,20 +12,18 @@
                 <div class="sidebar-item-icon"><i class="fa-solid fa-qrcode"></i></div>
                 Dashboard
             </a>
-
-
             <a href="scantoday.php" class="sidebar-item text-white <?php echo $current_view === 'scantoday.php' ? 'active' : ''; ?>" onclick="document.getElementById('loadingOverlay').style.display = 'flex'">
                 <div class="sidebar-item-icon"><img width="25" height="25" src="https://img.icons8.com/fluency-systems-filled/48/FFFFFF/barcode-scanner-2.png" alt="barcode-scanner-2"/></div>
                 Scanned Today
             </a>
-
-
             <a href="production.php" id="productionNavLink" class="sidebar-item text-white <?php echo $current_view === 'production.php' ? 'active' : ''; ?>">
                 <div class="sidebar-item-icon"><i class="bi bi-graph-up-arrow"></i></div>
                 Production <span style="font-size: 12px; font-style: italic;">&nbsp;[May Display Slowly]</span>
             </a>
-
-
+            <a href="solped_search.php" class="sidebar-item text-white <?php echo $current_view == 'solped_search.php' ? 'active' : ''; ?>">
+                <div class="sidebar-item-icon"><i class="fas fa-id-card"></i></div>
+                Search by Solped Client
+            </a>
             <a href="barcode_settings.php" class="sidebar-item text-white <?php echo $current_view === 'barcode_settings.php' ? 'active' : ''; ?>">
                 <div class="sidebar-item-icon"><i class="fa-solid fa-wrench"></i></div>
                 Barcodes Settings
@@ -74,6 +72,10 @@
                 <a href="production.php" id="productionNavLink" class="sidebar-item text-white <?php echo $current_view === 'production.php' ? 'active' : ''; ?>">
                     <div class="sidebar-item-icon"><i class="bi bi-graph-up-arrow"></i></div>
                     Production
+                </a>
+                <a href="solped_search.php" class="sidebar-item text-white <?php echo $current_view == 'solped_search.php' ? 'active' : ''; ?>">
+                    <div class="sidebar-item-icon"><i class="fas fa-id-card"></i></div>
+                    Search by Solped Client
                 </a>
                 <a href="barcode_settings.php" class="sidebar-item text-white <?php echo $current_view === 'barcode_settings.php' ? 'active' : ''; ?>">
                     <div class="sidebar-item-icon"><i class="fa-solid fa-wrench"></i></div>

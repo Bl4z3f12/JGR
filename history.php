@@ -481,7 +481,7 @@ function displayBarcodeData($result) {
             
                 
                 <div class="alert alert-warning text-start m-3" role="alert">
-                    <i class="fa-solid fa-triangle-exclamation"></i> <span class="fw-bold">Please Note:</span> History records (logs) are removed from our server after 3 months.
+                    <i class="fa-solid fa-triangle-exclamation"></i> <span class="fw-bold">Please Note:</span> History records (logs) are removed from our server after 30 Days
                 </div>
                 <!-- Search Form -->
 
@@ -560,7 +560,7 @@ function displayBarcodeData($result) {
                                         <select class="form-select" id="stage" name="stage">
                                             <option value="select">All Stages</option>
                                             <?php
-                                            $stage_options = ['Coupe', 'V1', 'V2', 'V3', 'Pantalon', 'Repassage', 'P_ fini'];
+                                            $stage_options = ['Coupe', 'V1', 'V2', 'V3', 'Pantalon', 'AMF', 'Repassage', 'P_ fini'];
                                             foreach ($stage_options as $option): ?>
                                                 <option value="<?php echo htmlspecialchars($option); ?>" 
                                                         <?php echo (isset($stage) && $stage === $option) ? 'selected' : ''; ?>>
