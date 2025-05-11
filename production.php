@@ -16,7 +16,7 @@ try {
         'Coupe' => [
             'icon' => '<i class="fas fa-cut"></i>',
             'color' => 'primary',
-            'emoji' => '<img src="assets/tiptop.png" alt="Coupe" style="width: 40px;">'
+            'emoji' => '<img src="assets/tiptop.png" alt="Coupe" style="width: 34px;">'
         ],
         'V1' => [
             'icon' => '<i class="fas fa-tshirt"></i>',
@@ -452,75 +452,61 @@ $daily_items = $daily_items_stmt->fetchAll(PDO::FETCH_ASSOC);
                                                 </span>
                                             </div>
                                             
+                                            <!-- Items In Section --><!-- Items In Detail Section -->
+                                            <!-- Items In Detail Section -->
                                             <div class="mt-3">
-                                                <div class="accordion" id="accordion-<?php echo str_replace(' ', '_', $stage); ?>">
-                                                    <div class="accordion-item bg-transparent border-0">
-                                                        <h2 class="accordion-header" id="heading-in-<?php echo str_replace(' ', '_', $stage); ?>">
-                                                            <button class="accordion-button collapsed py-1 bg-transparent text-white" type="button" data-bs-toggle="collapse" 
-                                                                    data-bs-target="#collapse-in-<?php echo str_replace(' ', '_', $stage); ?>" 
-                                                                    aria-expanded="false" aria-controls="collapse-in-<?php echo str_replace(' ', '_', $stage); ?>">
-                                                                <small>Items In Detail</small>
-                                                            </button>
-                                                        </h2>
-                                                        <div id="collapse-in-<?php echo str_replace(' ', '_', $stage); ?>" class="accordion-collapse collapse" 
-                                                             aria-labelledby="heading-in-<?php echo str_replace(' ', '_', $stage); ?>"
-                                                             data-bs-parent="#accordion-<?php echo str_replace(' ', '_', $stage); ?>-in">
-                                                            <div class="accordion-body p-2">
-                                                                <div>
-                                                                    <?php if (empty($from_stages)): ?>
-                                                                        <p class="text-white-50"><small>No incoming items</small></p>
-                                                                    <?php else: ?>
-                                                                        <ul class="list-group list-group-flush">
-                                                                            <?php foreach ($from_stages as $from_stage => $count): ?>
-                                                                                <li class="list-group-item py-1 bg-transparent text-white border-0">
-                                                                                    <small>
-                                                                                        <span class="fw-bold"><?php echo htmlspecialchars($from_stage); ?>:</span> 
-                                                                                        <?php echo $count; ?> items
-                                                                                    </small>
-                                                                                </li>
-                                                                            <?php endforeach; ?>
-                                                                        </ul>
-                                                                    <?php endif; ?>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="accordion mt-2" id="accordion-<?php echo str_replace(' ', '_', $stage); ?>-out">
-                                                    <div class="accordion-item bg-transparent border-0">
-                                                        <h2 class="accordion-header" id="heading-out-<?php echo str_replace(' ', '_', $stage); ?>">
-                                                            <button class="accordion-button collapsed py-1 bg-transparent text-white" type="button" data-bs-toggle="collapse" 
-                                                                    data-bs-target="#collapse-out-<?php echo str_replace(' ', '_', $stage); ?>" 
-                                                                    aria-expanded="false" aria-controls="collapse-out-<?php echo str_replace(' ', '_', $stage); ?>">
-                                                                <small>Items Out Detail</small>
-                                                            </button>
-                                                        </h2>
-                                                        <div id="collapse-out-<?php echo str_replace(' ', '_', $stage); ?>" class="accordion-collapse collapse" 
-                                                             aria-labelledby="heading-out-<?php echo str_replace(' ', '_', $stage); ?>"
-                                                             data-bs-parent="#accordion-<?php echo str_replace(' ', '_', $stage); ?>-out">
-                                                            <div class="accordion-body p-2">
-                                                                <div>
-                                                                    <?php if (empty($to_stages)): ?>
-                                                                        <p class="text-white-50"><small>No outgoing items</small></p>
-                                                                    <?php else: ?>
-                                                                        <ul class="list-group list-group-flush">
-                                                                            <?php foreach ($to_stages as $to_stage => $count): ?>
-                                                                                <li class="list-group-item py-1 bg-transparent text-white border-0">
-                                                                                    <small>
-                                                                                        <span class="fw-bold"><?php echo htmlspecialchars($to_stage); ?>:</span> 
-                                                                                        <?php echo $count; ?> items
-                                                                                    </small>
-                                                                                </li>
-                                                                            <?php endforeach; ?>
-                                                                        </ul>
-                                                                    <?php endif; ?>
-                                                                </div>
-                                                            </div>
-                                                        </div>
+                                                <button onclick="togglePanel('panel-in-<?= str_replace(' ', '_', $stage) ?>', this)" 
+                                                        class="btn btn-sm btn-outline-light w-100 text-start d-flex justify-content-between align-items-center">
+                                                    <span>Items In Detail</span>
+                                                    <i class="fas fa-chevron-down toggle-icon"></i>
+                                                </button>
+                                                <div id="panel-in-<?= str_replace(' ', '_', $stage) ?>" class="toggle-panel" style="display: none;">
+                                                    <div class="pt-2">
+                                                        <?php if (empty($from_stages)): ?>
+                                                            <p class="text-white-50"><small>No incoming items</small></p>
+                                                        <?php else: ?>
+                                                            <ul class="list-group list-group-flush">
+                                                                <?php foreach ($from_stages as $from_stage => $count): ?>
+                                                                    <li class="list-group-item py-1 bg-transparent text-white border-0">
+                                                                        <small>
+                                                                            <span class="fw-bold"><?= htmlspecialchars($from_stage) ?>:</span>
+                                                                            <?= $count ?> items
+                                                                        </small>
+                                                                    </li>
+                                                                <?php endforeach; ?>
+                                                            </ul>
+                                                        <?php endif; ?>
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            <!-- Items Out Section -->
+                                            <div class="mt-2">
+                                                <button onclick="togglePanel('panel-out-<?= str_replace(' ', '_', $stage) ?>', this)" 
+                                                        class="btn btn-sm btn-outline-light w-100 text-start d-flex justify-content-between align-items-center">
+                                                    <span>Items Out Detail [PRODUCTION]</span>
+                                                    <i class="fas fa-chevron-down toggle-icon"></i>
+                                                </button>
+                                                <div id="panel-out-<?= str_replace(' ', '_', $stage) ?>" class="toggle-panel" style="display: none;">
+                                                    <div class="pt-2">
+                                                        <?php if (empty($to_stages)): ?>
+                                                            <p class="text-white-50"><small>No outgoing items</small></p>
+                                                        <?php else: ?>
+                                                            <ul class="list-group list-group-flush">
+                                                                <?php foreach ($to_stages as $to_stage => $count): ?>
+                                                                    <li class="list-group-item py-1 bg-transparent text-white border-0">
+                                                                        <small>
+                                                                            <span class="fw-bold"><?= htmlspecialchars($to_stage) ?>:</span>
+                                                                            <?= $count ?> items
+                                                                        </small>
+                                                                    </li>
+                                                                <?php endforeach; ?>
+                                                            </ul>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                         </div>
                                     </div>
                                 </div>
@@ -606,12 +592,12 @@ $daily_items = $daily_items_stmt->fetchAll(PDO::FETCH_ASSOC);
                     {
                         label: 'Items In',
                         data: <?php echo json_encode($chart_data['in']); ?>,
-                        backgroundColor: '#1cc88a',
+                        backgroundColor: '#e74a3b', // Changed to red
                     },
                     {
-                        label: 'Items Out {prod}',
+                        label: 'Items Out {PRODUCTION}',
                         data: <?php echo json_encode($chart_data['out']); ?>,
-                        backgroundColor: '#e74a3b',
+                        backgroundColor: '#1cc88a', // Changed to green
                     }
                 ]
             },
@@ -675,6 +661,22 @@ $daily_items = $daily_items_stmt->fetchAll(PDO::FETCH_ASSOC);
             }
         });
     </script>
-    <?php include 'includes/footer.php'; ?>
+
+    <script>
+        function togglePanel(panelId, buttonElement) {
+            var panel = document.getElementById(panelId);
+            var icon = buttonElement.querySelector('.toggle-icon');
+            
+            if (panel.style.display === 'none') {
+                panel.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                panel.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+    </script>
+
+<?php include 'includes/footer.php'; ?>
 </body>
 </html>

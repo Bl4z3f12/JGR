@@ -317,6 +317,19 @@ requireLogin('login.php');
                 </div>
               </div>
             </div>
+
+            <div class="col-md-6">
+              <div class="version-card" data-version="p_fini">
+                <div class="version-icon">
+                <i class="fa-solid fa-star"></i>
+                </div>
+                <div class="version-details">
+                  <h6>AMF</h6>
+                  <span class="badge bg-info">v2.5.0</span>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>

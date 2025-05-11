@@ -138,6 +138,21 @@ html, body {
     }
 }
 
+
+
+
+
+.toggle-icon {
+    transition: transform 0.2s ease-in-out;
+}
+.toggle-panel {
+    overflow: hidden;
+}
+
+
+
+
+
 /* Medium Devices and Desktops (992px and up) */
 @media (min-width: 992px) {
     #loadingOverlay .d-flex.flex-column {
