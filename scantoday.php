@@ -6,11 +6,102 @@ requireLogin('login.php');
 // Get the requested tab
 $requested_tab = $_GET['tab'] ?? 'summary';
 
-// Only require login for the quantity_coupe tab
+
+// Only require login and IP check for the quantity_coupe tab
 if ($requested_tab == 'quantity_coupe') {
     requireLogin('login.php');
+    
+    // IP Restriction Logic
+    $allowed_ips = ['127.0.0.1', '192.168.1.130', '::1', 'NEW_IP_HERE'];
+    $client_ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
+    $client_ip = trim(explode(',', $client_ip)[0]);
+    $is_localhost = in_array($client_ip, ['127.0.0.1', '::1']) || 
+                   stripos($_SERVER['HTTP_HOST'], 'localhost') !== false;
+
+
+if (!$is_localhost && !in_array($client_ip, $allowed_ips)) {
+    die('
+   <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Access Denied</title>
+            <link rel="icon" href="assets/stop.ico" type="image/png">
+            <!-- Bootstrap CSS -->
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+            <!-- Font Awesome -->
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+            <!-- AdminLTE CSS -->
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css" rel="stylesheet">
+        </head>
+        <style>
+            body {
+                background-color: #f8f9fa;
+            }
+            .card {
+                margin: auto;
+            }
+            .message {
+                font-size: 1.2rem;
+                color:rgb(0, 0, 0);
+            }
+            .list-group a {
+                color:black;
+            }
+        </style>
+        <body class="bg-light d-flex flex-column justify-content-center align-items-center vh-100">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6 mx-auto text-center">
+                        <div class="card shadow">
+                            <div class="card-body p-5">
+                                <!-- Lock Icon -->
+                                <div class="mb-4">
+                                    <i class="fas fa-lock fa-4x text-danger"></i>
+                                </div>
+                                
+                                <!-- Message -->
+                                <div class="message">
+                                    <h1 class="mb-4">Oops! Access to this page is restricted</h1>
+                                    <p class="mb-4">You are not authorized to access this page. If you want full access to all services, contact the developer.</p>
+                                    
+                                    <div class="alert alert-info">
+                                        <h5><i class="fas fa-info-circle me-2"></i>You are authorized to access the following pages:</h5>
+                                        <div class="list-group mt-3">
+                                            <a href="scantoday.php" class="list-group-item list-group-item-action">
+                                                <i class="fas fa-file-alt me-2"></i>Scanned Today
+                                            </a>
+                                            <a href="production.php" class="list-group-item list-group-item-action">
+                                                <i class="fas fa-industry me-2"></i>Production
+                                            </a>
+                                            <a href="scanner_system_download.php" class="list-group-item list-group-item-action">
+                                                <i class="fas fa-download me-2"></i>Scanner System Download
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3 text-muted">
+                            <small>Please contact support if you need assistance</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bootstrap JS Bundle with Popper -->
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+            <!-- AdminLTE JS -->
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/js/adminlte.min.js"></script>
+        </body>
+        </html>
+    ');
+}   
 }
+
 require "scantoday_settings.php";
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -503,12 +594,12 @@ require "scantoday_settings.php";
     <!-- Loading Overlay -->
     <div id="loadingOverlay">
         <div class="d-flex flex-column bg-white align-items-center">
-            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
-            <h5 class="mt-3 mb-2 text-center text-dark" style="font-size: 1.25rem;">
+            <div class="spinner-border text-primary" ></div>
+            <h5 class="mt-3 mb-2 text-center text-dark">
                 Processing Your Request...
             </h5>
-            <p class="text-muted text-center" style="max-width: 300px; line-height: 1.4;">
-                This may take a moment depending on data size.
+            <p class="text-muted text-center" >
+                This may take a moment depending on data size
             </p>
         </div>
     </div>
@@ -540,44 +631,44 @@ require "scantoday_settings.php";
 
     <!-- Auto-Calculate Script -->
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Get references to the form elements
-        const form = document.getElementById('quantityForm');
-        if (!form) return; // Exit if the form doesn't exist on this page
-        
-        const mainQuantityInput = document.getElementById('principale_quantity');
-        const qtyCouperInput = document.getElementById('quantity_coupe');
-        const manqueInput = document.getElementById('manque');
-        const suvPlusInput = document.getElementById('suv_plus');
-        
-        // Function to calculate manque and suv_plus
-        function calculateDifferences() {
-            const mainQty = parseInt(mainQuantityInput.value) || 0;
-            const coupeQty = parseInt(qtyCouperInput.value) || 0;
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get references to the form elements
+            const form = document.getElementById('quantityForm');
+            if (!form) return; // Exit if the form doesn't exist on this page
             
-            // If quantity_coupe is less than principale_quantity, there's a shortage (manque)
-            // If quantity_coupe is more than principale_quantity, there's an excess (suv_plus)
-            if (coupeQty < mainQty) {
-                manqueInput.value = mainQty - coupeQty;
-                suvPlusInput.value = 0;
-            } else if (coupeQty > mainQty) {
-                suvPlusInput.value = coupeQty - mainQty;
-                manqueInput.value = 0;
-            } else {
-                // If they're equal, both are zero
-                manqueInput.value = 0;
-                suvPlusInput.value = 0;
+            const mainQuantityInput = document.getElementById('principale_quantity');
+            const qtyCouperInput = document.getElementById('quantity_coupe');
+            const manqueInput = document.getElementById('manque');
+            const suvPlusInput = document.getElementById('suv_plus');
+            
+            // Function to calculate manque and suv_plus
+            function calculateDifferences() {
+                const mainQty = parseInt(mainQuantityInput.value) || 0;
+                const coupeQty = parseInt(qtyCouperInput.value) || 0;
+                
+                // If quantity_coupe is less than principale_quantity, there's a shortage (manque)
+                // If quantity_coupe is more than principale_quantity, there's an excess (suv_plus)
+                if (coupeQty < mainQty) {
+                    manqueInput.value = mainQty - coupeQty;
+                    suvPlusInput.value = 0;
+                } else if (coupeQty > mainQty) {
+                    suvPlusInput.value = coupeQty - mainQty;
+                    manqueInput.value = 0;
+                } else {
+                    // If they're equal, both are zero
+                    manqueInput.value = 0;
+                    suvPlusInput.value = 0;
+                }
             }
-        }
-        
-        // Add event listeners to recalculate when values change
-        mainQuantityInput.addEventListener('input', calculateDifferences);
-        qtyCouperInput.addEventListener('input', calculateDifferences);
-        
-        // Calculate initial values if the form is loaded with existing data
-        calculateDifferences();
-        
-    });
+            
+            // Add event listeners to recalculate when values change
+            mainQuantityInput.addEventListener('input', calculateDifferences);
+            qtyCouperInput.addEventListener('input', calculateDifferences);
+            
+            // Calculate initial values if the form is loaded with existing data
+            calculateDifferences();
+            
+        });
     </script>
     
         

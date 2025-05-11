@@ -276,7 +276,7 @@ $daily_items = $daily_items_stmt->fetchAll(PDO::FETCH_ASSOC);
                     Processing Your Request...
                 </h5>
                 <p class="text-muted text-center" >
-                    This may take a moment depending on data size.
+                    This may take a moment depending on data size
                 </p>
             </div>
         </div>

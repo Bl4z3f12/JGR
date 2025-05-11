@@ -476,8 +476,13 @@ input:disabled + label {
     font-size: 20px;
 }
 .modal.show {
+    background: rgb(0 0 0 / 40%);
+    box-shadow: 0 4px 30px rgb(0 0 0 / 55%);
+    backdrop-filter: blur(11.1px);
+    -webkit-backdrop-filter: blur(11.1px);
     display: block;
 }
+
 .network-status.online {
     background-color: #4CAF50;
 }

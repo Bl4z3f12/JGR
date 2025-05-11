@@ -26,6 +26,21 @@ if (!$is_localhost && !in_array($client_ip, $allowed_ips)) {
     <!-- AdminLTE CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css" rel="stylesheet">
 </head>
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+    .card {
+        margin: auto;
+    }
+    .message {
+        font-size: 1.2rem;
+        color:rgb(0, 0, 0);
+    }
+    .list-group a {
+        color:black;
+    }
+</style>
 <body class="bg-light d-flex flex-column justify-content-center align-items-center vh-100">
     <div class="container">
         <div class="row">
