@@ -411,7 +411,7 @@ $daily_items = $daily_items_stmt->fetchAll(PDO::FETCH_ASSOC);
                                                 </div>
                                                 <div class="col-4">
                                                     <div class="fw-bold fs-5"><?php echo number_format($items_out); ?></div>
-                                                    <div class="small">Out <br>PRODUCTION</div>
+                                                    <div class="small">Out <br><span style="font-size: 11px;">PRODUCTION</span></div>
                                                 </div>
                                                 <div class="col-4">
                                                     <div class="fw-bold fs-5"><?php echo number_format($current); ?></div>
@@ -484,7 +484,7 @@ $daily_items = $daily_items_stmt->fetchAll(PDO::FETCH_ASSOC);
                                             <div class="mt-2">
                                                 <button onclick="togglePanel('panel-out-<?= str_replace(' ', '_', $stage) ?>', this)" 
                                                         class="btn btn-sm btn-outline-light w-100 text-start d-flex justify-content-between align-items-center">
-                                                    <span>Items Out Detail [PRODUCTION]</span>
+                                                    <span>Items Out Detail <i>[PRODUCTION]</i></span>
                                                     <i class="fas fa-chevron-down toggle-icon"></i>
                                                 </button>
                                                 <div id="panel-out-<?= str_replace(' ', '_', $stage) ?>" class="toggle-panel" style="display: none;">
