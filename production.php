@@ -291,7 +291,7 @@ $daily_items = $daily_items_stmt->fetchAll(PDO::FETCH_ASSOC);
 
                     <div class="row">
                         <div class="col-12">
-                            <div class="alert alert-info d-flex align-items-center mt-2 mb-2" role="alert">
+                            <div class="alert alert-warning d-flex align-items-center mt-2 mb-2" role="alert">
                                 <i class="bi bi-database-fill-lock dbico"></i>
                                 <div>
                                     <strong>Data Retention Notice:</strong> Production history records are automatically archived and permanently deleted 30 days after creation. Once purged, this data cannot be retrieved or reconstructed through any means.
