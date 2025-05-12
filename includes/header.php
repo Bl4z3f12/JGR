@@ -14,10 +14,10 @@ function is_mobile() {
     <!-- Left: Toggler Button and Title -->
     <div class="d-flex align-items-center">
       <!-- Toggler Button for Small Screens -->
-      <button class="navbar-toggler d-block d-md-none me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
-        <i class="fas fa-bars"></i>
+      <button class="navbar-toggler barnew d-block d-md-none me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fa-solid fa-bars-staggered"></i>
       </button>
-      <h2 class="fs-4 fw-normal m-0" style="font-family: 'Tagesschrift', sans-serif;">Barcode System (JGR_FORMENS) <span style="font-style: italic; font-size: 20px;">local workshop</span></h2>
+      <h2 class="fs-4 fw-normal m-0 bigtitle" style="font-family: 'Tagesschrift', sans-serif;">Barcode System (JGR_FORMENS) <span style="font-style: italic; font-size: 20px;">local workshop</span></h2>
     </div>
 
     <!-- Right: Username and Logout -->

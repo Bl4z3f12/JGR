@@ -123,7 +123,7 @@ require_once 'barcode_system.php';
                             <button type="submit" class="btn btn-primary">
                                 <i class="fa-solid fa-filter me-1"></i> Filter
                             </button>
-                            <button type="button" id="clear-filters" class="btn btn-outline-secondary">
+                            <button type="button" id="clear-filters" class="btn btn-outline-dark">
                                 <i class="fa-solid fa-broom"></i> Clear
                             </button>
                         </div>

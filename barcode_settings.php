@@ -129,7 +129,7 @@ require_once 'settings.php';
                             </div>
 
                             <div class="col-auto">
-                                <a href="barcode_settings.php" class="btn btn-secondary h-100">
+                                <a href="barcode_settings.php" class="btn btn-outline-dark">
                                     <i class="fas fa-broom"></i> Clear
                                 </a>
                             </div>

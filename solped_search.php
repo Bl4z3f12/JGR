@@ -149,38 +149,6 @@ if ($search_performed && !empty($solped_client)) {
             margin-left: 8px;
             vertical-align: middle;
         }
-        /* Enhanced button styles */
-        .search-btn {
-            background-color: #0d6efd;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 10px 15px;
-            min-width: 100px;
-            font-weight: 500;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: all 0.2s ease;
-        }
-        .search-btn:hover {
-            background-color: #0b5ed7;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-        .reset-btn {
-            text-decoration: none;
-            background-color: #6c757d;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 10px 15px;
-            min-width: 100px;
-            font-weight: 500;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: all 0.2s ease;
-        }
-        .reset-btn:hover {
-            background-color: #5c636a;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
         .input-group-text {
             background-color: #f8f9fa;
         }
@@ -246,10 +214,10 @@ if ($search_performed && !empty($solped_client)) {
                                 </div>
                             </div>
                             <div class="btn-container">
-                                <button type="submit" name="search" class="search-btn">
+                                <button type="submit" name="search" class="btn btn-primary">
                                     <i class="fas fa-search me-2"></i> Search
                                 </button>
-                                <a href="solped_search.php" class="reset-btn">
+                                <a href="solped_search.php"  class="btn btn-outline-dark">
                                     <i class="fa-solid fa-broom me-2"></i> Reset
                                 </a>
                             </div>

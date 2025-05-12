@@ -151,7 +151,7 @@ require "scantoday_settings.php";
                                     <div class="flex-shrink-0">
                                         <div class="d-flex gap-2">
                                             <button type="submit" name="search" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
-                                            <a href="?tab=summary" class="btn btn-secondary"><i class="fa-solid fa-broom"></i> Reset</a>
+                                            <a href="?tab=summary"  class="btn btn-outline-dark"><i class="fa-solid fa-broom"></i> Reset</a>
                                         </div>
                                     </div>
                                 </div>
@@ -463,7 +463,7 @@ require "scantoday_settings.php";
                                     
                                     <div class="button-group">
                                         <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
-                                        <a href="?tab=quantity_coupe" class="btn btn-secondary"><i class="fa-solid fa-broom"></i> Reset</a>
+                                        <a href="?tab=quantity_coupe" class="btn btn-outline-dark"><i class="fa-solid fa-broom"></i> Reset</a>
                                     </div>
                                 </div>
                             </form>

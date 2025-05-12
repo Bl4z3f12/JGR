@@ -56,7 +56,7 @@ require_once 'productionset.php';
             <div class="filter-section">
                 <form method="GET" class="row g-2 align-items-center" id="filterForm">
                     <div class="col-auto">
-                        <label for="date" class="form-label mb-0">Date:</label>
+                        <label for="date" class="form-label mb-0">Select Date:</label>
                     </div>
                     <div class="col-auto">
                         <div class="input-group">
@@ -71,7 +71,7 @@ require_once 'productionset.php';
                     </div>
                     <div class="col-auto">
                         <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Apply Filter</button>
-                        <a href="<?php echo $_SERVER['PHP_SELF']; ?>" class="btn btn-secondary ms-2"><i class="fas fa-broom"></i> Reset</a>
+                        <a href="<?php echo $_SERVER['PHP_SELF']; ?>"  class="btn btn-outline-dark"><i class="fas fa-broom"></i> Reset</a>
                     </div>
                 </form>
             </div>
@@ -83,7 +83,7 @@ require_once 'productionset.php';
     <div class="row mt-4">
         <div class="col-12">
             <div class="alert alert-info">
-                <h5><i class="fas fa-info-circle me-2"></i> Please enter a date to view production data.</h5>
+                <h5><i class="fas fa-info-circle me-2"></i> Please select a date to view production data.</h5>
             </div>
         </div>
     </div>
@@ -111,8 +111,8 @@ require_once 'productionset.php';
                     if (!$has_data):
                     ?>
                         <div class="no-data-message">
-                            <div class="alert alert-info">
-                                <h5><i class="fas fa-info-circle me-2"></i> No production data available for <?php echo htmlspecialchars($filter_date); ?></h5>
+                            <div class="alert alert-danger">
+                                <h5><i class="fa-solid fa-triangle-exclamation"></i> No production data available for <?php echo htmlspecialchars($filter_date); ?></h5>
                                 <p>Try selecting a different date.</p>
                             </div>
                         </div>
