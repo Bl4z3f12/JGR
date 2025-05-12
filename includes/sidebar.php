@@ -1,4 +1,3 @@
-
 <div class="col-lg-2 col-md-3 d-none d-md-block text-white min-vh-100 p-0">
     <div class="d-flex flex-column h-100">
         <div class="p-3 text-center">
@@ -35,6 +34,10 @@
             <a href="scanner_system_download.php" class="sidebar-item text-white <?php echo $current_view === 'scanner_system_download.php' ? 'active' : ''; ?>">
                 <div class="sidebar-item-icon"><i class="fas fa-download me-2"></i></div>
                 Scanner System Download
+            </a>
+            <a href="onlinewebsite.php" class="sidebar-item text-white <?php echo $current_view === 'onlinewebsite.php' ? 'active' : ''; ?>">
+                <div class="sidebar-item-icon"><i class="fa-solid fa-earth-africa"></i></div>
+                Online Website
             </a>
         </div>
         
@@ -88,6 +91,10 @@
                 <a href="scanner_system_download.php" class="sidebar-item text-white <?php echo $current_view === 'scanner_system_download.php' ? 'active' : ''; ?>">
                     <div class="sidebar-item-icon"><i class="fas fa-download me-2"></i></div>
                     Scanner System Download
+                </a>
+                <a href="onlinewebsite.php" class="sidebar-item text-white <?php echo $current_view === 'onlinewebsite.php' ? 'active' : ''; ?>">
+                    <div class="sidebar-item-icon"><i class="fa-solid fa-earth-africa"></i></div>
+                    Online Website
                 </a>
                 
                 <a href="logout.php" class="sidebar-item text-white">

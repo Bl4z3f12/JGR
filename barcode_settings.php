@@ -597,7 +597,7 @@ require_once 'settings.php';
                             <div class="col-md-6">
                                 <label for="last_update" class="form-label">Last Update</label>
                                 <input type="date" class="form-control" id="last_update" name="last_update" 
-                                    value="<?php echo formatDateForInput($edit_barcode['last_update']); ?>">
+                                    value="<?php echo htmlspecialchars(formatDateForInput($edit_barcode['last_update'])); ?>">
                             </div>
                         </div>
                         
