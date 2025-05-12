@@ -733,6 +733,7 @@ $items_per_page = 200;
                 });
             }
         }
+        
     </script>
     
 </body>

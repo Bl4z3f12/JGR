@@ -7,6 +7,7 @@ $password = "";
 
 require_once 'auth_functions.php';
 requireLogin('login.php');
+$filter_date = null;
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
@@ -285,241 +286,238 @@ $daily_items = $daily_items_stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="container-fluid">
         
         <div class="row mb-0">
-            <div class="col-12">
-                <div class="card-body">
-                    <h1 class="mb-0" style="font-size: 18px;">Production Stage</h1>
+    <div class="col-12">
+        <div class="card-body">
+            <h1 class="mb-0" style="font-size: 18px;">Production Stage</h1>
 
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="alert alert-warning d-flex align-items-center mt-2 mb-2" role="alert">
-                                <i class="bi bi-database-fill-lock dbico"></i>
-                                <div>
-                                    <strong>Data Retention Notice:</strong> Production history records are automatically archived and permanently deleted 30 days after creation. Once purged, this data cannot be retrieved or reconstructed through any means.
-                                </div>
-                            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-warning d-flex align-items-center mt-2 mb-2" role="alert">
+                        <i class="bi bi-database-fill-lock dbico"></i>
+                        <div>
+                            <strong>Data Retention Notice:</strong> Production history records are automatically archived and permanently deleted 30 days after creation. Once purged, this data cannot be retrieved or reconstructed through any means.
                         </div>
-                    </div>
-                    <div class="filter-section">
-                        <form method="GET" class="row g-2 align-items-center" id="filterForm">
-                            
-                            <div class="col-auto">
-                                <label for="date" class="form-label mb-0">Date:</label>
-                            </div>
-                            <div class="col-auto">
-                                <div class="input-group">
-                                    <input
-                                        type="date"
-                                        class="form-control"
-                                        id="date"
-                                        name="date"
-                                        value="<?php echo isset($filter_date) ? htmlspecialchars($filter_date) : date('Y-m-d'); ?>"
-                                        >
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Apply Filter</button>
-                                <a href="<?php echo $_SERVER['PHP_SELF']; ?>" class="btn btn-secondary ms-2"><i class="fas fa-broom"></i> Reset</a>
-                            </div>
-                        </form>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0">Production Date: <?php echo isset($filter_date) ? htmlspecialchars(date('d/m/Y', strtotime($filter_date))) : htmlspecialchars(date('d/m/Y')); ?></h4>
+            <div class="filter-section">
+                <form method="GET" class="row g-2 align-items-center" id="filterForm">
+                    <div class="col-auto">
+                        <label for="date" class="form-label mb-0">Date:</label>
                     </div>
-                    <div class="card-body">
-                        <?php
-                        $has_data = false;
-                        if (isset($daily_stage_stats) && is_array($daily_stage_stats)) {
-                            foreach ($daily_stage_stats as $stage => $stats) {
-                                if ($stats['current'] > 0 || $stats['in'] > 0 || $stats['out'] > 0) {
-                                    $has_data = true;
-                                    break;
-                                }
+                    <div class="col-auto">
+                        <div class="input-group">
+                            <input
+                                type="date"
+                                class="form-control"
+                                id="date"
+                                name="date"
+                                value="<?php echo isset($_GET['date']) ? htmlspecialchars($_GET['date']) : ''; ?>"
+                            >
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Apply Filter</button>
+                        <a href="<?php echo $_SERVER['PHP_SELF']; ?>" class="btn btn-secondary ms-2"><i class="fas fa-broom"></i> Reset</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php if (!isset($_GET['date']) || empty($_GET['date'])): ?>
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <h5><i class="fas fa-info-circle me-2"></i> Please enter a date to view production data.</h5>
+            </div>
+        </div>
+    </div>
+<?php else: ?>
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Production Date: <?php echo htmlspecialchars(date('d/m/Y', strtotime($_GET['date']))); ?></h4>
+                </div>
+                <div class="card-body">
+                    <?php
+                    $filter_date = $_GET['date'];
+                    $has_data = false;
+
+                    if (isset($daily_stage_stats) && is_array($daily_stage_stats)) {
+                        foreach ($daily_stage_stats as $stage => $stats) {
+                            if ($stats['current'] > 0 || $stats['in'] > 0 || $stats['out'] > 0) {
+                                $has_data = true;
+                                break;
                             }
                         }
-                        
-                        if (!$has_data):
-                        ?>
+                    }
+
+                    if (!$has_data):
+                    ?>
                         <div class="no-data-message">
                             <div class="alert alert-info">
-                                <h5><i class="fas fa-info-circle me-2"></i> No production data available for <?php echo htmlspecialchars($filter_date ?? date('Y-m-d')); ?></h5>
+                                <h5><i class="fas fa-info-circle me-2"></i> No production data available for <?php echo htmlspecialchars($filter_date); ?></h5>
                                 <p>Try selecting a different date.</p>
                             </div>
                         </div>
-                        <?php else: ?>
-                        
+                    <?php else: ?>
                         <div class="row g-4">
-                            <?php 
+                            <?php
                             if (isset($display_stages) && is_array($display_stages)):
-                                foreach ($display_stages as $stage => $properties): 
+                                foreach ($display_stages as $stage => $properties):
                                     $current = isset($daily_stage_stats[$stage]) ? $daily_stage_stats[$stage]['current'] : 0;
                                     $target = isset($targets[$stage]) ? $targets[$stage] : 100;
-                                    
+
                                     $items_in = isset($daily_stage_stats[$stage]) ? $daily_stage_stats[$stage]['in'] : 0;
                                     $items_out = isset($daily_stage_stats[$stage]) ? $daily_stage_stats[$stage]['out'] : 0;
-                                    
-                                    $in_percent = (isset($total_count) && $total_count > 0) ? round(($items_in / $total_count) * 100) : 0;
-                                    $out_percent = (isset($total_count) && $total_count > 0) ? round(($items_out / $total_count) * 100) : 0;
-                                    $current_percent = (isset($total_count) && $total_count > 0) ? round(($current / $total_count) * 100) : 0;
-                                    
-                                    $from_stages = isset($daily_stage_stats[$stage]['from_stages']) ? $daily_stage_stats[$stage]['from_stages'] : [];
-                                    $to_stages = isset($daily_stage_stats[$stage]['to_stages']) ? $daily_stage_stats[$stage]['to_stages'] : [];
-                                    
-                                    if($current > 900) {
-                                        $moodEmoji = '<i class="fas fa-smile text-success fa-2x"></i>'; // Excellent
-                                    } elseif($current >= 700) {
-                                        $moodEmoji = '<i class="fas fa-meh text-warning fa-2x"></i>'; // Good
-                                    } else {
-                                        $moodEmoji = '<i class="fas fa-angry text-danger fa-2x"></i>'; // Below Target
-                                    }
-                                
-                                    if($current > 900) {
+
+                                    $in_percent = ($total_count ?? 0) > 0 ? round(($items_in / $total_count) * 100) : 0;
+                                    $out_percent = ($total_count ?? 0) > 0 ? round(($items_out / $total_count) * 100) : 0;
+                                    $current_percent = ($total_count ?? 0) > 0 ? round(($current / $total_count) * 100) : 0;
+
+                                    $from_stages = $daily_stage_stats[$stage]['from_stages'] ?? [];
+                                    $to_stages = $daily_stage_stats[$stage]['to_stages'] ?? [];
+
+                                    if ($current > 900) {
                                         $badgeClass = "bg-success";
                                         $moodEmoji = '<i class="fas fa-smile text-success fa-2x"></i>';
-                                    } elseif($current >= 700) {
+                                    } elseif ($current >= 700) {
                                         $badgeClass = "bg-warning";
                                         $moodEmoji = '<i class="fas fa-meh text-warning fa-2x"></i>';
                                     } else {
                                         $badgeClass = "bg-danger";
                                         $moodEmoji = '<i class="fas fa-angry text-danger fa-2x"></i>';
                                     }
-                                    ?>
 
-                                <div class="col-xl-3 col-lg-4 col-md-6">
-                                    <div class="card h-100 bg-<?php echo htmlspecialchars($properties['color']); ?> text-white">
-                                        <div class="card-body">
-                                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                                <h5 class="card-title mb-0">
-                                                    <span class="me-2"><?php echo $properties['emoji']; ?></span>
-                                                    <?php echo htmlspecialchars($stage); ?>
-                                                </h5>
-                                                <div>
-                                                    <span class="fs-5"><?php echo $moodEmoji; ?></span>
-                                                </div>
+                                    $in_percentage = ($target > 0) ? min(100, ($items_in / $target) * 100) : 0;
+                                    $out_percentage = ($target > 0) ? min(100, ($items_out / $target) * 100) : 0;
+                                    $current_percentage = max(0, $in_percentage - $out_percentage);
+                            ?>
+                            <div class="col-xl-3 col-lg-4 col-md-6">
+                                <div class="card h-100 bg-<?php echo htmlspecialchars($properties['color']); ?> text-white">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h5 class="card-title mb-0">
+                                                <span class="me-2"><?php echo $properties['emoji']; ?></span>
+                                                <?php echo htmlspecialchars($stage); ?>
+                                            </h5>
+                                            <div>
+                                                <span class="fs-5"><?php echo $moodEmoji; ?></span>
                                             </div>
-                                            
-                                            <div class="row text-center mb-3">
-                                                <div class="col-4">
-                                                    <div class="fw-bold fs-5"><?php echo number_format($items_in); ?></div>
-                                                    <div class="small">In</div>
-                                                </div>
-                                                <div class="col-4">
-                                                    <div class="fw-bold fs-5"><?php echo number_format($items_out); ?></div>
-                                                    <div class="small">Out <br><span style="font-size: 11px;">PRODUCTION</span></div>
-                                                </div>
-                                                <div class="col-4">
-                                                    <div class="fw-bold fs-5"><?php echo number_format($current); ?></div>
-                                                    <div class="small">Current</div>
-                                                </div>
-                                            </div>
-                                            
-                                                <?php
-                                                $in_percentage = ($target > 0) ? min(100, ($items_in / $target) * 100) : 0;
-                                                $out_percentage = ($target > 0) ? min(100, ($items_out / $target) * 100) : 0;
-                                                $current_percentage = max(0, $in_percentage - $out_percentage);
-                                                ?>
-
-                                                <div class="mt-3">
-                                                    <div class="progress bg-dark rounded-pill" style="height: 20px;">
-                                                        <div class="progress-bar bg-light text-dark rounded-pill" role="progressbar"
-                                                            style="width: <?= $current_percentage; ?>%;"
-                                                            aria-valuenow="<?= $current_percentage; ?>" aria-valuemin="0" aria-valuemax="100">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            
-                                            <div class="d-flex justify-content-between text-white-50 small mb-3">
-                                                <span>In: <?php echo $in_percent; ?>%</span>
-                                                <span>Out: <?php echo $out_percent; ?>%</span>
-                                                <span>Current: <?php echo $current_percent; ?>%</span>
-                                            </div>
-                                            
-                                            <div class="text-center mt-3">
-                                                <span class="badge <?php echo $badgeClass; ?> rounded-pill px-3 py-2">
-                                                    <?php if($current > 900): ?>
-                                                        Excellent
-                                                    <?php elseif($current >= 700): ?>
-                                                        Good
-                                                    <?php else: ?>
-                                                        Below Target
-                                                    <?php endif; ?>
-                                                </span>
-                                            </div>
-                                            
-                                            <!-- Items In Section --><!-- Items In Detail Section -->
-                                            <!-- Items In Detail Section -->
-                                            <div class="mt-3">
-                                                <button onclick="togglePanel('panel-in-<?= str_replace(' ', '_', $stage) ?>', this)" 
-                                                        class="btn btn-sm btn-outline-light w-100 text-start d-flex justify-content-between align-items-center">
-                                                    <span>Items In Detail</span>
-                                                    <i class="fas fa-chevron-down toggle-icon"></i>
-                                                </button>
-                                                <div id="panel-in-<?= str_replace(' ', '_', $stage) ?>" class="toggle-panel" style="display: none;">
-                                                    <div class="pt-2">
-                                                        <?php if (empty($from_stages)): ?>
-                                                            <p class="text-white-50"><small>No incoming items</small></p>
-                                                        <?php else: ?>
-                                                            <ul class="list-group list-group-flush">
-                                                                <?php foreach ($from_stages as $from_stage => $count): ?>
-                                                                    <li class="list-group-item py-1 bg-transparent text-white border-0">
-                                                                        <small>
-                                                                            <span class="fw-bold"><?= htmlspecialchars($from_stage) ?>:</span>
-                                                                            <?= $count ?> items
-                                                                        </small>
-                                                                    </li>
-                                                                <?php endforeach; ?>
-                                                            </ul>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Items Out Section -->
-                                            <div class="mt-2">
-                                                <button onclick="togglePanel('panel-out-<?= str_replace(' ', '_', $stage) ?>', this)" 
-                                                        class="btn btn-sm btn-outline-light w-100 text-start d-flex justify-content-between align-items-center">
-                                                    <span>Items Out Detail <i>[PRODUCTION]</i></span>
-                                                    <i class="fas fa-chevron-down toggle-icon"></i>
-                                                </button>
-                                                <div id="panel-out-<?= str_replace(' ', '_', $stage) ?>" class="toggle-panel" style="display: none;">
-                                                    <div class="pt-2">
-                                                        <?php if (empty($to_stages)): ?>
-                                                            <p class="text-white-50"><small>No outgoing items</small></p>
-                                                        <?php else: ?>
-                                                            <ul class="list-group list-group-flush">
-                                                                <?php foreach ($to_stages as $to_stage => $count): ?>
-                                                                    <li class="list-group-item py-1 bg-transparent text-white border-0">
-                                                                        <small>
-                                                                            <span class="fw-bold"><?= htmlspecialchars($to_stage) ?>:</span>
-                                                                            <?= $count ?> items
-                                                                        </small>
-                                                                    </li>
-                                                                <?php endforeach; ?>
-                                                            </ul>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                </div>
-                                            </div>
-
                                         </div>
+
+                                        <div class="row text-center mb-3">
+                                            <div class="col-4">
+                                                <div class="fw-bold fs-5"><?php echo number_format($items_in); ?></div>
+                                                <div class="small">In</div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="fw-bold fs-5"><?php echo number_format($items_out); ?></div>
+                                                <div class="small">Out <br><span style="font-size: 11px;">PRODUCTION</span></div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="fw-bold fs-5"><?php echo number_format($current); ?></div>
+                                                <div class="small">Current</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-3">
+                                            <div class="progress bg-dark rounded-pill" style="height: 20px;">
+                                                <div class="progress-bar bg-light text-dark rounded-pill" role="progressbar"
+                                                    style="width: <?= $current_percentage; ?>%;"
+                                                    aria-valuenow="<?= $current_percentage; ?>" aria-valuemin="0" aria-valuemax="100">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between text-white-50 small mb-3">
+                                            <span>In: <?php echo $in_percent; ?>%</span>
+                                            <span>Out: <?php echo $out_percent; ?>%</span>
+                                            <span>Current: <?php echo $current_percent; ?>%</span>
+                                        </div>
+
+                                        <div class="text-center mt-3">
+                                            <span class="badge <?php echo $badgeClass; ?> rounded-pill px-3 py-2">
+                                                <?php if($current > 900): ?>
+                                                    Excellent
+                                                <?php elseif($current >= 700): ?>
+                                                    Good
+                                                <?php else: ?>
+                                                    Below Target
+                                                <?php endif; ?>
+                                            </span>
+                                        </div>
+
+                                        <!-- Items In Detail -->
+                                        <div class="mt-3">
+                                            <button onclick="togglePanel('panel-in-<?= str_replace(' ', '_', $stage) ?>', this)"
+                                                class="btn btn-sm btn-outline-light w-100 text-start d-flex justify-content-between align-items-center">
+                                                <span>Items In Detail</span>
+                                                <i class="fas fa-chevron-down toggle-icon"></i>
+                                            </button>
+                                            <div id="panel-in-<?= str_replace(' ', '_', $stage) ?>" class="toggle-panel" style="display: none;">
+                                                <div class="pt-2">
+                                                    <?php if (empty($from_stages)): ?>
+                                                        <p class="text-white-50"><small>No incoming items</small></p>
+                                                    <?php else: ?>
+                                                        <ul class="list-group list-group-flush">
+                                                            <?php foreach ($from_stages as $from_stage => $count): ?>
+                                                                <li class="list-group-item py-1 bg-transparent text-white border-0">
+                                                                    <small>
+                                                                        <span class="fw-bold"><?= htmlspecialchars($from_stage) ?>:</span>
+                                                                        <?= $count ?> items
+                                                                    </small>
+                                                                </li>
+                                                            <?php endforeach; ?>
+                                                        </ul>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Items Out Detail -->
+                                        <div class="mt-2">
+                                            <button onclick="togglePanel('panel-out-<?= str_replace(' ', '_', $stage) ?>', this)"
+                                                class="btn btn-sm btn-outline-light w-100 text-start d-flex justify-content-between align-items-center">
+                                                <span>Items Out Detail <i>[PRODUCTION]</i></span>
+                                                <i class="fas fa-chevron-down toggle-icon"></i>
+                                            </button>
+                                            <div id="panel-out-<?= str_replace(' ', '_', $stage) ?>" class="toggle-panel" style="display: none;">
+                                                <div class="pt-2">
+                                                    <?php if (empty($to_stages)): ?>
+                                                        <p class="text-white-50"><small>No outgoing items</small></p>
+                                                    <?php else: ?>
+                                                        <ul class="list-group list-group-flush">
+                                                            <?php foreach ($to_stages as $to_stage => $count): ?>
+                                                                <li class="list-group-item py-1 bg-transparent text-white border-0">
+                                                                    <small>
+                                                                        <span class="fw-bold"><?= htmlspecialchars($to_stage) ?>:</span>
+                                                                        <?= $count ?> items
+                                                                    </small>
+                                                                </li>
+                                                            <?php endforeach; ?>
+                                                        </ul>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                     </div>
                                 </div>
-                            <?php 
-                                endforeach;
-                            endif;
-                            ?>
+                            </div>
+                            <?php endforeach; endif; ?>
                         </div>
-                        <?php endif; ?>
-                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
+    </div>
+<?php endif; ?>
+
         
         <?php if (isset($has_data) && $has_data): ?>
         <div class="row g-4">
