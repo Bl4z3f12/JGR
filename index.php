@@ -14,10 +14,7 @@ if (!$is_localhost && !in_array($client_ip, $allowed_ips)) {
     require_once 'die.php';
     die();
 }
-
 require_once 'barcode_system.php';
-$items_per_page = 200;
-
 ?>
 <!DOCTYPE html>
 <html lang="en">

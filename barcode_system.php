@@ -5,7 +5,7 @@ $pdf = new FPDF();
 $current_view = $_GET['view'] ?? 'dashboard';
 $current_date = date("F j, Y");
 $page = $_GET['page'] ?? 1;
-$items_per_page = 2000;
+$items_per_page = 250;
 $date = $_GET['date'] ?? $current_date;
 $filter_of_number = $_GET['filter_of'] ?? '';
 $filter_size = $_GET['filter_size'] ?? '';
@@ -198,6 +198,12 @@ function placeBarcodeInPdf($generator, $pdf, $full_barcode_name, $col, $row, $ce
     }
     return ['col' => $col, 'row' => $row];
 }
+function createNewPdf() {
+    $pdf = new FPDF('P', 'mm', 'A4');
+    $pdf->AddPage();
+    $pdf->SetAutoPageBreak(false);
+    return $pdf;
+}
 function removeEmptyPages($filePath) {
     $fileSize = filesize($filePath);
     $estimatedPageCount = ceil($fileSize / 40000);
@@ -275,9 +281,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
         $conn = connectDB();
         if ($conn) {
             $generator = new BarcodeGeneratorPNG();
-            $pdf = new FPDF('P', 'mm', 'A4');
-            $pdf->AddPage();
-            $pdf->SetAutoPageBreak(false);
+            $successCount = 0;
+            $pdfFiles = [];
+            
+            // Configuration for all barcode PDFs
             $colsPerPage = 3;
             $rowsPerPage = 5;
             $pageWidth = 210;
@@ -288,10 +295,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
             $barcodeHeight = 20;
             $topSpacing = 12;
             $fontSize = 14;
-            $col = 0;
-            $row = 0;
-            $successCount = 0;
+
             if ($is_lost_barcode) {
+                // Lost barcode handling - single PDF as before
+                $pdf = createNewPdf();
+                $col = 0;
+                $row = 0;
+                
                 $lost_barcode_count = (int)($_POST['lost_barcode_count'] ?? 1);
                 $lost_barcode_number = rand(1, 1000);
                 for ($i = 0; $i < $lost_barcode_count; $i++) {
@@ -304,7 +314,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
                             continue;
                         }
                         $stmt = $conn->prepare("INSERT INTO barcodes (of_number, size, category, piece_name, order_str, full_barcode_name, status, stage) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL)");
-                        $stmt->bind_param("ssssss", $of_number, $size, $category, $piece_name, $formatted_number, $full_barcode_name); // Changed type 'i' to 's' for size parameter
+                        $stmt->bind_param("ssssss", $of_number, $size, $category, $piece_name, $formatted_number, $full_barcode_name);
                         $stmt->execute();
                         $successCount++;
                     }
@@ -317,13 +327,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
                     }
                     $lost_barcode_number++;
                 }
+                
+                $pdfFilename = "{$of_number}-{$size}{$category}-RTC.pdf";
+                $pdfFilename = preg_replace('/[^a-zA-Z0-9\-_.]/', '', $pdfFilename);
+                if (empty($pdfFilename) || $pdfFilename == ".pdf") {
+                    $randomNumber = rand(10000, 99999);
+                    $pdfFilename = "A{$randomNumber}.pdf";
+                }
+                $pdfPath = __DIR__ . "/barcodes/$pdfFilename";
+                $pdf->Output('F', $pdfPath);
+                $actualPages = removeEmptyPages($pdfPath);
+                $pdfFiles[] = [
+                    'filename' => $pdfFilename,
+                    'pages' => $actualPages,
+                    'piece' => 'RTC'
+                ];
+                
             } else if ($generate_costume_2pcs || $generate_costume_3pcs) {
                 $pieces = $generate_costume_2pcs ? ['P', 'V'] : ['P', 'V', 'G'];
                 $range_from = (int)$_POST['range_from'];
                 $range_to = (int)$_POST['range_to'];
-                $total_barcodes = count($pieces) * ($range_to - $range_from + 1);
-                $barcode_counter = 0;
-                foreach ($pieces as $current_piece) {
+                
+                // Create a single PDF with each piece starting on a new page
+                $pdf = createNewPdf();
+                $piecesPageCount = [];
+                
+                foreach ($pieces as $index => $current_piece) {
+                    // Start on a new page for each piece except the first one
+                    if ($index > 0) {
+                        $pdf->AddPage();
+                    }
+                    
+                    $col = 0;
+                    $row = 0;
+                    $currentPieceStartPage = $pdf->PageNo();
+                    
                     for ($i = $range_from; $i <= $range_to; $i++) {
                         $full_barcode_name = formatBarcodeString($of_number, $size, $category, $current_piece, $i);
                         if (!$generate_pdf_only) {
@@ -332,25 +370,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
                                 continue;
                             }
                             $stmt = $conn->prepare("INSERT INTO barcodes (of_number, size, category, piece_name, order_str, full_barcode_name, status, stage) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL)");
-                            $stmt->bind_param("ssssss", $of_number, $size, $category, $current_piece, $i, $full_barcode_name); // Changed type 'i' to 's' for size parameter
+                            $stmt->bind_param("ssssss", $of_number, $size, $category, $current_piece, $i, $full_barcode_name);
                             $stmt->execute();
                             $successCount++;
                         }
                         $result = placeBarcodeInPdf($generator, $pdf, $full_barcode_name, $col, $row, $cellWidth, $cellHeight, $barcodeWidth, $barcodeHeight, $topSpacing, $fontSize, $pageWidth, $colsPerPage, $rowsPerPage);
                         $col = $result['col'];
                         $row = $result['row'];
-                        $barcode_counter++;
-                        if ($row >= $rowsPerPage && $barcode_counter < $total_barcodes) {
+                        
+                        if ($row >= $rowsPerPage && $i < $range_to) {
                             $row = 0;
                             $pdf->AddPage();
                         }
                     }
+                    
+                    // Calculate how many pages this piece took
+                    $piecePages = $pdf->PageNo() - $currentPieceStartPage + 1;
+                    $piecesPageCount[$current_piece] = $piecePages;
                 }
+                
+                // Save the combined PDF
+                $piecesStr = implode('', $pieces);
+                $pdfFilename = "{$of_number}-{$size}{$category}-{$piecesStr}.pdf";
+                $pdfFilename = preg_replace('/[^a-zA-Z0-9\-_.]/', '', $pdfFilename);
+                if (empty($pdfFilename) || $pdfFilename == ".pdf") {
+                    $randomNumber = rand(10000, 99999);
+                    $pdfFilename = "A{$randomNumber}.pdf";
+                }
+                $pdfPath = __DIR__ . "/barcodes/$pdfFilename";
+                $pdf->Output('F', $pdfPath);
+                $actualPages = removeEmptyPages($pdfPath);
+                
+                // Record each piece's information for the message
+                foreach ($pieces as $piece) {
+                    $pdfFiles[] = [
+                        'filename' => $pdfFilename,
+                        'pages' => $piecesPageCount[$piece] ?? 0,
+                        'piece' => $piece
+                    ];
+                }
+                
             } else {
+                // Single piece type - single PDF as before
+                $pdf = createNewPdf();
+                $col = 0;
+                $row = 0;
+                
                 $range_from = (int)$_POST['range_from'];
                 $range_to = (int)$_POST['range_to'];
                 $total_barcodes = $range_to - $range_from + 1;
                 $barcode_counter = 0;
+                
                 for ($i = $range_from; $i <= $range_to; $i++) {
                     $full_barcode_name = formatBarcodeString($of_number, $size, $category, $piece_name, $i);
                     if (!$generate_pdf_only) {
@@ -359,7 +429,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
                             continue;
                         }
                         $stmt = $conn->prepare("INSERT INTO barcodes (of_number, size, category, piece_name, order_str, full_barcode_name, status, stage) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL)");
-                        $stmt->bind_param("ssssss", $of_number, $size, $category, $piece_name, $i, $full_barcode_name); // Changed type 'i' to 's' for size parameter
+                        $stmt->bind_param("ssssss", $of_number, $size, $category, $piece_name, $i, $full_barcode_name);
                         $stmt->execute();
                         $successCount++;
                     }
@@ -367,47 +437,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
                     $col = $result['col'];
                     $row = $result['row'];
                     $barcode_counter++;
+                    
                     if ($row >= $rowsPerPage && $barcode_counter < $total_barcodes) {
                         $row = 0;
                         $pdf->AddPage();
                     }
                 }
+                
+                if ($generate_pdf_only) {
+                    $pdfFilename = "{$of_number}-{$size}{$category}-pdfonly.pdf";
+                } else {
+                    $pdfFilename = "{$of_number}-{$size}{$category}-{$piece_name}.pdf";
+                }
+                $pdfFilename = preg_replace('/[^a-zA-Z0-9\-_.]/', '', $pdfFilename);
+                if (empty($pdfFilename) || $pdfFilename == ".pdf") {
+                    $randomNumber = rand(10000, 99999);
+                    $pdfFilename = "A{$randomNumber}.pdf";
+                }
+                $pdfPath = __DIR__ . "/barcodes/$pdfFilename";
+                $pdf->Output('F', $pdfPath);
+                $actualPages = removeEmptyPages($pdfPath);
+                $pdfFiles[] = [
+                    'filename' => $pdfFilename,
+                    'pages' => $actualPages,
+                    'piece' => $piece_name
+                ];
             }
-            if ($generate_pdf_only) {
-                $pdfFilename = "{$of_number}-{$size}{$category}-pdfonly.pdf";
-            } elseif ($is_lost_barcode) {
-                $pdfFilename = "{$of_number}-{$size}{$category}-RTC.pdf";
-            } elseif ($generate_costume_2pcs) {
-                $pdfFilename = "{$of_number}-{$size}{$category}-PV.pdf";
-            } elseif ($generate_costume_3pcs) {
-                $pdfFilename = "{$of_number}-{$size}{$category}-PVG.pdf";
-            } else {
-                $pdfFilename = "{$of_number}-{$size}{$category}-{$piece_name}.pdf";
-            }
-            $pdfFilename = preg_replace('/[^a-zA-Z0-9\-_.]/', '', $pdfFilename);
-            if (empty($pdfFilename) || $pdfFilename == ".pdf") {
-                $randomNumber = rand(10000, 99999);
-                $pdfFilename = "A{$randomNumber}.pdf";
-            }
-            $pdfPath = __DIR__ . "/barcodes/$pdfFilename";
-            $pdf->Output('F', $pdfPath);
-            $actualPages = removeEmptyPages($pdfPath);
+            
             $conn->close();
+            
+            // Create PDF file list for the success message
+            $pdf_list = '';
+            foreach ($pdfFiles as $pdfFile) {
+                $pdf_list .= "{$pdfFile['filename']} ({$pdfFile['pages']} pages) for {$pdfFile['piece']}, ";
+            }
+            $pdf_list = rtrim($pdf_list, ', ');
+            
+            // Use the first PDF filename for the redirect
+            $first_pdf = $pdfFiles[0]['filename'] ?? '';
+            
             if (!empty($duplicates)) {
                 $duplicate_message = "The following barcodes already exist: " . implode(", ", array_slice($duplicates, 0, 5));
                 if (count($duplicates) > 5) {
                     $duplicate_message .= " and " . (count($duplicates) - 5) . " more";
                 }
                 if ($successCount > 0) {
-                    $message = "$successCount barcodes created successfully ($actualPages pages). $duplicate_message";
-                    header("Location: index.php?view=dashboard&modal=create&warning=" . urlencode($message) . "&pdf=$pdfFilename");
+                    $message = "$successCount barcodes created successfully. Generated PDFs: $pdf_list. $duplicate_message";
+                    header("Location: index.php?view=dashboard&modal=create&warning=" . urlencode($message) . "&pdf=$first_pdf");
                 } else {
                     header("Location: index.php?view=$form_view&modal=create&error=" . urlencode($duplicate_message));
                 }
                 exit;
             } else {
-                $success_message = "PDF created with $actualPages pages";
-                header("Location: index.php?view=dashboard&modal=create&success=1&pdf=$pdfFilename&info=" . urlencode($success_message));
+                $success_message = "Created PDFs: $pdf_list";
+                header("Location: index.php?view=dashboard&modal=create&success=1&pdf=$first_pdf&info=" . urlencode($success_message));
                 exit;
             }
         }

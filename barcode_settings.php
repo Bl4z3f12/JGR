@@ -15,8 +15,6 @@ if (!$is_localhost && !in_array($client_ip, $allowed_ips)) {
     require_once 'die.php';
     die();
 }
-
-
 require_once 'settings.php';
 ?>
 
