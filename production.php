@@ -301,75 +301,75 @@ require_once 'productionset.php';
         <?php endif; ?>
         
         <!-- New Production Details Table -->
-            <div class="row mt-4 mb-4">
-                <div class="col-12">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0"><i class="fas fa-table me-2"></i> Production Details</h5>
-                            <button class="btn btn-success btn-sm" id="exportToExcel">
-                                <i class="fas fa-file-excel me-1"></i> Export to Excel
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-striped" id="productionTable">
-                                    <thead class="bg-light">
-                                        <tr>
-                                            <th>QF Number</th>
-                                            <th>Size</th>
-                                            <th>Category</th>
-                                            <th>Piece Name</th>
-                                            <th>Chef</th>
-                                            <th>Total Stage Quantity</th>
-                                            <th>Total Main Quantity</th>
-                                            <th>Stages</th>
-                                            <th>Total Count</th>
-                                            <th>Solped Client</th>
-                                            <th>Pedido Client</th>
-                                            <th>Color Tissus</th>
-                                            <th>Main Qty</th>
-                                            <th>Coupe</th>
-                                            <th>Mangue</th>
-                                            <th>Suv Plus</th>
-                                            <th>Latest Update</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php if (isset($production_details) && !empty($production_details)): ?>
-                                            <?php foreach ($production_details as $item): ?>
-                                                <tr>
-                                                    <td><?= htmlspecialchars($item['qf_number'] ?? '') ?></td>
-                                                    <td><?= htmlspecialchars($item['size'] ?? '') ?></td>
-                                                    <td><?= htmlspecialchars($item['category'] ?? '') ?></td>
-                                                    <td><?= htmlspecialchars($item['piece_name'] ?? '') ?></td>
-                                                    <td><?= htmlspecialchars($item['chef'] ?? '') ?></td>
-                                                    <td><?= htmlspecialchars($item['total_stage_qty'] ?? '') ?></td>
-                                                    <td><?= htmlspecialchars($item['total_main_qty'] ?? '') ?></td>
-                                                    <td><?= htmlspecialchars($item['stages'] ?? '') ?></td>
-                                                    <td><?= htmlspecialchars($item['total_count'] ?? '') ?></td>
-                                                    <td><?= htmlspecialchars($item['solped_client'] ?? '') ?></td>
-                                                    <td><?= htmlspecialchars($item['pedido_client'] ?? '') ?></td>
-                                                    <td><?= htmlspecialchars($item['color_tissus'] ?? '') ?></td>
-                                                    <td><?= htmlspecialchars($item['main_qty'] ?? '') ?></td>
-                                                    <td><?= htmlspecialchars($item['coupe'] ?? '') ?></td>
-                                                    <td><?= htmlspecialchars($item['mangue'] ?? '') ?></td>
-                                                    <td><?= htmlspecialchars($item['suv_plus'] ?? '') ?></td>
-                                                    <td><?= htmlspecialchars($item['latest_update'] ?? '') ?></td>
-                                                </tr>
-                                            <?php endforeach; ?>
-                                        <?php else: ?>
+        <div class="row mt-4 mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-table me-2"></i> Production Details</h5>
+                        <button class="btn btn-success btn-sm" id="exportToExcel">
+                            <i class="fas fa-file-excel me-1"></i> Export to Excel
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped" id="productionTable">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>QF Number</th>
+                                        <th>Size</th>
+                                        <th>Category</th>
+                                        <th>Piece Name</th>
+                                        <th>Chef</th>
+                                        <th>Total Stage Quantity</th>
+                                        <th>Total Main Quantity</th>
+                                        <th>Stages</th>
+                                        <th>Total Count</th>
+                                        <th>Solped Client</th>
+                                        <th>Pedido Client</th>
+                                        <th>Color Tissus</th>
+                                        <th>Main Qty</th>
+                                        <th>Coupe</th>
+                                        <th>Mangue</th>
+                                        <th>Suv Plus</th>
+                                        <th>Latest Update</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php if (isset($production_details) && !empty($production_details)): ?>
+                                        <?php foreach ($production_details as $item): ?>
                                             <tr>
-                                                <td colspan="17" class="text-center">No production details available for the selected date.</td>
+                                                <td><?= htmlspecialchars($item['qf_number'] ?? '') ?></td>
+                                                <td><?= htmlspecialchars($item['size'] ?? '') ?></td>
+                                                <td><?= htmlspecialchars($item['category'] ?? '') ?></td>
+                                                <td><?= htmlspecialchars($item['piece_name'] ?? '') ?></td>
+                                                <td><?= htmlspecialchars($item['chef'] ?? '') ?></td>
+                                                <td><?= htmlspecialchars($item['total_stage_qty'] ?? '') ?></td>
+                                                <td><?= htmlspecialchars($item['total_main_qty'] ?? '') ?></td>
+                                                <td><?= htmlspecialchars($item['stages'] ?? '') ?></td>
+                                                <td><?= htmlspecialchars($item['total_count'] ?? '') ?></td>
+                                                <td><?= htmlspecialchars($item['solped_client'] ?? '') ?></td>
+                                                <td><?= htmlspecialchars($item['pedido_client'] ?? '') ?></td>
+                                                <td><?= htmlspecialchars($item['color_tissus'] ?? '') ?></td>
+                                                <td><?= htmlspecialchars($item['main_qty'] ?? '') ?></td>
+                                                <td><?= htmlspecialchars($item['coupe'] ?? '') ?></td>
+                                                <td><?= htmlspecialchars($item['mangue'] ?? '') ?></td>
+                                                <td><?= htmlspecialchars($item['suv_plus'] ?? '') ?></td>
+                                                <td><?= htmlspecialchars($item['latest_update'] ?? '') ?></td>
                                             </tr>
-                                        <?php endif; ?>
-                                    </tbody>
-                                </table>
-                            </div>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <tr>
+                                            <td colspan="17" class="text-center">No production details available for the selected date.</td>
+                                        </tr>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
     </div><!-- Added missing closing div for main-content -->
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>

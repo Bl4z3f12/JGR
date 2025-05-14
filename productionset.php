@@ -33,6 +33,7 @@ function getDatabaseConnection() {
     }
 }
 
+
 // Sanitize and validate input
 $filter_date = isset($_GET['date']) ? 
     date('Y-m-d', strtotime($_GET['date'])) : 

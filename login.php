@@ -543,7 +543,7 @@ if (!$isAjaxRequest) {
                         if (data.success) {
                             // Keep the loading state for successful login
                             setTimeout(() => {
-                                window.location.href = 'scantoday.php';
+                                window.location.href = 'ofsizedetails.php';
                             }, 1000);
                         }
                     })
