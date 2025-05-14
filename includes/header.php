@@ -6,6 +6,10 @@ function is_mobile() {
     );
 }
 ?>
+
+<!-- Add Bootstrap Icons CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&family=Tagesschrift&display=swap');
 </style>
@@ -20,9 +24,9 @@ function is_mobile() {
       <h2 class="fs-4 fw-normal m-0 bigtitle" style="font-family: 'Tagesschrift', sans-serif;">Barcode System (JGR_FORMENS) <span style="font-style: italic; font-size: 20px;">local workshop</span></h2>
     </div>
 
-    <!-- Right: Username and Logout -->
+    <!-- Right: Notifications, Username and Logout -->
     <div class="d-flex align-items-center">
-        <i class="fas fa-user-circle me-2"></i>
+      <i class="fas fa-user-circle me-2"></i>
       <span class="me-3">
         <?php if (isset($_SESSION['username'])): ?>
           <?php echo htmlspecialchars($_SESSION['username']); ?>
@@ -31,11 +35,48 @@ function is_mobile() {
         <?php endif; ?>
       </span>
       
-        <?php if ( ! is_mobile() ): ?>
-            <a href="logout.php" class="btn btn-outline-light btn-sm">Logout 
-            <i class="fas fa-sign-out-alt"></i>
-            </a>
-        <?php endif; ?>
+      <!-- Notification Bell -->
+      <!-- In the right section of the header -->
+      <div class="d-flex align-items-center">
+        <!-- Notification Bell Link -->
+        <a href="notifications.php" class="text-white me-3 position-relative">
+          <i class="bi bi-bell-fill"></i>
+          <span id="notificationBadge" class="badge position-absolute top-0 start-100 translate-middle bg-success">0</span>
+        </a>
+      </div>
+      
+      <?php if ( ! is_mobile() ): ?>
+          <a href="logout.php" class="btn btn-outline-light btn-sm">Logout 
+          <i class="fas fa-sign-out-alt"></i>
+          </a>
+      <?php endif; ?>
     </div>
   </div>
 </div>
+
+<script>
+function updateNotificationCount() {
+    fetch('get_notification_count.php')
+        .then(response => response.json())
+        .then(data => {
+            const badge = document.getElementById('notificationBadge');
+            badge.textContent = data.count;
+            
+            // Change color based on count
+            if (data.count == 0) {
+                badge.classList.remove('bg-danger');
+                badge.classList.add('bg-success'); // Green for 0
+            } else {
+                badge.classList.remove('bg-success');
+                badge.classList.add('bg-danger');   // Red for 1+
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+// Update on load and every 60 seconds
+document.addEventListener('DOMContentLoaded', function() {
+    updateNotificationCount();
+    setInterval(updateNotificationCount, 60000);
+});
+</script>

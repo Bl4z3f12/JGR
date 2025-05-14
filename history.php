@@ -121,7 +121,7 @@ function displayBarcodeSummary($conn, $where_conditions, $params, $types, $stage
     $result = $stmt->get_result();
     
     echo "<div class='table-responsive'>";
-    echo "<table class='table table-striped table-hover'>";
+    echo "<table class='table table-bordered table-hover'>";
     echo "<thead class='table-dark'>";
     echo "<tr>";
     echo "<th>Last Update</th>";
@@ -279,7 +279,7 @@ function displayBarcodeSummary($conn, $where_conditions, $params, $types, $stage
 // Function to display quantity data
 function displayQuantityData($result) {
     echo "<div class='table-responsive'>";
-    echo "<table class='table table-striped table-hover'>";
+    echo "<table class='table table-bordered table-hover'>";
     
     echo "<thead class='table-dark'>";
     echo "<tr>";
@@ -333,7 +333,7 @@ function displayQuantityData($result) {
 // Function to display traditional barcode data (for the original barcode tab)
 function displayBarcodeData($result) {
     echo "<div class='table-responsive'>";
-    echo "<table class='table table-striped table-hover'>";
+    echo "<table class='table table-bordered table-hover'>";
     
     echo "<thead class='table-dark'>";
     echo "<tr>";

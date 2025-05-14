@@ -261,7 +261,7 @@ if ($search_performed && !empty($solped_client)) {
                                 The "Count" column shows duplicate quantities.
                             </div>
                             <div class="table-responsive">
-                                <table class="table table-striped table-hover">
+                                <table class="table table-bordered table-hover">
                                     <thead class="table-primary">
                                         <tr>
                                             <th>Count</th>

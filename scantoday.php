@@ -245,7 +245,7 @@ require "scantoday_settings.php";
 
         <!-- Results Table -->
         <div class="table-responsive">
-            <table class="table table-striped table-hover">
+            <table class="table table-bordered table-hover">
                 <thead class="table-primary">
                     <tr>
                         <th>OF Number</th>

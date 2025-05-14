@@ -1,7 +1,6 @@
 <?php
 $current_view = 'dashboard';
 require_once 'auth_functions.php';
-
 requireLogin('login.php');
 
 $allowed_ips = ['127.0.0.1', '192.168.1.130', '::1', '192.168.0.120' ,'NEW_IP_HERE'];
@@ -133,8 +132,8 @@ require_once 'barcode_system.php';
         <div class="container-fluid py-3">
 
         <div class="d-none d-md-block">
-            <table class="table table-striped table-hover">
-                <thead class="table-light">
+            <table class="table table-bordered table-hover">
+                <thead class="table-primary">
                     <tr>
                         <th>OF_Number</th>
                         <th>Size</th>

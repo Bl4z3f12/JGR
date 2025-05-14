@@ -1,0 +1,26 @@
+.barcode-preview {
+    border: 1px dashed #ccc;
+    padding: 20px;
+    text-align: center;
+    margin-top: 20px;
+    min-height: 100px;
+    border-radius: 5px;
+}
+.form-card {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    border: none;
+}
+.form-card .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #eaeaea;
+    padding: 15px 20px;
+}
+.btn-verify {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+.btn-verify:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}

@@ -1,6 +1,10 @@
 <?php
 $current_view = 'barcode_settings.php';
 require_once 'auth_functions.php';
+function formatDateForInput($datetime) {
+    return date('Y-m-d', strtotime($datetime));
+}
+
 date_default_timezone_set('Africa/Casablanca'); // Add this at the top
 
 requireLogin('login.php');
@@ -262,7 +266,7 @@ require_once 'settings.php';
                         </div>
                         
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover">
+                            <table class="table table-bordered table-hover">
                                 <thead class="table-primary">
                                     <tr>
                                         <th width="40px"><input type="checkbox" id="checkAll" class="form-check-input"></th>

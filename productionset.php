@@ -110,7 +110,7 @@ function getDailyStageStats($pdo, $filter_date) {
             FROM jgr_barcodes_history
             WHERE stage = b.stage 
             AND DATE(last_update) = :date
-            AND action_type = 'INSERT'
+            AND action_type = 'UPDATE'
         ) as in_count,
         (
             SELECT COUNT(DISTINCT h1.full_barcode_name)

@@ -11,9 +11,9 @@
                 <div class="sidebar-item-icon"><i class="fa-solid fa-qrcode"></i></div>
                 Dashboard
             </a>
-            <a href="generatebarcodepublic.php" class="sidebar-item text-white <?php echo $current_view === 'generatebarcodepublic.php' ? 'active' : ''; ?>" tabindex="0">
+            <a href="RTCpublic.php" class="sidebar-item text-white <?php echo $current_view === 'RTCpublic.php' ? 'active' : ''; ?>" tabindex="0">
                 <div class="sidebar-item-icon"><i class="fa-solid fa-circle-plus"></i></div>
-                Generate Barcodes [PUBLIC]
+                RTC [PUBLIC]
             </a>
             <a href="scantoday.php" class="sidebar-item text-white <?php echo $current_view === 'scantoday.php' ? 'active' : ''; ?>" onclick="document.getElementById('loadingOverlay').style.display = 'flex'">
                 <div class="sidebar-item-icon"><img width="25" height="25" src="https://img.icons8.com/fluency-systems-filled/48/FFFFFF/barcode-scanner-2.png" alt="barcode-scanner-2"/></div>
@@ -71,9 +71,9 @@
                     <div class="sidebar-item-icon"><i class="fa-solid fa-qrcode"></i></div>
                     Dashboard
                 </a>
-                <a href="generatebarcodepublic.php" class="sidebar-item text-white <?php echo $current_view === 'generatebarcodepublic.php' ? 'active' : ''; ?>" tabindex="0">
+                <a href="RTCpublic.php" class="sidebar-item text-white <?php echo $current_view === 'RTCpublic.php' ? 'active' : ''; ?>" tabindex="0">
                     <div class="sidebar-item-icon"><i class="fa-solid fa-circle-plus"></i></div>
-                    Generate Barcodes [PUBLIC]
+                    RTC [PUBLIC]
                 </a>
                 <a href="scantoday.php" class="sidebar-item text-white <?php echo $current_view === 'scantoday.php' ? 'active' : ''; ?>" onclick="document.getElementById('loadingOverlay').style.display = 'flex'">
                     <div class="sidebar-item-icon"><img width="25" height="25" src="https://img.icons8.com/fluency-systems-filled/48/FFFFFF/barcode-scanner-2.png" alt="barcode-scanner-2"/></div>
