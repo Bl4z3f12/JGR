@@ -25,8 +25,8 @@ if (!$conn) {
     die(json_encode(['success' => false, 'error' => 'Database connection failed']));
 }
 
-// Use backticks for reserved keyword `read`
-$stmt = $conn->prepare("UPDATE notifications SET `read` = ? WHERE id = ?");
+// Use backticks for reserved keyword `read` and update the updated_at timestamp
+$stmt = $conn->prepare("UPDATE notifications SET `read` = ?, updated_at = NOW() WHERE id = ?");
 if (!$stmt) {
     die(json_encode(['success' => false, 'error' => 'Prepare failed: ' . $conn->error]));
 }

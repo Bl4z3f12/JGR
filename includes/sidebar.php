@@ -15,9 +15,9 @@
                 <div class="sidebar-item-icon"><i class="fa-solid fa-circle-plus"></i></div>
                 RTC [PUBLIC]
             </a>
-            <a href="scantoday.php" class="sidebar-item text-white <?php echo $current_view === 'scantoday.php' ? 'active' : ''; ?>" onclick="document.getElementById('loadingOverlay').style.display = 'flex'">
+            <a href="ofsizedetails.php" class="sidebar-item text-white <?php echo $current_view === 'ofsizedetails.php' ? 'active' : ''; ?>" onclick="document.getElementById('loadingOverlay').style.display = 'flex'">
                 <div class="sidebar-item-icon"><img width="25" height="25" src="https://img.icons8.com/fluency-systems-filled/48/FFFFFF/barcode-scanner-2.png" alt="barcode-scanner-2"/></div>
-                Scanned Today
+                OF_ Size Details
             </a>
             <a href="production.php" id="productionNavLink" class="sidebar-item text-white <?php echo $current_view === 'production.php' ? 'active' : ''; ?>">
                 <div class="sidebar-item-icon"><i class="fa-solid fa-chart-pie"></i></div>
@@ -75,7 +75,7 @@
                     <div class="sidebar-item-icon"><i class="fa-solid fa-circle-plus"></i></div>
                     RTC [PUBLIC]
                 </a>
-                <a href="scantoday.php" class="sidebar-item text-white <?php echo $current_view === 'scantoday.php' ? 'active' : ''; ?>" onclick="document.getElementById('loadingOverlay').style.display = 'flex'">
+                <a href="ofsizedetails.php" class="sidebar-item text-white <?php echo $current_view === 'ofsizedetails.php' ? 'active' : ''; ?>" onclick="document.getElementById('loadingOverlay').style.display = 'flex'">
                     <div class="sidebar-item-icon"><img width="25" height="25" src="https://img.icons8.com/fluency-systems-filled/48/FFFFFF/barcode-scanner-2.png" alt="barcode-scanner-2"/></div>
                     Scanned Today
                 </a>

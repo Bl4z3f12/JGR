@@ -35,17 +35,18 @@ function is_mobile() {
         <?php endif; ?>
       </span>
       
-      <!-- Notification Bell -->
-      <!-- In the right section of the header -->
-      <div class="d-flex align-items-center">
-        <!-- Notification Bell Link -->
-        <a href="notifications.php" class="text-white me-3 position-relative">
-          <i class="bi bi-bell-fill"></i>
-          <span id="notificationBadge" class="badge position-absolute top-0 start-100 translate-middle bg-success">0</span>
-        </a>
-      </div>
+      <!-- Notification Bell - Hidden on mobile -->
+      <?php if (!is_mobile()): ?>
+        <div class="d-flex align-items-center">
+          <!-- Notification Bell Link -->
+          <a href="notifications.php" class="text-white me-3 position-relative">
+            <i class="bi bi-bell-fill"></i>
+            <span id="notificationBadge" class="badge position-absolute top-0 start-100 translate-middle bg-success">0</span>
+          </a>
+        </div>
+      <?php endif; ?>
       
-      <?php if ( ! is_mobile() ): ?>
+      <?php if (!is_mobile()): ?>
           <a href="logout.php" class="btn btn-outline-light btn-sm">Logout 
           <i class="fas fa-sign-out-alt"></i>
           </a>
@@ -60,15 +61,17 @@ function updateNotificationCount() {
         .then(response => response.json())
         .then(data => {
             const badge = document.getElementById('notificationBadge');
-            badge.textContent = data.count;
-            
-            // Change color based on count
-            if (data.count == 0) {
-                badge.classList.remove('bg-danger');
-                badge.classList.add('bg-success'); // Green for 0
-            } else {
-                badge.classList.remove('bg-success');
-                badge.classList.add('bg-danger');   // Red for 1+
+            if(badge) { // Check if badge exists
+                badge.textContent = data.count;
+                
+                // Change color based on count
+                if (data.count == 0) {
+                    badge.classList.remove('bg-danger');
+                    badge.classList.add('bg-success'); // Green for 0
+                } else {
+                    badge.classList.remove('bg-success');
+                    badge.classList.add('bg-danger');   // Red for 1+
+                }
             }
         })
         .catch(error => console.error('Error:', error));

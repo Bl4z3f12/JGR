@@ -229,13 +229,13 @@ if (isset($_POST['ajax_create_barcode']) && $_POST['ajax_create_barcode'] == 1) 
                             <!-- Quantity section moved below the verify button -->
                             <div class="mb-4">
                                 <div class="form-group mb-3">
-                                    <label for="user_name" class="form-label">Name <span class="text-danger">*</span></label>
+                                    <label for="user_name" class="form-label">Your Name <span class="text-danger">*</span></label>
                                     <select class="form-select" id="user_name" name="user_name" required>
-                                        <option value="">Select Name</option>
-                                        <option value="user 1">User 1</option>
-                                        <option value="user 2">User 2</option>
-                                        <option value="hamza">Hamza</option>
-                                        <option value="halal">Halal</option>
+                                        <option value="">Select Your Name</option>
+                                        <option value="Othmane">Othmane</option>
+                                        <option value="Othmane Jebar">Othmane Jebar</option>
+                                        <option value="Brahim Akikab">Brahim Akikab</option>
+                                        <option value="Mohamed Errhioui">Mohamed Errhioui</option>
                                     </select>
                                 </div>
 
@@ -266,10 +266,35 @@ if (isset($_POST['ajax_create_barcode']) && $_POST['ajax_create_barcode'] == 1) 
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    
+    
     <script>
+
+        // New function to control UI elements state
+        function updateUIState() {
+            const isVerified = document.getElementById('verificationMessage').querySelector('.alert-success') !== null;
+            const userNameValid = document.getElementById('user_name').value !== '';
+            const quantityInput = document.getElementById('lost_barcode_count');
+            const createBtn = document.getElementById('createBtn');
+
+            // Enable quantity only after successful verification
+            quantityInput.disabled = !isVerified;
+            
+            // Enable create button only when verified AND name is selected
+            createBtn.disabled = !(isVerified && userNameValid);
+        }
+
+        // Initial state setup
+        document.addEventListener('DOMContentLoaded', function() {
+            updateUIState();
+        });
+
+        // Name dropdown change handler
+        document.getElementById('user_name').addEventListener('change', updateUIState);
+
         document.getElementById('verifyBtn').addEventListener('click', function() {
             const verificationMessage = document.getElementById('verificationMessage');
-            const quantitySection = document.getElementById('lost_barcode_options');
             verificationMessage.innerHTML = '';
             
             const ofNumber = document.getElementById('barcode_prefix').value;
@@ -277,13 +302,15 @@ if (isset($_POST['ajax_create_barcode']) && $_POST['ajax_create_barcode'] == 1) 
             let category = document.getElementById('barcode_category').value;
             const pieceName = document.getElementById('barcode_piece_name').value;
 
+            // Only check barcode-related fields for verification
             if (!ofNumber || !size || pieceName === '0') {
                 verificationMessage.innerHTML = `
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        Please fill all required fields
+                        Please fill all required barcode fields
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 `;
+                updateUIState();
                 return;
             }
 
@@ -313,40 +340,28 @@ if (isset($_POST['ajax_create_barcode']) && $_POST['ajax_create_barcode'] == 1) 
             .then(response => response.json())
             .then(data => {
                 if (data.error) {
-                    // Handle database or server error
                     verificationMessage.innerHTML = `
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
                             <i class="fas fa-exclamation-circle me-1"></i> ${data.error}
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     `;
-                    document.getElementById('createBtn').disabled = true;
                 } else if (data.exists) {
-                    // Barcode exists - show success message for LOST barcode generation
                     verificationMessage.innerHTML = `
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             <i class="fas fa-check-circle me-1"></i> ${data.message}
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     `;
-                    
-                    // Highlight the quantity section to draw attention
-                    quantitySection.classList.add('border', 'border-success', 'p-2', 'rounded');
-                    setTimeout(() => {
-                        quantitySection.classList.remove('border', 'border-success', 'p-2', 'rounded');
-                    }, 3000);
-                    
-                    document.getElementById('createBtn').disabled = false;
                 } else {
-                    // Barcode doesn't exist - show danger alert
                     verificationMessage.innerHTML = `
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
                             <i class="fas fa-times-circle me-1"></i> ${data.message}
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     `;
-                    document.getElementById('createBtn').disabled = true;
                 }
+                updateUIState();
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -356,7 +371,7 @@ if (isset($_POST['ajax_create_barcode']) && $_POST['ajax_create_barcode'] == 1) 
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 `;
-                document.getElementById('createBtn').disabled = true;
+                updateUIState();
             });
         });
 
@@ -418,5 +433,9 @@ if (isset($_POST['ajax_create_barcode']) && $_POST['ajax_create_barcode'] == 1) 
             });
         });
     </script>
+
+
+
+
 </body>
 </html>

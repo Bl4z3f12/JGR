@@ -1,6 +1,19 @@
 <?php
 require_once __DIR__ . '/barcode_system.php';
 $current_view = 'notifications.php';
+require_once 'auth_functions.php';
+requireLogin('login.php');
+
+$allowed_ips = ['127.0.0.1', '192.168.1.130', '::1', '192.168.0.120' ,'NEW_IP_HERE'];
+$client_ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
+$client_ip = trim(explode(',', $client_ip)[0]);
+$is_localhost = in_array($client_ip, ['127.0.0.1', '::1']) || 
+               stripos($_SERVER['HTTP_HOST'], 'localhost') !== false;
+
+if (!$is_localhost && !in_array($client_ip, $allowed_ips)) {
+    require_once 'die.php';
+    die();
+}
 ?>
 
 <!DOCTYPE html>
@@ -13,12 +26,26 @@ $current_view = 'notifications.php';
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" rel="stylesheet">
     <style>
-        .list-group-item.unread {
-            background-color: #f8f9fa; /* Gray background for unread */
+        tr.read td {
+        background-color:#b3efcd !important ;
         }
-        .list-group-item.read {
-            background-color: #d4edda; /* Green background for read */
+        tr.unread td {
+            background-color: #f8f9fa !important;
         }
+        /* Remove any conflicting Bootstrap styles */
+        table tr {
+            background-color: inherit !important;
+        }
+        .table-responsive {
+            margin: 20px 0;
+        }
+        .actions-column {
+            min-width: 250px;
+        }
+        .btn-group.gap-2 {
+            gap: 0.5rem !important;
+        }
+
     </style>
 </head>
 <body>
@@ -28,63 +55,65 @@ $current_view = 'notifications.php';
         <?php include 'includes/header.php'; ?>
 
         <div class="row justify-content-center">
-            <div class="col-md-8">
+            <div class="col-md-100">
                 <div class="card form-card">
                     <div class="card-header bg-primary text-white">
                         <h3 class="mb-0">Notifications</h3>
                     </div>
                     <div class="card-body">
-                        <div class="list-group">
-                            <?php
-                            $notifications = [];
-                            $conn = connectDB();
-                            $result = $conn->query("SELECT * FROM notifications ORDER BY date DESC");
-                            if ($result) {
-                                while ($row = $result->fetch_assoc()) {
-                                    $notifications[] = [
-                                        'id' => $row['id'],
-                                        'type' => $row['type'],
-                                        'message' => $row['message'],
-                                        'date' => date('Y-m-d H:i:s', strtotime($row['date'])), // Added time
-                                        'read' => $row['read'],
-                                        // Add other fields from the database (e.g., 'name', 'details', etc.)
-                                        'name' => $row['name'] ?? '', // Example if 'name' exists
-                                        // Include other columns as needed
-                                    ];
-                                }
-                            }
-                            
-                            foreach ($notifications as $notification) {
-                                $readClass = $notification['read'] ? 'read' : 'unread';
-                                $message = $notification['message'];
-                                // Check if message matches the old format and reformat
-                                if (preg_match('/^barcode (.*) created$/', $message, $matches)) {
-                                    $formattedMessage = 'new barcode created: <strong>' . htmlspecialchars($matches[1]) . '</strong>';
-                                } else {
-                                    $formattedMessage = htmlspecialchars($message);
-                                }
-                                echo '
-                                <a href="#" class="list-group-item list-group-item-action ' . $readClass . '" data-id="' . htmlspecialchars($notification['id']) . '">
-                                    <div class="d-flex w-100 justify-content-between">
-                                        <div>
-                                            <h6 class="mb-1">' . $formattedMessage . '</h6>
-                                            <!-- Display name -->
-                                            '. (!empty($notification['name']) ? '<p class="mb-0">Creator: '.htmlspecialchars($notification['name']).'</p>' : '') .'
-                                            <!-- Add other fields here -->
-                                        </div>
-                                        <small>'.htmlspecialchars($notification['date']).'</small>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center mt-2">
-                                        <small class="text-muted">'.ucfirst($notification['type']).' notification</small>
-                                        <div>
-                                            <button class="btn btn-sm btn-outline-danger delete-notification">Delete</button>
-                                            <button class="btn btn-sm btn-outline-secondary mark-as-read">Mark as Read</button>
-                                            <button class="btn btn-sm btn-outline-secondary mark-as-unread">Mark as Unread</button>
-                                        </div>
-                                    </div>
-                                </a>';
-                            }
-                            ?>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Message</th>
+                                        <th>Creator</th>
+                                        <th>Type</th>
+                                        <th>Created At</th>
+                                        <th class="actions-column">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $conn = connectDB();
+                                    $result = $conn->query("SELECT * FROM notifications ORDER BY created_at DESC");
+                                    
+                                    if ($result && $result->num_rows > 0) {
+                                        while ($row = $result->fetch_assoc()) {
+                                            $readClass = $row['read'] ? 'read' : 'unread';
+                                            $message = $row['message'];
+                                            
+                                            if (preg_match('/^barcode (.*) created$/', $message, $matches)) {
+                                                $formattedMessage = 'New barcode created: <strong>' . htmlspecialchars($matches[1]) . '</strong>';
+                                            } else {
+                                                $formattedMessage = htmlspecialchars($message);
+                                            }
+                                            ?>
+                                            <tr class="<?= $readClass ?>" data-id="<?= htmlspecialchars($row['id']) ?>">
+                                                <td><?= $formattedMessage ?></td>
+                                                <td><?= !empty($row['name']) ? htmlspecialchars($row['name']) : '-' ?></td>
+                                                <td><?= ucfirst($row['type']) ?></td>
+                                                <td><?= date('Y-m-d H:i:s', strtotime($row['created_at'])) ?></td>
+                                                
+                                                <td>
+                                                    <div class="d-flex justify-content-center">
+                                                        <div class="btn-group gap-2">
+                                                            <button class="btn btn-sm btn-danger delete-notification">Delete</button>
+                                                            <button class="btn btn-sm btn-success mark-as-read">Mark Read</button>
+                                                            <button class="btn btn-sm btn-secondary mark-as-unread">Mark Unread</button>
+                                                        </div>
+                                                    </div>
+                                                </td>
+
+
+                                            </tr>
+                                            <?php
+                                        }
+                                    } else {
+                                        echo '<tr><td colspan="5" class="text-center">No notifications found</td></tr>';
+                                    }
+                                    ?>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -93,71 +122,61 @@ $current_view = 'notifications.php';
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
-        // Update the event listeners
+    // Update event listeners to work with table rows
+        
+        // Mark as Read
         document.querySelectorAll('.mark-as-read').forEach(button => {
             button.addEventListener('click', function(e) {
                 e.preventDefault();
-                const notificationItem = this.closest('.list-group-item');
-                const notificationId = notificationItem.dataset.id;
+                const row = this.closest('tr');
+                const id = row.dataset.id;
                 
                 fetch('mark_notification.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: notificationId, read: 1 })
+                    body: JSON.stringify({ id: id, read: 1 })
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        notificationItem.classList.replace('unread', 'read');
+                        row.classList.remove('unread');
+                        row.classList.add('read');
                         updateBellCount();
                     }
                 });
             });
         });
 
-        // Similar update for mark-as-unread
+        // Mark as Unread
         document.querySelectorAll('.mark-as-unread').forEach(button => {
             button.addEventListener('click', function(e) {
                 e.preventDefault();
-                const notificationItem = this.closest('.list-group-item');
-                const notificationId = notificationItem.dataset.id;
+                const row = this.closest('tr');
+                const id = row.dataset.id;
                 
                 fetch('mark_notification.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: notificationId, read: 0 })
+                    body: JSON.stringify({ id: id, read: 0 })
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        notificationItem.classList.replace('read', 'unread');
+                        row.classList.remove('read');
+                        row.classList.add('unread');
                         updateBellCount();
                     }
                 });
             });
         });
 
-        // Function to update the bell count
-        function updateBellCount() {
-            fetch('get_notification_count.php')
-                .then(response => response.json())
-                .then(data => {
-                    const badge = document.querySelector('.fa-bell + .badge');
-                    if (data.count > 0) {
-                        badge.textContent = data.count;
-                        badge.style.display = 'block';
-                    } else {
-                        badge.style.display = 'none';
-                    }
-                });
-        }
-        // Add this to the existing script
         document.querySelectorAll('.delete-notification').forEach(button => {
             button.addEventListener('click', function(e) {
                 e.preventDefault();
-                const notificationItem = this.closest('.list-group-item');
-                const notificationId = notificationItem.dataset.id;
+                const notificationRow = this.closest('tr');
+                const notificationId = notificationRow.dataset.id;
 
                 if (confirm('Are you sure you want to delete this notification?')) {
                     fetch('delete_notification.php', {
@@ -168,13 +187,27 @@ $current_view = 'notifications.php';
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            notificationItem.remove();
-                            updateBellCount(); // Update unread count if needed
+                            notificationRow.remove();
+                            updateBellCount();
+                            if (!document.querySelector('tbody').children.length) {
+                                document.querySelector('tbody').innerHTML = 
+                                    '<tr><td colspan="5" class="text-center">No notifications found</td></tr>';
+                            }
                         }
                     });
                 }
             });
         });
+
+        function updateBellCount() {
+            fetch('get_notification_count.php')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.querySelector('.fa-bell + .badge');
+                    badge.textContent = data.count > 0 ? data.count : '';
+                    badge.style.display = data.count > 0 ? 'block' : 'none';
+                });
+        }
     </script>
 </body>
 </html>
