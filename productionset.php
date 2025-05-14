@@ -41,7 +41,7 @@ $filter_date = isset($_GET['date']) ?
 
 // Predefined stage configurations
  $display_stages = [
-        'Coupe' => [
+   'Coupe' => [
             'icon' => '<i class="fas fa-cut"></i>',
             'color' => 'primary',
             'emoji' => '<img src="assets/tiptop.png" alt="Coupe" style="width: 40px;">'
@@ -86,7 +86,7 @@ $filter_date = isset($_GET['date']) ?
             'color' => 'primary',
             'emoji' => '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAADzklEQVR4nO2bV2gUQRjHx94VEXvQYEPxRYkvvlkSRCSgsYMNxBJBRXxQLBgE0Ygvglhe1AcRFSOiDyKWBBRBUNAHG1gwYsUWuyT6k4nfxnGZvdtN7nLJzv3gg7uZuW92/js75ds5pbJkyZIKgHbAPGCpz3RaOxV3gFkEM0vFHWBkAgFGqLgDtABeWRr/WucpFwCOWwQ4plwBWGERoFi5AjAM+G00Xn8eplwCyAfeiuUrFwGeaFOuQlYAdA/4DmwC2irXAHYAX2QgPKlcAGgDTARay/eOQLmIkKfiDlAojZ1hpBVL2nwVd4BR0tiLQAfpAZckbYxyAeCkNPiTmDtjgEaP+MBm2QBpdjoRC/ADHBIBcpWL4LIAQA/gsghQqFwByAMOAF992+F7wGqgk4obQFcJfN4iOVUi0EgVo7v9mfpxFZjprRqbBUB7uegLpI7nQAnQSzVVgOGyuXlH+vgJnGhyARSgFTCokS2zCydgQAYaHWQDMhXMaCo0fliNJiyAXlkCHxrgrwZYHkWASqAnUGZxdkrydBk/M4AiS3pUf34BxgU07LvMTncseVckT9t5YEIUAcolTU9Vfkokz4v6mOSK+YnqL6wAteWARZa8goY8AuUxEGCb6wJcc12AaqCLywJoJrkuwI64C/BG8m1Tr+Z63AVANm06KHsYeAg8MuytCwJUAJ1DNzSkABUhLrgiggBR/UURALnbBcabKu+oXlHomAP/C1AlP75pqeyG5OkyfnT8oNSSHtVfVAES9cwfwIaoAmSaIAHe+55x01YHCOAxJw4ClIS4kbZHE9lsNc9je/wT4KzlSK5p64zzCTb6qOYI4caAMOTGVYAa4Jl082qXBPgIrNGv5Yyy3XT0x3hTXT8B+Lu6miLP1nigZZKA6gJgYTpUDhDgKTBY8gdK3YuBIZLWF7ibVAAgx5hK1kvaaOCxZb6udQDsAvrL563SBT1+ecEIoB/wIMHUFdZeWLp87ekTYIuv2+vP2+UQ91DgWzIBcg2nvfUeOiDep7mue4IXw5feEcQyKXOE1FMmvvVdD2KllNkftgecke9LklReF1wE7icod0/KTEtBD/DbXPF9O0H9L6VMgfG7nDDP2+4kAqwy3h7p7h7Er3QvPCQqnIju9XG6MYnT2UZZ2x8lPCpT3WDLteq7GkRVooFbJRnRbRsdZLlct/WUASiIjSrNAGsT1F/aEMdFxnE3D323x1pOiZ62VF7WGGcAZEA+aqn/XINftvJ3btVT3EE9PZqLDUvZqcA+YG8mzgcBk4E9MuJPb7abnixZsmRRjcQfk5uigB3FlTsAAAAASUVORK5CYII=" alt="external-cargo-logistics-delivery-icongeek26-glyph-icongeek26" style="width:50px;">'
         ]
-    ];
+ ];
 
 $targets = [
     'Coupe' => 100, 'V1' => 100, 'V2' => 100, 'V3' => 100, 
@@ -246,6 +246,78 @@ function getFaceEmoji($count) {
         return '<i class="fas fa-meh text-warning fa-2x"></i>';
     } else {
         return '<i class="fas fa-angry text-danger fa-2x"></i>';
+    }
+}
+/**
+ * Get production summary data for the specified date
+ * 
+ * @param PDO $pdo Database connection
+ * @param string $filter_date Date in Y-m-d format
+ * @return array Production summary data
+ */
+function getProductionSummary($pdo, $filter_date) {
+    if (!$pdo || !$filter_date) {
+        error_log("Invalid database connection or date in getProductionSummary");
+        return [];
+    }
+    
+    try {
+        // Fixed query based on the actual barcodes table structure
+        $query = "
+        SELECT 
+            b.of_number,
+            b.size,
+            b.category,
+            b.piece_name,
+            b.chef,
+            COUNT(b.id) AS total_stage_qty,
+            GROUP_CONCAT(DISTINCT b.stage ORDER BY b.stage SEPARATOR ', ') AS stages,
+            COUNT(DISTINCT b.full_barcode_name) AS total_count,
+            MAX(b.last_update) AS latest_update
+        FROM 
+            barcodes b
+        WHERE 
+            DATE(b.last_update) = :date
+        GROUP BY 
+            b.of_number, b.size, b.category, b.piece_name, b.chef
+        ORDER BY 
+            MAX(b.last_update) DESC
+        ";
+        
+        $stmt = $pdo->prepare($query);
+        $stmt->execute([':date' => $filter_date]);
+        
+        error_log("Production summary query executed for date: $filter_date");
+        
+        $results = $stmt->fetchAll();
+        
+        // Don't format the timestamps here - leave them as raw database values
+        // This allows proper handling in the display code
+        
+        return $results;
+    } catch(PDOException $e) {
+        error_log("Production Summary Query Error: " . $e->getMessage());
+        error_log("Date Parameter: " . $filter_date);
+        
+        return [];
+    }
+}
+
+// Main code flow
+
+// Make sure to properly define $filter_date
+$filter_date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
+
+// Initialize production summary data
+$production_summary = [];
+
+// Only try to fetch data if a date filter is actually set and database connection exists
+if (isset($_GET['date']) && !empty($_GET['date']) && isset($pdo)) {
+    try {
+        // Fetch production summary data
+        $production_summary = getProductionSummary($pdo, $filter_date);
+    } catch(Exception $e) {
+        error_log("Error fetching production summary: " . $e->getMessage());
     }
 }
 ?>

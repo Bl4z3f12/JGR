@@ -1,5 +1,6 @@
 <?php
 require_once 'productionset.php';
+$_SESSION['production_summary'] = $production_summary;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -301,74 +302,87 @@ require_once 'productionset.php';
         <?php endif; ?>
         
         <!-- New Production Details Table -->
-        <div class="row mt-4 mb-4">
-            <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="fas fa-table me-2"></i> Production Details</h5>
-                        <button class="btn btn-success btn-sm" id="exportToExcel">
-                            <i class="fas fa-file-excel me-1"></i> Export to Excel
+       <?php
+// Add this code right before the closing div for container-fluid, just before:
+// </div>
+?>
+
+<!-- Production Summary Table -->
+<div class="row mt-4 mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Production Summary</h5>
+                <div class="export-button-container">
+                    <form method="GET" action="export_excel.php">
+                        <!-- Hidden inputs to pass all current filter values -->
+                        <input type="hidden" name="export" value="excel">
+                        <input type="hidden" name="of_number" value="<?php echo htmlspecialchars($of_number ?? ''); ?>">
+                        <input type="hidden" name="size" value="<?php echo htmlspecialchars($size ?? ''); ?>">
+                        <input type="hidden" name="category" value="<?php echo htmlspecialchars($category ?? ''); ?>">
+                        <input type="hidden" name="p_name" value="<?php echo htmlspecialchars($p_name ?? ''); ?>">
+                        <input type="hidden" name="stage" value="<?php echo htmlspecialchars($stage ?? ''); ?>">
+                        <input type="hidden" name="date" value="<?php echo htmlspecialchars($date ?? date('Y-m-d')); ?>">
+                        
+                        <button type="submit" class="btn btn-success mb-2" <?php echo empty($production_summary) ? 'disabled' : ''; ?>>
+                            <i class="fas fa-file-excel"></i> Export to Excel
                         </button>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-striped" id="productionTable">
-                                <thead class="bg-light">
-                                    <tr>
-                                        <th>QF Number</th>
-                                        <th>Size</th>
-                                        <th>Category</th>
-                                        <th>Piece Name</th>
-                                        <th>Chef</th>
-                                        <th>Total Stage Quantity</th>
-                                        <th>Total Main Quantity</th>
-                                        <th>Stages</th>
-                                        <th>Total Count</th>
-                                        <th>Solped Client</th>
-                                        <th>Pedido Client</th>
-                                        <th>Color Tissus</th>
-                                        <th>Main Qty</th>
-                                        <th>Coupe</th>
-                                        <th>Mangue</th>
-                                        <th>Suv Plus</th>
-                                        <th>Latest Update</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php if (isset($production_details) && !empty($production_details)): ?>
-                                        <?php foreach ($production_details as $item): ?>
-                                            <tr>
-                                                <td><?= htmlspecialchars($item['qf_number'] ?? '') ?></td>
-                                                <td><?= htmlspecialchars($item['size'] ?? '') ?></td>
-                                                <td><?= htmlspecialchars($item['category'] ?? '') ?></td>
-                                                <td><?= htmlspecialchars($item['piece_name'] ?? '') ?></td>
-                                                <td><?= htmlspecialchars($item['chef'] ?? '') ?></td>
-                                                <td><?= htmlspecialchars($item['total_stage_qty'] ?? '') ?></td>
-                                                <td><?= htmlspecialchars($item['total_main_qty'] ?? '') ?></td>
-                                                <td><?= htmlspecialchars($item['stages'] ?? '') ?></td>
-                                                <td><?= htmlspecialchars($item['total_count'] ?? '') ?></td>
-                                                <td><?= htmlspecialchars($item['solped_client'] ?? '') ?></td>
-                                                <td><?= htmlspecialchars($item['pedido_client'] ?? '') ?></td>
-                                                <td><?= htmlspecialchars($item['color_tissus'] ?? '') ?></td>
-                                                <td><?= htmlspecialchars($item['main_qty'] ?? '') ?></td>
-                                                <td><?= htmlspecialchars($item['coupe'] ?? '') ?></td>
-                                                <td><?= htmlspecialchars($item['mangue'] ?? '') ?></td>
-                                                <td><?= htmlspecialchars($item['suv_plus'] ?? '') ?></td>
-                                                <td><?= htmlspecialchars($item['latest_update'] ?? '') ?></td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    <?php else: ?>
-                                        <tr>
-                                            <td colspan="17" class="text-center">No production details available for the selected date.</td>
-                                        </tr>
-                                    <?php endif; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    </form>
                 </div>
             </div>
+          <div class="card-body">
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped" id="productionSummaryTable">
+            <thead class="bg-light">
+                <tr>
+                    <th>QF Number</th>
+                    <th>Size</th>
+                    <th>Category</th>
+                    <th>Piece Name</th>
+                    <th>Chef</th>
+                    <th>Total Stage Quantity</th>
+                    <th>Stages</th>
+                    <th>Total Count</th>
+                    <th>Latest Update</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (isset($production_summary) && !empty($production_summary)): ?>
+                    <?php foreach ($production_summary as $item): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($item['of_number'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($item['size'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($item['category'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($item['piece_name'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($item['chef'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($item['total_stage_qty'] ?? 0) ?></td>
+                            <td><?= htmlspecialchars($item['stages'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($item['total_count'] ?? 0) ?></td>
+                            <td><?php 
+                                if (!empty($item['latest_update'])) {
+                                    echo htmlspecialchars(date('Y-m-d H:i', strtotime($item['latest_update'])));
+                                } else {
+                                    echo '';
+                                }
+                            ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php elseif(isset($_GET['date']) && !empty($_GET['date'])): ?>
+                    <tr>
+                        <td colspan="9" class="text-center">No production summary available for the selected date.</td>
+                    </tr>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="9" class="text-center">Please select a date to view production summary.</td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
         </div>
+    </div>
+</div>
     </div>
     </div><!-- Added missing closing div for main-content -->
 

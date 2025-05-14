@@ -4,7 +4,7 @@ require_once 'auth_functions.php';
 requireLogin('login.php');
 
 // Include settings file for database connection and common functions
-require "scantoday_settings.php";
+require "ofsizedetails_settings.php";
 
 // Initialize search parameters
 $solped_client = $_GET['solped_client'] ?? '';
