@@ -36,6 +36,16 @@ $_SESSION['production_summary'] = $production_summary;
     <?php include 'includes/head.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
+    <style>
+
+    .dip{
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-content: flex-start;
+        justify-content: space-between;
+    }
+    </style>
 </head>
 <body class="bg-light">
 <div id="loadingOverlay">
@@ -326,20 +336,29 @@ $_SESSION['production_summary'] = $production_summary;
                             <h4 class="mb-0">Production Summary - Stage: <?= htmlspecialchars($filter_stage ?? 'All') ?></h4>
                         </div>
                         <div class="card-body">
-                            <div class="row mb-4">
-                                <div class="col-md-8">
-                                    <form id="stageFilterForm" class="form-inline" method="get">
+                            <div class="row mb-4 dip">
+                                
+                                <div class="col-md-7">
+                                    <form id="stageFilterForm" class="form-inline d-flex flex-row align-items-center" method="get">
                                         <?php if (!empty($filter_date)): ?>
                                             <input type="hidden" name="date" value="<?= htmlspecialchars($filter_date) ?>">
                                         <?php endif; ?>
                                         
-                                        <div class="form-group">
-                                            <label for="stageFilter" class="mr-2 mt-2">Filter by Stage:</label>
-                                            <select name="stage" id="stageFilter" class="form-control">
-                                                <option value="">All Stages</option>
+                                        <div class="form-group mr-2">
+                                            <label for="stageFilter" class="mr-2">Stage:</label>
+                                            <select name="stage" id="stageFilter" class="form-select" style="min-width: 200px;">
+                                                <option value="0">All Stages</option>
+                                                <option value="Coupe">Coupe</option>
+                                                <option value="V1">V1</option>
+                                                <option value="V2">V2</option>
+                                                <option value="V3">V3</option>
+                                                <option value="Pantalon">Pantalon</option>
+                                                <option value="AMF">AMF</option>
+                                                <option value="Repassage">Repassage</option>
+                                                <option value="P_ fini">P_ fini</option>
+                                                <option value="Exported">Exported</option>
                                                 <?php 
                                                 foreach ($available_stages as $stage): 
-                                                    // Skip empty stages or "No Stage" entries
                                                     if (empty($stage) || $stage == 'No Stage') continue;
                                                 ?>
                                                     <option value="<?= htmlspecialchars($stage) ?>" <?= ($filter_stage == $stage) ? 'selected' : '' ?>>
@@ -349,9 +368,9 @@ $_SESSION['production_summary'] = $production_summary;
                                             </select>
                                         </div>
                                         
-                                        <div class="form-group ml-3">
-                                            <label for="pieceNameFilter" class="mr-2 mt-2">Filter by Piece Name:</label>
-                                            <select name="piece_name" id="pieceNameFilter" class="form-control">
+                                        <div class="form-group mr-2">
+                                            <label for="pieceNameFilter" class="mr-2">Piece Name:</label>
+                                            <select name="piece_name" id="pieceNameFilter" class="form-select" style="min-width: 180px;">
                                                 <option value="">All Piece Names</option>
                                                 <option value="V" <?= (isset($_GET['piece_name']) && $_GET['piece_name'] == 'V') ? 'selected' : '' ?>>V</option>
                                                 <option value="P" <?= (isset($_GET['piece_name']) && $_GET['piece_name'] == 'P') ? 'selected' : '' ?>>P</option>
@@ -360,11 +379,12 @@ $_SESSION['production_summary'] = $production_summary;
                                             </select>
                                         </div>
                                         
-                                        <button type="submit" id="applyFilterBtn" class="btn btn-primary mt-2 ml-3">Apply Filter</button>
-                                        <a href="?<?= !empty($filter_date) ? 'date=' . htmlspecialchars($filter_date) : '' ?>" class="btn btn-secondary mt-2 ml-2" id="resetFilterBtn">Reset Filters</a>
+                                        <button type="submit" id="applyFilterBtn" class="btn btn-primary mr-2" ><i class="bi bi-funnel-fill"></i> Apply Filter</button>
+                                        <a href="?<?= !empty($filter_date) ? 'date=' . htmlspecialchars($filter_date) : '' ?>" class="btn btn-outline-dark" id="resetFilterBtn" ><i class="fas fa-broom"></i> Reset</a>
                                     </form>
                                 </div>
-                                <div class="col-md-4">
+
+                                <div class="col-md-5">
                                     <div class="card bg-light">
                                         <div class="card-body p-2">
                                             <h5 class="card-title">Grand Totals <?= !empty($filter_stage) ? 'for Stage: ' . ($filter_stage == 'No Stage' ? '' : htmlspecialchars($filter_stage)) : '' ?></h5>
