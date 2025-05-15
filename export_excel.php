@@ -1,6 +1,6 @@
 <?php
 /**
- * export_excel.php - Exports production summary data to Excel XLSX file
+ * export_excel.php - Exports table data to Excel XLSX file
  * 
  * Requirements:
  * - PhpSpreadsheet library (install via Composer)
@@ -18,145 +18,179 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 // Check if this is an export request
 if (isset($_GET['export']) && $_GET['export'] === 'excel') {
 
-    // Verify PhpSpreadsheet is installed
     if (!class_exists(Spreadsheet::class)) {
         die('PhpSpreadsheet library is not installed. Please run: composer require phpoffice/phpspreadsheet');
     }
 
-    // Enable error reporting for debugging
-    ini_set('display_errors', 1);
-    ini_set('display_startup_errors', 1);
-    error_reporting(E_ALL);
+    // Database connection
+    $host = 'localhost';
+    $db_name = 'jgr';
+    $username = 'root';
+    $password = '';
+    $charset = 'utf8mb4';
 
-    // Start a session if not already started to access the stored production summary data
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-
-    // Check if we have production summary data in the session
-    if (!isset($_SESSION['production_summary']) || empty($_SESSION['production_summary'])) {
-        // If no data in session, we need to fetch it using the same query as in the main page
-        
-        // Database connection
-        $host = 'localhost';
-        $db_name = 'jgr';
-        $username = 'root';
-        $password = '';
-        $charset = 'utf8mb4';
-
-        $options = [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false,
-        ];
-
-        $dsn = "mysql:host=$host;dbname=$db_name;charset=$charset";
-
-        try {
-            $pdo = new PDO($dsn, $username, $password, $options);
-        } catch (PDOException $e) {
-            die("Database connection failed: " . $e->getMessage());
-        }
-
-        // Get filter parameters from request
-        $of_number = $_GET['of_number'] ?? '';
-        $size = $_GET['size'] ?? '';
-        $category = $_GET['category'] ?? '';
-        $p_name = $_GET['p_name'] ?? '';
-        $stage = $_GET['stage'] ?? '';
-        $date = $_GET['date'] ?? date("Y-m-d");
-
-        // Build the query - use named parameters for better debugging
-        $query = "SELECT
-                    b.of_number,
-                    b.size,
-                    b.category,
-                    b.piece_name,
-                    b.chef,
-                    COUNT(b.id) AS total_stage_qty,
-                    GROUP_CONCAT(DISTINCT b.stage ORDER BY b.stage SEPARATOR ', ') AS stages,
-                    COUNT(DISTINCT b.full_barcode_name) AS total_count,
-                    MAX(b.last_update) AS latest_update
-                  FROM
-                    barcodes b
-                  WHERE 1=1";
-
-        $params = [];
-
-        // Apply filters
-        if (!empty($date)) {
-            // Use DATE() function to compare only the date part
-            $query .= " AND DATE(b.last_update) = :date";
-            $params[':date'] = $date;
-        }
-
-        if (!empty($of_number)) {
-            $query .= " AND b.of_number LIKE :of_number";
-            $params[':of_number'] = "%$of_number%";
-        }
-
-        if (!empty($size)) {
-            $query .= " AND b.size = :size";
-            $params[':size'] = $size;
-        }
-
-        if (!empty($category) && $category != 'select') {
-            $query .= " AND b.category = :category";
-            $params[':category'] = $category;
-        }
-
-        if (!empty($p_name) && $p_name != 'select') {
-            $query .= " AND b.piece_name = :p_name";
-            $params[':p_name'] = $p_name;
-        }
-
-        if (!empty($stage) && $stage != 'select') {
-            $query .= " AND b.stage = :stage";
-            $params[':stage'] = $stage;
-        }
-
-        // Group and order results
-        $query .= " GROUP BY b.of_number, b.size, b.category, b.piece_name, b.chef";
-        $query .= " ORDER BY MAX(b.last_update) DESC";
-
-        try {
-            $stmt = $pdo->prepare($query);
-            $stmt->execute($params);
-            $results = $stmt->fetchAll();
-        } catch (PDOException $e) {
-            die("Query execution failed: " . $e->getMessage());
-        }
-    } else {
-        // Use the data that's already in the session
-        $results = $_SESSION['production_summary'];
-    }
-
-    // If still no results, just create an empty file with headers
-    if (empty($results)) {
-        $results = [];
-    }
-
-    // Calculate totals
-    $total_items = 0;
-    $total_stage_qty = 0;
-
-    foreach ($results as $row) {
-        $total_items += $row['total_count'];
-        $total_stage_qty += $row['total_stage_qty'];
-    }
-
-    // Create Excel file
-    $spreadsheet = new Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet();
-    $sheet->setTitle('Production Summary');
-
-    // Set up column headers
-    $headers = [
-        'QF Number', 'Size', 'Category', 'Piece Name', 'Chef', 
-        'Total Stage Qty', 'Stages', 'Total Count', 'Latest Update'
+    $options = [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES => false,
     ];
 
-    // Apply header styles
+    $dsn = "mysql:host=$host;dbname=$db_name;charset=$charset";
+
+    try {
+        $pdo = new PDO($dsn, $username, $password, $options);
+    } catch (PDOException $e) {
+        die("Connection failed: " . $e->getMessage());
+    }
+
+    // Parameters
+    $of_number = $_GET['of_number'] ?? '';
+    $size = $_GET['size'] ?? '';
+    $category = $_GET['category'] ?? '';
+    $p_name = $_GET['p_name'] ?? '';
+    $stage = $_GET['stage'] ?? '';
+    $date = $_GET['date'] ?? date("Y-m-d");
+
+    // Base query - Only get the specific fields we need for the export
+    $query = "SELECT 
+                b.of_number, 
+                b.size, 
+                b.category, 
+                b.piece_name AS p_name,
+                b.chef,
+                b.stage,
+                COUNT(b.id) AS total_count,
+                -- Get the values from quantity_coupe if they exist
+                MAX(qc.quantity_coupe) AS total_stage_quantity,
+                MAX(qc.principale_quantity) AS total_main_quantity,
+                MAX(qc.solped_client) AS solped_client,
+                MAX(qc.pedido_client) AS pedido_client,
+                MAX(qc.color_tissus) AS color_tissus,
+                MAX(qc.principale_quantity) AS principale_quantity,
+                MAX(qc.quantity_coupe) AS quantity_coupe,
+                MAX(qc.manque) AS manque,
+                MAX(qc.suv_plus) AS suv_plus,
+                MAX(IFNULL(qc.lastupdate, b.last_update)) AS latest_update
+              FROM barcodes b
+              LEFT JOIN quantity_coupe qc ON b.of_number = qc.of_number 
+                AND b.size = qc.size 
+                AND b.category = qc.category 
+                AND b.piece_name = qc.piece_name
+              WHERE 1=1";
+
+    $params = [];
+
+    // Add date filter first since it's the most restrictive
+    if (!empty($date)) {
+        $query .= " AND DATE(IFNULL(qc.lastupdate, b.last_update)) = ?";
+        $params[] = $date;
+    }
+
+    if (!empty($of_number)) {
+        $query .= " AND b.of_number LIKE ?";
+        $params[] = "%$of_number%";
+    }
+
+    if (!empty($size)) {
+        $query .= " AND b.size = ?";
+        $params[] = $size;
+    }
+
+    if (!empty($category) && $category != 'select') {
+        $query .= " AND b.category = ?";
+        $params[] = $category;
+    }
+
+    if (!empty($p_name) && $p_name != 'select') {
+        $query .= " AND b.piece_name = ?";
+        $params[] = $p_name;
+    }
+
+    if (!empty($stage) && $stage != 'select') {
+        $query .= " AND b.stage = ?";
+        $params[] = $stage;
+    }
+
+    $query .= " GROUP BY b.of_number, b.size, b.category, b.piece_name, b.chef, b.stage";
+    $query .= " ORDER BY b.of_number, b.size, b.category, b.piece_name, b.chef, b.stage";
+
+    $stmt = $pdo->prepare($query);
+    $stmt->execute($params);
+    $results = $stmt->fetchAll();
+
+    // Process the results to match the table view (grouped by OF, size, category, piece_name)
+    $grouped_results = [];
+    
+    foreach ($results as $row) {
+        $key = $row['of_number'] . '_' . $row['size'] . '_' . $row['category'] . '_' . $row['p_name'];
+        
+        if (!isset($grouped_results[$key])) {
+            $grouped_results[$key] = [
+                'of_number' => $row['of_number'],
+                'size' => $row['size'],
+                'category' => $row['category'],
+                'p_name' => $row['p_name'],
+                'chef' => $row['chef'],
+                'stage' => $row['stage'],
+                'total_count' => $row['total_count'],
+                'total_stage_quantity' => $row['total_stage_quantity'] ?? 0,
+                'total_main_quantity' => $row['total_main_quantity'] ?? 0,
+                'solped_client' => $row['solped_client'] ?? '',
+                'pedido_client' => $row['pedido_client'] ?? '',
+                'color_tissus' => $row['color_tissus'] ?? '',
+                'principale_quantity' => $row['principale_quantity'] ?? 0,
+                'quantity_coupe' => $row['quantity_coupe'] ?? 0,
+                'manque' => $row['manque'] ?? 0,
+                'suv_plus' => $row['suv_plus'] ?? 0,
+                'latest_update' => $row['latest_update'] ?? ''
+            ];
+        } else {
+            // Add stage if not already included
+            if (!str_contains($grouped_results[$key]['stage'], $row['stage'])) {
+                $grouped_results[$key]['stage'] .= ', ' . $row['stage'];
+            }
+            
+            // Increment counts
+            $grouped_results[$key]['total_count'] += $row['total_count'];
+            
+            // Keep latest update date
+            if (!empty($row['latest_update'])) {
+                if (empty($grouped_results[$key]['latest_update']) || 
+                    strtotime($row['latest_update']) > strtotime($grouped_results[$key]['latest_update'])) {
+                    $grouped_results[$key]['latest_update'] = $row['latest_update'];
+                }
+            }
+        }
+    }
+    
+    // Convert back to indexed array for Excel export
+    $results_for_export = array_values($grouped_results);
+
+    // Totals
+    $total_items = 0;
+    $total_stage_quantity = 0;
+    $total_main_quantity = 0;
+
+    foreach ($results_for_export as $row) {
+        $total_items += $row['total_count'];
+        $total_stage_quantity += $row['total_stage_quantity'] ?? 0;
+        $total_main_quantity += $row['total_main_quantity'] ?? 0;
+    }
+
+    // Excel file preparation
+    $filename = 'export_data_' . date('Y-m-d_H-i-s') . '.xlsx';
+    
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+    $sheet->setTitle('Export Data');
+
+    // Headers for the Excel file - Ensure these match exactly what's shown in the table
+    $headers = [
+        'OF Number', 'Size', 'Category', 'Piece Name', 'Chef', 'Total Stage Quantity', 
+        'Total Main Quantity', 'Stages', 'Total Count', 'Solped Client', 'Pedido Client', 
+        'Color Tissus', 'Main Qty', 'Qty Coupe', 'Manque', 'Suv Plus', 'Latest Update'
+    ];
+
     $headerStyle = [
         'font' => [
             'bold' => true,
@@ -178,32 +212,34 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
         ],
     ];
 
-    // Set header values and column widths
     foreach ($headers as $idx => $header) {
         $col = chr(65 + $idx); // A, B, C, ...
         $sheet->setCellValue($col . '1', $header);
         $sheet->getColumnDimension($col)->setAutoSize(true);
     }
-    
-    // Apply header styles
-    $lastCol = chr(65 + count($headers) - 1);
-    $sheet->getStyle('A1:' . $lastCol . '1')->applyFromArray($headerStyle);
+    $sheet->getStyle('A1:Q1')->applyFromArray($headerStyle);
 
-    // Fill data rows
     $row = 2;
-    foreach ($results as $data) {
+    foreach ($results_for_export as $data) {
         $sheet->setCellValue('A' . $row, $data['of_number'] ?? '');
         $sheet->setCellValue('B' . $row, $data['size'] ?? '');
         $sheet->setCellValue('C' . $row, $data['category'] ?? '');
-        $sheet->setCellValue('D' . $row, $data['piece_name'] ?? '');
+        $sheet->setCellValue('D' . $row, $data['p_name'] ?? '');
         $sheet->setCellValue('E' . $row, $data['chef'] ?? '');
-        $sheet->setCellValue('F' . $row, $data['total_stage_qty'] ?? 0);
-        $sheet->setCellValue('G' . $row, $data['stages'] ?? '');
-        $sheet->setCellValue('H' . $row, $data['total_count'] ?? 0);
-        $sheet->setCellValue('I' . $row, $data['latest_update'] ? date('Y-m-d H:i', strtotime($data['latest_update'])) : '');
+        $sheet->setCellValue('F' . $row, $data['total_stage_quantity'] ?? 0);
+        $sheet->setCellValue('G' . $row, $data['total_main_quantity'] ?? 0);
+        $sheet->setCellValue('H' . $row, $data['stage'] ?? '');
+        $sheet->setCellValue('I' . $row, $data['total_count'] ?? 0);
+        $sheet->setCellValue('J' . $row, $data['solped_client'] ?? '');
+        $sheet->setCellValue('K' . $row, $data['pedido_client'] ?? '');
+        $sheet->setCellValue('L' . $row, $data['color_tissus'] ?? '');
+        $sheet->setCellValue('M' . $row, $data['principale_quantity'] ?? 0);
+        $sheet->setCellValue('N' . $row, $data['quantity_coupe'] ?? 0);
+        $sheet->setCellValue('O' . $row, $data['manque'] ?? 0);
+        $sheet->setCellValue('P' . $row, $data['suv_plus'] ?? 0);
+        $sheet->setCellValue('Q' . $row, $data['latest_update'] ? date('Y-m-d H:i', strtotime($data['latest_update'])) : '');
 
-        // Apply border styling to data rows
-        $sheet->getStyle('A' . $row . ':I' . $row)->applyFromArray([
+        $sheet->getStyle('A' . $row . ':Q' . $row)->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => Border::BORDER_THIN,
@@ -211,79 +247,64 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
                 ],
             ],
         ]);
-
-        // Apply number formatting where appropriate
-        $sheet->getStyle('F' . $row)->getNumberFormat()->setFormatCode('#,##0');
-        $sheet->getStyle('H' . $row)->getNumberFormat()->setFormatCode('#,##0');
 
         $row++;
     }
 
-    // Add totals row if we have data
-    if (!empty($results)) {
-        $totalRow = $row;
-        $sheet->setCellValue('A' . $totalRow, 'TOTALS');
-        $sheet->mergeCells('A' . $totalRow . ':E' . $totalRow);
-        $sheet->setCellValue('F' . $totalRow, $total_stage_qty);
-        $sheet->setCellValue('H' . $totalRow, $total_items);
+    $totalRow = $row;
+    $sheet->setCellValue('A' . $totalRow, 'TOTALS');
+    $sheet->mergeCells('A' . $totalRow . ':E' . $totalRow);
+    $sheet->setCellValue('F' . $totalRow, $total_stage_quantity);
+    $sheet->setCellValue('G' . $totalRow, $total_main_quantity);
+    $sheet->mergeCells('H' . $totalRow . ':H' . $totalRow);
+    $sheet->setCellValue('I' . $totalRow, $total_items);
 
-        // Style the totals row
-        $sheet->getStyle('A' . $totalRow . ':I' . $totalRow)->applyFromArray([
-            'font' => [
-                'bold' => true,
+    $sheet->getStyle('A' . $totalRow . ':Q' . $totalRow)->applyFromArray([
+        'font' => [
+            'bold' => true,
+        ],
+        'fill' => [
+            'fillType' => Fill::FILL_SOLID,
+            'startColor' => ['rgb' => 'E2EFDA'],
+        ],
+        'borders' => [
+            'allBorders' => [
+                'borderStyle' => Border::BORDER_THIN,
+                'color' => ['rgb' => '000000'],
             ],
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => 'E2EFDA'],
-            ],
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['rgb' => '000000'],
-                ],
-            ],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-            ],
-        ]);
+        ],
+        'alignment' => [
+            'horizontal' => Alignment::HORIZONTAL_CENTER,
+        ],
+    ]);
 
-        // Apply number formatting to totals
-        $sheet->getStyle('F' . $totalRow)->getNumberFormat()->setFormatCode('#,##0');
-        $sheet->getStyle('H' . $totalRow)->getNumberFormat()->setFormatCode('#,##0');
-    }
+    $sheet->getStyle('F' . $totalRow . ':I' . $totalRow)->getNumberFormat()->setFormatCode('#,##0');
 
-    // Generate filename with date/time
-    $filename = 'production_summary_' . date('Y-m-d_H-i-s') . '.xlsx';
+    // Create a temporary file
+    $temp_file = tempnam(sys_get_temp_dir(), 'excel_');
     
-    try {
-        // Create a temporary file
-        $temp_file = tempnam(sys_get_temp_dir(), 'excel_');
-        
-        // Save the spreadsheet to the temporary file
-        $writer = new Xlsx($spreadsheet);
-        $writer->save($temp_file);
-        
-        // Output headers for direct download
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-        header('Content-Length: ' . filesize($temp_file));
-        header('Cache-Control: max-age=0');
-        
-        // Clear the output buffer
-        if (ob_get_level()) {
-            ob_end_clean();
-        }
-        
-        // Output the file
-        readfile($temp_file);
-        
-        // Delete the temporary file
-        unlink($temp_file);
-        
-        // Stop script execution
-        exit;
-    } catch (Exception $e) {
-        die("Failed to create Excel file: " . $e->getMessage());
+    // Save the spreadsheet to the temporary file
+    $writer = new Xlsx($spreadsheet);
+    $writer->save($temp_file);
+    
+    // Output headers for direct download
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Content-Length: ' . filesize($temp_file));
+    header('Cache-Control: max-age=0');
+    
+    // Clear the output buffer
+    if (ob_get_level()) {
+        ob_end_clean();
     }
+    
+    // Output the file
+    readfile($temp_file);
+    
+    // Delete the temporary file
+    unlink($temp_file);
+    
+    // Stop script execution
+    exit;
 }
 ?>

@@ -1,6 +1,6 @@
 <?php
 // Include settings file for database connection
-require "ofsizedetails_settings.php";
+require "scantoday_settings.php";
 require_once 'auth_functions.php';
 requireLogin('login.php');
 

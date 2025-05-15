@@ -1,6 +1,7 @@
 <?php
 require_once 'productionset.php';
 $_SESSION['production_summary'] = $production_summary;
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -307,42 +308,26 @@ $_SESSION['production_summary'] = $production_summary;
 // </div>
 ?>
 
-<!-- Production Summary Table -->
-<div class="row mt-4 mb-4">
-    <div class="col-12">
-        <div class="card shadow-sm">
-            <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Production Summary</h5>
-                <div class="export-button-container">
-                    <form method="GET" action="export_excel.php">
-                        <!-- Hidden inputs to pass all current filter values -->
-                        <input type="hidden" name="export" value="excel">
-                        <input type="hidden" name="of_number" value="<?php echo htmlspecialchars($of_number ?? ''); ?>">
-                        <input type="hidden" name="size" value="<?php echo htmlspecialchars($size ?? ''); ?>">
-                        <input type="hidden" name="category" value="<?php echo htmlspecialchars($category ?? ''); ?>">
-                        <input type="hidden" name="p_name" value="<?php echo htmlspecialchars($p_name ?? ''); ?>">
-                        <input type="hidden" name="stage" value="<?php echo htmlspecialchars($stage ?? ''); ?>">
-                        <input type="hidden" name="date" value="<?php echo htmlspecialchars($date ?? date('Y-m-d')); ?>">
-                        
-                        <button type="submit" class="btn btn-success mb-2" <?php echo empty($production_summary) ? 'disabled' : ''; ?>>
-                            <i class="fas fa-file-excel"></i> Export to Excel
-                        </button>
-                    </form>
-                </div>
-            </div>
-          <div class="card-body">
+
+<div class="card-body">
     <div class="table-responsive">
         <table class="table table-bordered table-striped" id="productionSummaryTable">
             <thead class="bg-light">
                 <tr>
-                    <th>QF Number</th>
+                    <th>OF Number</th>
                     <th>Size</th>
                     <th>Category</th>
                     <th>Piece Name</th>
                     <th>Chef</th>
-                    <th>Total Stage Quantity</th>
-                    <th>Stages</th>
+                    <th>Stage</th>
                     <th>Total Count</th>
+                    <th>Total Stage Quantity</th>
+                    <th>Total Main Quantity</th>
+                    <th>Solped Client</th>
+                    <th>Pedido Client</th>
+                    <th>Color Tissus</th>
+                    <th>Manque</th>
+                    <th>Suv Plus</th>
                     <th>Latest Update</th>
                 </tr>
             </thead>
@@ -353,11 +338,17 @@ $_SESSION['production_summary'] = $production_summary;
                             <td><?= htmlspecialchars($item['of_number'] ?? '') ?></td>
                             <td><?= htmlspecialchars($item['size'] ?? '') ?></td>
                             <td><?= htmlspecialchars($item['category'] ?? '') ?></td>
-                            <td><?= htmlspecialchars($item['piece_name'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($item['p_name'] ?? '') ?></td>
                             <td><?= htmlspecialchars($item['chef'] ?? '') ?></td>
-                            <td><?= htmlspecialchars($item['total_stage_qty'] ?? 0) ?></td>
-                            <td><?= htmlspecialchars($item['stages'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($item['stage'] ?? '') ?></td>
                             <td><?= htmlspecialchars($item['total_count'] ?? 0) ?></td>
+                            <td><?= htmlspecialchars($item['total_stage_quantity'] ?? 0) ?></td>
+                            <td><?= htmlspecialchars($item['total_main_quantity'] ?? 0) ?></td>
+                            <td><?= htmlspecialchars($item['solped_client'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($item['pedido_client'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($item['color_tissus'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($item['manque'] ?? 0) ?></td>
+                            <td><?= htmlspecialchars($item['suv_plus'] ?? 0) ?></td>
                             <td><?php 
                                 if (!empty($item['latest_update'])) {
                                     echo htmlspecialchars(date('Y-m-d H:i', strtotime($item['latest_update'])));
@@ -369,22 +360,20 @@ $_SESSION['production_summary'] = $production_summary;
                     <?php endforeach; ?>
                 <?php elseif(isset($_GET['date']) && !empty($_GET['date'])): ?>
                     <tr>
-                        <td colspan="9" class="text-center">No production summary available for the selected date.</td>
+                        <td colspan="15" class="text-center">No production summary available for the selected date.</td>
                     </tr>
                 <?php else: ?>
                     <tr>
-                        <td colspan="9" class="text-center">Please select a date to view production summary.</td>
+                        <td colspan="15" class="text-center">Please select a date to view production summary.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
         </table>
     </div>
 </div>
-        </div>
-    </div>
+       
 </div>
-    </div>
-    </div><!-- Added missing closing div for main-content -->
+</div><!-- Added missing closing div for main-content -->
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>

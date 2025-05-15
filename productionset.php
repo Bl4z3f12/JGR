@@ -1,47 +1,16 @@
 <?php
-// Enable error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 $current_view = 'production.php';
 $host = "localhost";
 $dbname = "jgr";
 $username = "root";
 $password = "";
 
-require_once 'auth_functions.php';
-requireLogin('login.php');
-
-// Performance Optimization: Add database connection with detailed error handling
-function getDatabaseConnection() {
-    global $host, $dbname, $username, $password;
-    try {
-        $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password, [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_PERSISTENT => true,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true
-        ]);
-        return $pdo;
-    } catch(PDOException $e) {
-        // Log the full error details
-        error_log("Database Connection Error: " . $e->getMessage());
-        error_log("Host: $host, Database: $dbname, Username: $username");
-        
-        // Display more informative error message
-        die("Database Connection Failed: " . $e->getMessage());
-    }
-}
-
-
-// Sanitize and validate input
-$filter_date = isset($_GET['date']) ? 
-    date('Y-m-d', strtotime($_GET['date'])) : 
-    date('Y-m-d');
-
-// Predefined stage configurations
- $display_stages = [
-   'Coupe' => [
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $filter_date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
+    $display_stages = [
+        'Coupe' => [
             'icon' => '<i class="fas fa-cut"></i>',
             'color' => 'primary',
             'emoji' => '<img src="assets/tiptop.png" alt="Coupe" style="width: 40px;">'
@@ -86,167 +55,201 @@ $filter_date = isset($_GET['date']) ?
             'color' => 'primary',
             'emoji' => '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAADzklEQVR4nO2bV2gUQRjHx94VEXvQYEPxRYkvvlkSRCSgsYMNxBJBRXxQLBgE0Ygvglhe1AcRFSOiDyKWBBRBUNAHG1gwYsUWuyT6k4nfxnGZvdtN7nLJzv3gg7uZuW92/js75ds5pbJkyZIKgHbAPGCpz3RaOxV3gFkEM0vFHWBkAgFGqLgDtABeWRr/WucpFwCOWwQ4plwBWGERoFi5AjAM+G00Xn8eplwCyAfeiuUrFwGeaFOuQlYAdA/4DmwC2irXAHYAX2QgPKlcAGgDTARay/eOQLmIkKfiDlAojZ1hpBVL2nwVd4BR0tiLQAfpAZckbYxyAeCkNPiTmDtjgEaP+MBm2QBpdjoRC/ADHBIBcpWL4LIAQA/gsghQqFwByAMOAF992+F7wGqgk4obQFcJfN4iOVUi0EgVo7v9mfpxFZjprRqbBUB7uegLpI7nQAnQSzVVgOGyuXlH+vgJnGhyARSgFTCokS2zCydgQAYaHWQDMhXMaCo0fliNJiyAXlkCHxrgrwZYHkWASqAnUGZxdkrydBk/M4AiS3pUf34BxgU07LvMTncseVckT9t5YEIUAcolTU9Vfkokz4v6mOSK+YnqL6wAteWARZa8goY8AuUxEGCb6wJcc12AaqCLywJoJrkuwI64C/BG8m1Tr+Z63AVANm06KHsYeAg8MuytCwJUAJ1DNzSkABUhLrgiggBR/UURALnbBcabKu+oXlHomAP/C1AlP75pqeyG5OkyfnT8oNSSHtVfVAES9cwfwIaoAmSaIAHe+55x01YHCOAxJw4ClIS4kbZHE9lsNc9je/wT4KzlSK5p64zzCTb6qOYI4caAMOTGVYAa4Jl082qXBPgIrNGv5Yyy3XT0x3hTXT8B+Lu6miLP1nigZZKA6gJgYTpUDhDgKTBY8gdK3YuBIZLWF7ibVAAgx5hK1kvaaOCxZb6udQDsAvrL563SBT1+ecEIoB/wIMHUFdZeWLp87ekTYIuv2+vP2+UQ91DgWzIBcg2nvfUeOiDep7mue4IXw5feEcQyKXOE1FMmvvVdD2KllNkftgecke9LklReF1wE7icod0/KTEtBD/DbXPF9O0H9L6VMgfG7nDDP2+4kAqwy3h7p7h7Er3QvPCQqnIju9XG6MYnT2UZZ2x8lPCpT3WDLteq7GkRVooFbJRnRbRsdZLlct/WUASiIjSrNAGsT1F/aEMdFxnE3D323x1pOiZ62VF7WGGcAZEA+aqn/XINftvJ3btVT3EE9PZqLDUvZqcA+YG8mzgcBk4E9MuJPb7abnixZsmRRjcQfk5uigB3FlTsAAAAASUVORK5CYII=" alt="external-cargo-logistics-delivery-icongeek26-glyph-icongeek26" style="width:50px;">'
         ]
- ];
-
-$targets = [
-    'Coupe' => 100, 'V1' => 100, 'V2' => 100, 'V3' => 100, 
-    'Pantalon' => 100, 'AMF' => 100, 'Repassage' => 1000, 
-    'P_ fini' => 1000, 'Exported' => 100
-];
-
-// Simplified query with detailed error checking
-function getDailyStageStats($pdo, $filter_date) {
-    // Validate the input date
-    if (!$pdo || !$filter_date) {
-        throw new Exception("Invalid database connection or date");
+    ];
+    $targets = [
+        'Coupe' => 100,
+        'V1' => 100,
+        'V2' => 100,
+        'V3' => 100,
+        'Pantalon' => 100,
+        'Repassage' => 1000,
+        'P_ fini' => 1000,
+        'Exported' => 100
+    ];
+    $daily_stage_stats = [];
+    foreach ($display_stages as $stage => $props) {
+        $daily_stage_stats[$stage] = [
+            'current' => 0, // This will hold the count for the specific day
+            'in' => 0,
+            'out' => 0,
+            'from_stages' => [],
+            'to_stages' => []
+        ];
     }
+$daily_items_query = "SELECT 
+    b.stage,
+    COUNT(DISTINCT b.full_barcode_name) as count
+FROM barcodes b
+LEFT JOIN jgr_barcodes_history h ON h.full_barcode_name = b.full_barcode_name
+WHERE h.full_barcode_name IS NOT NULL
+    AND DATE(h.last_update) = :date
+    AND h.action_type IN ('INSERT', 'UPDATE')
+    AND h.last_update = (
+        SELECT MAX(h2.last_update)
+        FROM jgr_barcodes_history h2
+        WHERE h2.full_barcode_name = h.full_barcode_name
+        AND DATE(h2.last_update) <= :date
+    )
+GROUP BY b.stage";
 
-    // Simpler, more reliable query
-    $query = "
-    SELECT 
-        b.stage,
-        COUNT(DISTINCT b.full_barcode_name) as current_count,
-        (
-            SELECT COUNT(DISTINCT full_barcode_name)
-            FROM jgr_barcodes_history
-            WHERE stage = b.stage 
-            AND DATE(last_update) = :date
-            AND action_type = 'INSERT'
-        ) as in_count,
-        (
-            SELECT COUNT(DISTINCT h1.full_barcode_name)
-            FROM jgr_barcodes_history h1
-            JOIN jgr_barcodes_history h2 ON h1.full_barcode_name = h2.full_barcode_name
-            WHERE h1.stage = b.stage
-            AND h2.stage != b.stage
+$daily_params = [':date' => $filter_date];
+$daily_items_stmt = $pdo->prepare($daily_items_query);
+$daily_items_stmt->execute($daily_params);
+$daily_items = $daily_items_stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    foreach ($daily_items as $row) {
+        $stage = $row['stage'];
+        if (isset($daily_stage_stats[$stage])) {
+            $daily_stage_stats[$stage]['current'] = (int)$row['count'];
+        }
+    }
+    
+    // Get stage transitions that occurred on the given date
+    $daily_transitions_query = "
+        SELECT 
+            h1.stage AS from_stage,
+            h2.stage AS to_stage,
+            COUNT(DISTINCT h1.full_barcode_name) as transition_count
+        FROM 
+            jgr_barcodes_history h1
+        JOIN 
+            jgr_barcodes_history h2 ON h1.full_barcode_name = h2.full_barcode_name
+                                   AND h2.action_time = (
+                                       SELECT MIN(h3.action_time)
+                                       FROM jgr_barcodes_history h3
+                                       WHERE h3.full_barcode_name = h1.full_barcode_name
+                                       AND h3.action_time > h1.action_time
+                                       AND DATE(h3.last_update) = :date
+                                   )
+        JOIN
+            barcodes b ON h1.full_barcode_name = b.full_barcode_name
+        WHERE 
+            h1.stage != h2.stage
+            AND h1.action_type IN ('INSERT', 'UPDATE')
+            AND h2.action_type = 'UPDATE'
             AND DATE(h2.last_update) = :date
-        ) as out_count
-    FROM 
-        barcodes b
-    JOIN 
-        jgr_barcodes_history h ON h.full_barcode_name = b.full_barcode_name
-    WHERE 
-        DATE(h.last_update) = :date
-    GROUP BY 
-        b.stage
+        GROUP BY 
+            h1.stage, h2.stage
+        ORDER BY 
+            from_stage, to_stage
     ";
-
-    try {
-        $stmt = $pdo->prepare($query);
-        $stmt->execute([':date' => $filter_date]);
+    
+    $daily_transitions_stmt = $pdo->prepare($daily_transitions_query);
+    $daily_transitions_stmt->execute($daily_params);
+    $daily_transitions = $daily_transitions_stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    foreach ($daily_transitions as $transition) {
+        $from_stage = $transition['from_stage'];
+        $to_stage = $transition['to_stage'];
+        $count = (int)$transition['transition_count'];
         
-        // Log query details for debugging
-        error_log("Query executed for date: $filter_date");
+        if (isset($daily_stage_stats[$from_stage])) {
+            $daily_stage_stats[$from_stage]['out'] += $count;
+            
+            if (!isset($daily_stage_stats[$from_stage]['to_stages'][$to_stage])) {
+                $daily_stage_stats[$from_stage]['to_stages'][$to_stage] = $count;
+            } else {
+                $daily_stage_stats[$from_stage]['to_stages'][$to_stage] += $count;
+            }
+        }
         
-        return $stmt->fetchAll();
-    } catch(PDOException $e) {
-        // Log detailed error information
-        error_log("Query Error: " . $e->getMessage());
-        error_log("Query: " . $query);
-        error_log("Date Parameter: " . $filter_date);
-        
-        throw new Exception("Failed to retrieve stage statistics: " . $e->getMessage());
+        if (isset($daily_stage_stats[$to_stage])) {
+            $daily_stage_stats[$to_stage]['in'] += $count;
+            
+            if (!isset($daily_stage_stats[$to_stage]['from_stages'][$from_stage])) {
+                $daily_stage_stats[$to_stage]['from_stages'][$from_stage] = $count;
+            } else {
+                $daily_stage_stats[$to_stage]['from_stages'][$from_stage] += $count;
+            }
+        }
     }
-}
-
-// Initialize stage statistics with default values even if there's no date parameter
-$daily_stage_stats = [];
-$chart_data = [
-    'labels' => [],
-    'current' => [],
-    'in' => [],
-    'out' => []
-];
-$total_count = 0;
-$has_data = false;
-
-foreach ($display_stages as $stage => $props) {
-    $daily_stage_stats[$stage] = [
-        'current' => 0,
-        'in' => 0,
-        'out' => 0,
-        'from_stages' => [],
-        'to_stages' => []
+    
+    // Get items that were first entered into the system on the given date (initial entries)
+    $first_stage_query = "
+    SELECT 
+        h.stage,
+        COUNT(DISTINCT h.full_barcode_name) as count
+    FROM 
+        jgr_barcodes_history h
+    JOIN
+        barcodes b ON h.full_barcode_name = b.full_barcode_name
+    WHERE 
+        h.action_type = 'INSERT'
+        AND DATE(h.last_update) = :date
+        AND NOT EXISTS (
+            SELECT 1
+            FROM jgr_barcodes_history h_prev
+            WHERE h_prev.full_barcode_name = h.full_barcode_name
+            AND h_prev.action_time < h.action_time
+        )
+    GROUP BY 
+        h.stage
+    ORDER BY 
+        stage
+    ";
+    
+    $first_stage_stmt = $pdo->prepare($first_stage_query);
+    $first_stage_stmt->execute($daily_params);
+    $first_stages = $first_stage_stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    foreach ($first_stages as $first) {
+        $stage = $first['stage'];
+        $count = (int)$first['count'];
+        
+        if (isset($daily_stage_stats[$stage])) {
+            $daily_stage_stats[$stage]['in'] += $count;
+            
+            if (!isset($daily_stage_stats[$stage]['from_stages']['Initial'])) {
+                $daily_stage_stats[$stage]['from_stages']['Initial'] = $count;
+            } else {
+                $daily_stage_stats[$stage]['from_stages']['Initial'] += $count;
+            }
+        }
+    }
+    
+    // Calculate totals for charts
+    $total_count = 0;
+    $chart_data = [
+        'labels' => [],
+        'current' => [],
+        'in' => [],
+        'out' => []
     ];
     
-    // Add empty data points for the chart
-    $chart_data['labels'][] = $stage;
-    $chart_data['current'][] = 0;
-    $chart_data['in'][] = 0;
-    $chart_data['out'][] = 0;
-}
-
-// Only try to fetch data if a date filter is actually set
-if (isset($_GET['date']) && !empty($_GET['date'])) {
-    try {
-        // Establish database connection
-        $pdo = getDatabaseConnection();
-        
-        // Fetch stage statistics
-        $combined_stats = getDailyStageStats($pdo, $filter_date);
-        
-        // Process retrieved statistics
-        foreach ($combined_stats as $row) {
-            $stage = $row['stage'];
-            if (isset($daily_stage_stats[$stage])) {
-                $daily_stage_stats[$stage]['current'] = (int)$row['current_count'];
-                $daily_stage_stats[$stage]['in'] = (int)$row['in_count'];
-                $daily_stage_stats[$stage]['out'] = (int)$row['out_count'];
-            }
-        }
-        
-        // Reset and populate chart data
-        $chart_data = [
-            'labels' => [],
-            'current' => [],
-            'in' => [],
-            'out' => []
-        ];
-        
-        $total_count = 0;
-        foreach ($daily_stage_stats as $stage => $stats) {
-            $total_count += $stats['current'];
-            $chart_data['labels'][] = $stage;
-            $chart_data['current'][] = $stats['current'];
-            $chart_data['in'][] = $stats['in'];
-            $chart_data['out'][] = $stats['out'];
-        }
-        
-        // Check if we have actual data
-        foreach ($daily_stage_stats as $stage => $stats) {
-            if ($stats['current'] > 0 || $stats['in'] > 0 || $stats['out'] > 0) {
-                $has_data = true;
-                break;
-            }
-        }
-    } catch(Exception $e) {
-        // More user-friendly error handling - don't stop execution completely
-        error_log("Application Error: " . $e->getMessage());
-        $error_message = $e->getMessage();
+    foreach ($daily_stage_stats as $stage => $stats) {
+        $total_count += $stats['current'];
+        $chart_data['labels'][] = $stage;
+        $chart_data['current'][] = $stats['current'];
+        $chart_data['in'][] = $stats['in'];
+        $chart_data['out'][] = $stats['out'];
     }
-}
-
-// Helper functions
-function getEmoji($count) {
-    if ($count > 900) return '🔥';
-    if ($count >= 700) return '👍';
-    return '⚠️';
-}
-
-function getBadgeColor($count) {
-    if ($count > 900) return 'bg-success';
-    if ($count >= 700) return 'bg-warning';
-    return 'bg-danger';
-}
-
-function getFaceEmoji($count) {
-    if ($count > 900) {
-        return '<i class="fas fa-smile text-success fa-2x"></i>';
-    } elseif ($count >= 700 && $count <= 900) {
-        return '<i class="fas fa-meh text-warning fa-2x"></i>';
-    } else {
-        return '<i class="fas fa-angry text-danger fa-2x"></i>';
+    
+    // Helper function to get emoji based on count
+    function getEmoji($count) {
+        if ($count > 900) return '🔥';
+        if ($count >= 700) return '👍';
+        return '⚠️';
     }
+    // Helper function to get badge color
+    function getBadgeColor($count) {
+        if ($count > 900) return 'bg-success';
+        if ($count >= 700) return 'bg-warning';
+        return 'bg-danger';
+    }
+    // New helper function to get emoji face based on the value
+    function getFaceEmoji($count) {
+        if ($count > 900) {
+            return '<i class="fas fa-smile text-success fa-2x"></i>'; // Happy green face for > 900
+        } elseif ($count >= 700 && $count <= 900) {
+            return '<i class="fas fa-meh text-warning fa-2x"></i>'; // Neutral face for 700-900
+        } else {
+            return '<i class="fas fa-angry text-danger fa-2x"></i>'; // Angry face for < 700
+        }
+    }
+
+} catch(PDOException $e) {
+    echo "Connection failed: " . $e->getMessage();
+    exit;
 }
 /**
  * Get production summary data for the specified date
@@ -256,48 +259,66 @@ function getFaceEmoji($count) {
  * @return array Production summary data
  */
 function getProductionSummary($pdo, $filter_date) {
-    if (!$pdo || !$filter_date) {
-        error_log("Invalid database connection or date in getProductionSummary");
+    if (!$pdo) {
+        error_log("Invalid database connection in getProductionSummary");
         return [];
     }
     
     try {
-        // Fixed query based on the actual barcodes table structure
+        // Query that shows all records from barcodes table, with or without matching quantity_coupe records
         $query = "
         SELECT 
-            b.of_number,
-            b.size,
-            b.category,
-            b.piece_name,
+            b.of_number, 
+            b.size, 
+            b.category, 
+            b.piece_name AS p_name,
             b.chef,
-            COUNT(b.id) AS total_stage_qty,
-            GROUP_CONCAT(DISTINCT b.stage ORDER BY b.stage SEPARATOR ', ') AS stages,
-            COUNT(DISTINCT b.full_barcode_name) AS total_count,
-            MAX(b.last_update) AS latest_update
-        FROM 
-            barcodes b
-        WHERE 
-            DATE(b.last_update) = :date
-        GROUP BY 
-            b.of_number, b.size, b.category, b.piece_name, b.chef
-        ORDER BY 
-            MAX(b.last_update) DESC
-        ";
+            b.stage,
+            COUNT(b.id) AS total_count,
+            qc.quantity_coupe AS total_stage_quantity,
+            qc.principale_quantity AS total_main_quantity,
+            qc.solped_client AS solped_client,
+            qc.pedido_client AS pedido_client,
+            qc.color_tissus AS color_tissus,
+            qc.manque AS manque,
+            qc.suv_plus AS suv_plus,
+            IFNULL(qc.lastupdate, b.last_update) AS latest_update
+        FROM barcodes b
+        LEFT JOIN quantity_coupe qc ON b.of_number = qc.of_number
+            AND b.size = qc.size
+            AND b.category = qc.category
+            AND b.piece_name = qc.piece_name
+        WHERE 1=1";
+        
+        // Add date filter if provided
+        if (!empty($filter_date)) {
+            $query .= " AND DATE(b.last_update) = ?";
+        }
+        
+        // Add grouping to support COUNT function
+        $query .= " GROUP BY b.of_number, b.size, b.category, b.piece_name, b.chef, b.stage, 
+                   qc.quantity_coupe, qc.principale_quantity, qc.solped_client, qc.pedido_client, 
+                   qc.color_tissus, qc.manque, qc.suv_plus, latest_update
+                   ORDER BY b.of_number, b.size, b.category, b.piece_name";
         
         $stmt = $pdo->prepare($query);
-        $stmt->execute([':date' => $filter_date]);
         
-        error_log("Production summary query executed for date: $filter_date");
+        if (!empty($filter_date)) {
+            $stmt->execute([$filter_date]);
+        } else {
+            $stmt->execute();
+        }
         
-        $results = $stmt->fetchAll();
+        error_log("Production summary query executed" . ($filter_date ? " for date: $filter_date" : ""));
         
-        // Don't format the timestamps here - leave them as raw database values
-        // This allows proper handling in the display code
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         return $results;
     } catch(PDOException $e) {
         error_log("Production Summary Query Error: " . $e->getMessage());
-        error_log("Date Parameter: " . $filter_date);
+        if (!empty($filter_date)) {
+            error_log("Date Parameter: " . $filter_date);
+        }
         
         return [];
     }
@@ -306,13 +327,13 @@ function getProductionSummary($pdo, $filter_date) {
 // Main code flow
 
 // Make sure to properly define $filter_date
-$filter_date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
+$filter_date = isset($_GET['date']) ? $_GET['date'] : null;
 
 // Initialize production summary data
 $production_summary = [];
 
-// Only try to fetch data if a date filter is actually set and database connection exists
-if (isset($_GET['date']) && !empty($_GET['date']) && isset($pdo)) {
+// Try to fetch data if database connection exists
+if (isset($pdo)) {
     try {
         // Fetch production summary data
         $production_summary = getProductionSummary($pdo, $filter_date);
