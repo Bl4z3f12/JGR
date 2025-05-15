@@ -9,6 +9,9 @@ try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $filter_date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
+    $filter_stage = isset($_GET['stage']) ? $_GET['stage'] : null;
+    $filter_piece_name = isset($_GET['piece_name']) ? $_GET['piece_name'] : null;
+
     $display_stages = [
         'Coupe' => [
             'icon' => '<i class="fas fa-cut"></i>',
@@ -56,6 +59,7 @@ try {
             'emoji' => '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAADzklEQVR4nO2bV2gUQRjHx94VEXvQYEPxRYkvvlkSRCSgsYMNxBJBRXxQLBgE0Ygvglhe1AcRFSOiDyKWBBRBUNAHG1gwYsUWuyT6k4nfxnGZvdtN7nLJzv3gg7uZuW92/js75ds5pbJkyZIKgHbAPGCpz3RaOxV3gFkEM0vFHWBkAgFGqLgDtABeWRr/WucpFwCOWwQ4plwBWGERoFi5AjAM+G00Xn8eplwCyAfeiuUrFwGeaFOuQlYAdA/4DmwC2irXAHYAX2QgPKlcAGgDTARay/eOQLmIkKfiDlAojZ1hpBVL2nwVd4BR0tiLQAfpAZckbYxyAeCkNPiTmDtjgEaP+MBm2QBpdjoRC/ADHBIBcpWL4LIAQA/gsghQqFwByAMOAF992+F7wGqgk4obQFcJfN4iOVUi0EgVo7v9mfpxFZjprRqbBUB7uegLpI7nQAnQSzVVgOGyuXlH+vgJnGhyARSgFTCokS2zCydgQAYaHWQDMhXMaCo0fliNJiyAXlkCHxrgrwZYHkWASqAnUGZxdkrydBk/M4AiS3pUf34BxgU07LvMTncseVckT9t5YEIUAcolTU9Vfkokz4v6mOSK+YnqL6wAteWARZa8goY8AuUxEGCb6wJcc12AaqCLywJoJrkuwI64C/BG8m1Tr+Z63AVANm06KHsYeAg8MuytCwJUAJ1DNzSkABUhLrgiggBR/UURALnbBcabKu+oXlHomAP/C1AlP75pqeyG5OkyfnT8oNSSHtVfVAES9cwfwIaoAmSaIAHe+55x01YHCOAxJw4ClIS4kbZHE9lsNc9je/wT4KzlSK5p64zzCTb6qOYI4caAMOTGVYAa4Jl082qXBPgIrNGv5Yyy3XT0x3hTXT8B+Lu6miLP1nigZZKA6gJgYTpUDhDgKTBY8gdK3YuBIZLWF7ibVAAgx5hK1kvaaOCxZb6udQDsAvrL563SBT1+ecEIoB/wIMHUFdZeWLp87ekTYIuv2+vP2+UQ91DgWzIBcg2nvfUeOiDep7mue4IXw5feEcQyKXOE1FMmvvVdD2KllNkftgecke9LklReF1wE7icod0/KTEtBD/DbXPF9O0H9L6VMgfG7nDDP2+4kAqwy3h7p7h7Er3QvPCQqnIju9XG6MYnT2UZZ2x8lPCpT3WDLteq7GkRVooFbJRnRbRsdZLlct/WUASiIjSrNAGsT1F/aEMdFxnE3D323x1pOiZ62VF7WGGcAZEA+aqn/XINftvJ3btVT3EE9PZqLDUvZqcA+YG8mzgcBk4E9MuJPb7abnixZsmRRjcQfk5uigB3FlTsAAAAASUVORK5CYII=" alt="external-cargo-logistics-delivery-icongeek26-glyph-icongeek26" style="width:50px;">'
         ]
     ];
+
     $targets = [
         'Coupe' => 100,
         'V1' => 100,
@@ -104,7 +108,6 @@ $daily_items = $daily_items_stmt->fetchAll(PDO::FETCH_ASSOC);
         }
     }
     
-    // Get stage transitions that occurred on the given date
     $daily_transitions_query = "
         SELECT 
             h1.stage AS from_stage,
@@ -164,7 +167,6 @@ $daily_items = $daily_items_stmt->fetchAll(PDO::FETCH_ASSOC);
         }
     }
     
-    // Get items that were first entered into the system on the given date (initial entries)
     $first_stage_query = "
     SELECT 
         h.stage,
@@ -207,7 +209,6 @@ $daily_items = $daily_items_stmt->fetchAll(PDO::FETCH_ASSOC);
         }
     }
     
-    // Calculate totals for charts
     $total_count = 0;
     $chart_data = [
         'labels' => [],
@@ -224,19 +225,16 @@ $daily_items = $daily_items_stmt->fetchAll(PDO::FETCH_ASSOC);
         $chart_data['out'][] = $stats['out'];
     }
     
-    // Helper function to get emoji based on count
     function getEmoji($count) {
         if ($count > 900) return '🔥';
         if ($count >= 700) return '👍';
         return '⚠️';
     }
-    // Helper function to get badge color
     function getBadgeColor($count) {
         if ($count > 900) return 'bg-success';
         if ($count >= 700) return 'bg-warning';
         return 'bg-danger';
     }
-    // New helper function to get emoji face based on the value
     function getFaceEmoji($count) {
         if ($count > 900) {
             return '<i class="fas fa-smile text-success fa-2x"></i>'; // Happy green face for > 900
@@ -246,23 +244,19 @@ $daily_items = $daily_items_stmt->fetchAll(PDO::FETCH_ASSOC);
             return '<i class="fas fa-angry text-danger fa-2x"></i>'; // Angry face for < 700
         }
     }
-
 } catch(PDOException $e) {
     echo "Connection failed: " . $e->getMessage();
     exit;
 }
-// Get available stages for the filter
 function getAvailableStages($pdo, $filter_date) {
-    // Define the predefined stages in the correct order
     $predefined_stages = ['Coupe', 'V1', 'V2', 'V3', 'Pantalon', 'AMF', 'Repassage', 'P_ fini', 'Exported', 'No Stage'];
     
     if (!$pdo) {
         error_log("Invalid database connection in getAvailableStages");
-        return $predefined_stages; // Return predefined stages even if DB connection fails
+        return $predefined_stages;
     }
     
     try {
-        // Query to get stages that actually exist in the database
         $query = "
         SELECT DISTINCT IFNULL(b.stage, 'No Stage') as stage 
         FROM barcodes b
@@ -282,42 +276,28 @@ function getAvailableStages($pdo, $filter_date) {
         
         $db_stages = $stmt->fetchAll(PDO::FETCH_COLUMN);
         
-        // Filter the predefined stages to only include those that exist in the database
-        // This ensures we maintain the correct order while only showing available stages
         $available_stages = array_filter($predefined_stages, function($stage) use ($db_stages) {
             return in_array($stage, $db_stages);
         });
         
-        // If there are any stages in the database that aren't in our predefined list, add them at the end
         foreach ($db_stages as $stage) {
             if (!in_array($stage, $predefined_stages) && !empty($stage)) {
                 $available_stages[] = $stage;
             }
         }
-        
         return $available_stages;
     } catch(PDOException $e) {
         error_log("Get Available Stages Query Error: " . $e->getMessage());
-        return $predefined_stages; // Return predefined stages if query fails
+        return $predefined_stages;
     }
 }
 
-/**
- * Get production summary data for the specified date and optional stage filter
- *
- * @param PDO $pdo Database connection
- * @param string $filter_date Date in Y-m-d format
- * @param string $filter_stage Optional stage filter
- * @return array Production summary data
- */
-function getProductionSummary($pdo, $filter_date, $filter_stage = null) {
+function getProductionSummary($pdo, $filter_date, $filter_stage = null, $filter_piece_name = null) {
     if (!$pdo) {
         error_log("Invalid database connection in getProductionSummary");
         return [];
     }
-    
     try {
-        // Modified query to properly aggregate the data
         $query = "
         SELECT 
             b.of_number,
@@ -340,14 +320,12 @@ function getProductionSummary($pdo, $filter_date, $filter_stage = null) {
             AND b.size = qc.size
             AND b.category = qc.category
             AND b.piece_name = qc.piece_name
-        WHERE 1=1";
+        WHERE b.stage IS NOT NULL AND b.stage != ''";
         
-        // Add date filter if provided
         if (!empty($filter_date)) {
             $query .= " AND DATE(b.last_update) = ?";
         }
         
-        // Add stage filter if provided, with special handling for "No Stage"
         if (!empty($filter_stage)) {
             if ($filter_stage == 'No Stage') {
                 $query .= " AND (b.stage IS NULL OR b.stage = '')";
@@ -356,86 +334,29 @@ function getProductionSummary($pdo, $filter_date, $filter_stage = null) {
             }
         }
         
-        // Simplified grouping - only group by essential fields
-        $query .= " GROUP BY b.of_number, b.size, b.category, b.piece_name, b.chef, IFNULL(b.stage, 'No Stage')
-                   ORDER BY b.of_number, b.size, b.category, b.piece_name";
-        
-        $stmt = $pdo->prepare($query);
-        
-        // Execute with appropriate parameters
-        if (!empty($filter_date) && !empty($filter_stage) && $filter_stage != 'No Stage') {
-            $stmt->execute([$filter_date, $filter_stage]);
-        } elseif (!empty($filter_date)) {
-            $stmt->execute([$filter_date]);
-        } elseif (!empty($filter_stage) && $filter_stage != 'No Stage') {
-            $stmt->execute([$filter_stage]);
-        } else {
-            $stmt->execute();
+        if (!empty($filter_piece_name)) {
+            $query .= " AND b.piece_name = ?";
         }
         
-        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $query .= " GROUP BY b.of_number, b.size, b.category, b.piece_name, b.chef, IFNULL(b.stage, 'No Stage')
+                   ORDER BY b.of_number, b.size, b.category, b.piece_name";
+        $stmt = $pdo->prepare($query);
+        $params = [];
+        if (!empty($filter_date)) {
+            $params[] = $filter_date;
+        }
+        if (!empty($filter_stage) && $filter_stage != 'No Stage') {
+            $params[] = $filter_stage;
+        }
+        if (!empty($filter_piece_name)) {
+            $params[] = $filter_piece_name;
+        }
         
-        return $results;
+        $stmt->execute($params);
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch(PDOException $e) {
         error_log("Production Summary Query Error: " . $e->getMessage());
         return [];
     }
 }
-
-/**
- * Calculate grand totals from the production summary data
- * 
- * @param array $production_summary The production summary data
- * @return array The grand totals
- */
-function calculateGrandTotals($production_summary) {
-    $grand_totals = [
-        'total_count' => 0,
-        'total_stage_quantity' => 0,
-        'total_main_quantity' => 0,
-        'manque' => 0,
-        'suv_plus' => 0
-    ];
-    
-    foreach ($production_summary as $item) {
-        $grand_totals['total_count'] += (int)($item['total_count'] ?? 0);
-        $grand_totals['total_stage_quantity'] += (float)($item['total_stage_quantity'] ?? 0);
-        $grand_totals['total_main_quantity'] += (float)($item['total_main_quantity'] ?? 0);
-        $grand_totals['manque'] += (float)($item['manque'] ?? 0);
-        $grand_totals['suv_plus'] += (float)($item['suv_plus'] ?? 0);
-    }
-    
-    return $grand_totals;
-}
-
-// Main code flow
-// Get filter parameters
-$filter_date = isset($_GET['date']) ? $_GET['date'] : null;
-$filter_stage = isset($_GET['stage']) ? $_GET['stage'] : null;
-
-// If no stage is selected initially, default to "Coupe" to show that stage
-if (empty($filter_stage)) {
-    $filter_stage = "Coupe";
-}
-
-// Initialize production summary data and available stages
-$production_summary = [];
-$available_stages = [];
-$grand_totals = [];
-
-// Try to fetch data if database connection exists
-if (isset($pdo)) {
-    try {
-        // Get available stages for the filter dropdown
-        $available_stages = getAvailableStages($pdo, $filter_date);
-        
-        // Fetch production summary data
-        $production_summary = getProductionSummary($pdo, $filter_date, $filter_stage);
-        
-        // Calculate grand totals
-        $grand_totals = calculateGrandTotals($production_summary);
-    } catch(Exception $e) {
-        error_log("Error fetching production summary: " . $e->getMessage());
-    }
-}
-?>

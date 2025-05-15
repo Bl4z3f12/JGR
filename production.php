@@ -1,20 +1,41 @@
 <?php
 require_once 'productionset.php';
-$_SESSION['production_summary'] = $production_summary;
+$production_summary = getProductionSummary(
+    $pdo,
+    $filter_date ?? (isset($_GET['date']) ? $_GET['date'] : date('Y-m-d')),
+    $filter_stage ?? (isset($_GET['stage']) ? $_GET['stage'] : null),
+    $filter_piece_name ?? (isset($_GET['piece_name']) ? $_GET['piece_name'] : null)
+);
 
+$grand_totals = [
+    'total_count' => 0,
+    'total_stage_quantity' => 0,
+    'total_main_quantity' => 0,
+    'manque' => 0,
+    'suv_plus' => 0,
+];
+if (!empty($production_summary) && is_array($production_summary)) {
+    foreach ($production_summary as $item) {
+        $grand_totals['total_count'] += (float)($item['total_count'] ?? 0);
+        $grand_totals['total_stage_quantity'] += (float)($item['total_stage_quantity'] ?? 0);
+        $grand_totals['total_main_quantity'] += (float)($item['total_main_quantity'] ?? 0);
+        $grand_totals['manque'] += (float)($item['manque'] ?? 0);
+        $grand_totals['suv_plus'] += (float)($item['suv_plus'] ?? 0);
+    }
+}
+
+$_SESSION['production_summary'] = $production_summary;
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Production Stage</title>
-    
     <?php include 'includes/head.php'; ?>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
-    <!-- Moved Chart.js script after Bootstrap to avoid potential conflicts -->
 </head>
 <body class="bg-light">
 <div id="loadingOverlay">
@@ -206,7 +227,6 @@ $_SESSION['production_summary'] = $production_summary;
                                                     </span>
                                                 </div>
 
-                                                <!-- Items In Detail -->
                                                 <div class="mt-3">
                                                     <button onclick="togglePanel('panel-in-<?= str_replace(' ', '_', $stage) ?>', this)"
                                                         class="btn btn-sm btn-outline-light w-100 text-start d-flex justify-content-between align-items-center">
@@ -233,7 +253,6 @@ $_SESSION['production_summary'] = $production_summary;
                                                     </div>
                                                 </div>
 
-                                                <!-- Items Out Detail -->
                                                 <div class="mt-2">
                                                     <button onclick="togglePanel('panel-out-<?= str_replace(' ', '_', $stage) ?>', this)"
                                                         class="btn btn-sm btn-outline-light w-100 text-start d-flex justify-content-between align-items-center">
@@ -300,131 +319,140 @@ $_SESSION['production_summary'] = $production_summary;
             </div>
             
             <!-- Production Summary Table - Only show when date is selected -->
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0">Production Summary - Stage: <?= htmlspecialchars($filter_stage ?? 'All') ?></h4>
-            </div>
-            <div class="card-body">
-                <!-- Filter controls -->
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <form id="stageFilterForm" class="form-inline" method="get">
-                            <!-- Preserve the date filter if it exists -->
-                            <?php if (!empty($filter_date)): ?>
-                                <input type="hidden" name="date" value="<?= htmlspecialchars($filter_date) ?>">
-                            <?php endif; ?>
-                            
-                            <div class="form-group">
-                                <label for="stageFilter" class="mr-2 mt-2">Filter by Stage:</label>
-                                <select name="stage" id="stageFilter" class="form-control " onchange="document.getElementById('stageFilterForm').submit();">
-                                    <option value="">All Stages</option>
-                                    <?php foreach ($available_stages as $stage): ?>
-                                        <option value="<?= htmlspecialchars($stage) ?>" <?= ($filter_stage == $stage) ? 'selected' : '' ?>>
-                                            <?= htmlspecialchars($stage) ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <button type="submit" class="btn btn-primary mt-2">Apply Filter</button>
-                               
-                            </div>
-                        </form>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card bg-light">
-                            <div class="card-body p-2">
-                                <h5 class="card-title">Grand Totals <?= !empty($filter_stage) ? 'for Stage: ' . htmlspecialchars($filter_stage) : '' ?></h5>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <p class="mb-1"><strong>Total Barcodes:</strong> <?= number_format($grand_totals['total_count']) ?></p>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <p class="mb-1"><strong>Total Stage Qty:</strong> <?= number_format($grand_totals['total_stage_quantity'], 2) ?></p>
-                                        <p class="mb-1"><strong>Total Main Qty:</strong> <?= number_format($grand_totals['total_main_quantity'], 2) ?></p>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <p class="mb-1"><strong>Total Manque:</strong> <?= number_format($grand_totals['manque'], 2) ?></p>
-                                        <p class="mb-1"><strong>Total Suv Plus:</strong> <?= number_format($grand_totals['suv_plus'], 2) ?></p>
+            <div class="row mt-4" id="productionSummaryContainer">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h4 class="mb-0">Production Summary - Stage: <?= htmlspecialchars($filter_stage ?? 'All') ?></h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-4">
+                                <div class="col-md-8">
+                                    <form id="stageFilterForm" class="form-inline" method="get">
+                                        <?php if (!empty($filter_date)): ?>
+                                            <input type="hidden" name="date" value="<?= htmlspecialchars($filter_date) ?>">
+                                        <?php endif; ?>
+                                        
+                                        <div class="form-group">
+                                            <label for="stageFilter" class="mr-2 mt-2">Filter by Stage:</label>
+                                            <select name="stage" id="stageFilter" class="form-control">
+                                                <option value="">All Stages</option>
+                                                <?php 
+                                                foreach ($available_stages as $stage): 
+                                                    // Skip empty stages or "No Stage" entries
+                                                    if (empty($stage) || $stage == 'No Stage') continue;
+                                                ?>
+                                                    <option value="<?= htmlspecialchars($stage) ?>" <?= ($filter_stage == $stage) ? 'selected' : '' ?>>
+                                                        <?= htmlspecialchars($stage) ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="form-group ml-3">
+                                            <label for="pieceNameFilter" class="mr-2 mt-2">Filter by Piece Name:</label>
+                                            <select name="piece_name" id="pieceNameFilter" class="form-control">
+                                                <option value="">All Piece Names</option>
+                                                <option value="V" <?= (isset($_GET['piece_name']) && $_GET['piece_name'] == 'V') ? 'selected' : '' ?>>V</option>
+                                                <option value="P" <?= (isset($_GET['piece_name']) && $_GET['piece_name'] == 'P') ? 'selected' : '' ?>>P</option>
+                                                <option value="G" <?= (isset($_GET['piece_name']) && $_GET['piece_name'] == 'G') ? 'selected' : '' ?>>G</option>
+                                                <option value="M" <?= (isset($_GET['piece_name']) && $_GET['piece_name'] == 'M') ? 'selected' : '' ?>>M</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <button type="submit" id="applyFilterBtn" class="btn btn-primary mt-2 ml-3">Apply Filter</button>
+                                        <a href="?<?= !empty($filter_date) ? 'date=' . htmlspecialchars($filter_date) : '' ?>" class="btn btn-secondary mt-2 ml-2" id="resetFilterBtn">Reset Filters</a>
+                                    </form>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body p-2">
+                                            <h5 class="card-title">Grand Totals <?= !empty($filter_stage) ? 'for Stage: ' . ($filter_stage == 'No Stage' ? '' : htmlspecialchars($filter_stage)) : '' ?></h5>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <p class="mb-1"><strong>Total Barcodes:</strong> <?= number_format($grand_totals['total_count']) ?></p>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <p class="mb-1"><strong>Total Stage Qty:</strong> <?= number_format($grand_totals['total_stage_quantity'], 2) ?></p>
+                                                    <p class="mb-1"><strong>Total Main Qty:</strong> <?= number_format($grand_totals['total_main_quantity'], 2) ?></p>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <p class="mb-1"><strong>Total Manque:</strong> <?= number_format($grand_totals['manque'], 2) ?></p>
+                                                    <p class="mb-1"><strong>Total Suv Plus:</strong> <?= number_format($grand_totals['suv_plus'], 2) ?></p>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped" id="productionSummaryTable">
+                                    <thead class="table-primary">
+                                        <tr>
+                                            <th>OF Number</th>
+                                            <th>Size</th>
+                                            <th>Category</th>
+                                            <th>Piece Name</th>
+                                            <th>Chef</th>
+                                            <th>Stage</th>
+                                            <th>Total Count</th>
+                                            <th>Total Stage Quantity</th>
+                                            <th>Total Main Quantity</th>
+                                            <th>Solped Client</th>
+                                            <th>Pedido Client</th>
+                                            <th>Color Tissus</th>
+                                            <th>Manque</th>
+                                            <th>Suv Plus</th>
+                                            <th>Latest Update</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if (isset($production_summary) && !empty($production_summary)): ?>
+                                            <?php foreach ($production_summary as $item): ?>
+                                                <tr>
+                                                    <td><?= htmlspecialchars($item['of_number'] ?? '') ?></td>
+                                                    <td><?= htmlspecialchars($item['size'] ?? '') ?></td>
+                                                    <td><?= htmlspecialchars($item['category'] ?? '') ?></td>
+                                                    <td><?= htmlspecialchars($item['p_name'] ?? '') ?></td>
+                                                    <td><?= htmlspecialchars($item['chef'] ?? '') ?></td>
+                                                    <td><span class="badge bg-primary text-white border border-primary rounded-pill px-3 py-2"><?= $item['stage'] == 'No Stage' ? '' : htmlspecialchars($item['stage'] ?? '') ?></span></td>
+                                                    <td><span class="badge bg-primary text-white border border-primary rounded-pill px-3 py-2"><?= htmlspecialchars($item['total_count'] ?? 0) ?></span></td>
+                                                    <td><?= htmlspecialchars($item['total_stage_quantity'] ?? 0) ?></td>
+                                                    <td><?= htmlspecialchars($item['total_main_quantity'] ?? 0) ?></td>
+                                                    <td><?= htmlspecialchars($item['solped_client'] ?? '') ?></td>
+                                                    <td><?= htmlspecialchars($item['pedido_client'] ?? '') ?></td>
+                                                    <td><?= htmlspecialchars($item['color_tissus'] ?? '') ?></td>
+                                                    <td><?= htmlspecialchars($item['manque'] ?? 0) ?></td>
+                                                    <td><?= htmlspecialchars($item['suv_plus'] ?? 0) ?></td>
+                                                    <td><?php 
+                                                        if (!empty($item['latest_update'])) {
+                                                            echo htmlspecialchars(date('Y-m-d H:i', strtotime($item['latest_update'])));
+                                                        } else {
+                                                            echo '';
+                                                        }
+                                                    ?></td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <tr>
+                                                <td colspan="15" class="text-center">No production summary available for the selected filters.</td>
+                                            </tr>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Production Summary Table -->
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped" id="productionSummaryTable">
-                        <thead class="bg-light">
-                            <tr>
-                                <th>OF Number</th>
-                                <th>Size</th>
-                                <th>Category</th>
-                                <th>Piece Name</th>
-                                <th>Chef</th>
-                                <th>Stage</th>
-                                <th>Total Count</th>
-                                <th>Total Stage Quantity</th>
-                                <th>Total Main Quantity</th>
-                                <th>Solped Client</th>
-                                <th>Pedido Client</th>
-                                <th>Color Tissus</th>
-                                <th>Manque</th>
-                                <th>Suv Plus</th>
-                                <th>Latest Update</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (isset($production_summary) && !empty($production_summary)): ?>
-                                <?php foreach ($production_summary as $item): ?>
-                                    <tr>
-                                        <td><?= htmlspecialchars($item['of_number'] ?? '') ?></td>
-                                        <td><?= htmlspecialchars($item['size'] ?? '') ?></td>
-                                        <td><?= htmlspecialchars($item['category'] ?? '') ?></td>
-                                        <td><?= htmlspecialchars($item['p_name'] ?? '') ?></td>
-                                        <td><?= htmlspecialchars($item['chef'] ?? '') ?></td>
-                                        <td><?= htmlspecialchars($item['stage'] ?? '') ?></td>
-                                        <td><?= htmlspecialchars($item['total_count'] ?? 0) ?></td>
-                                        <td><?= htmlspecialchars($item['total_stage_quantity'] ?? 0) ?></td>
-                                        <td><?= htmlspecialchars($item['total_main_quantity'] ?? 0) ?></td>
-                                        <td><?= htmlspecialchars($item['solped_client'] ?? '') ?></td>
-                                        <td><?= htmlspecialchars($item['pedido_client'] ?? '') ?></td>
-                                        <td><?= htmlspecialchars($item['color_tissus'] ?? '') ?></td>
-                                        <td><?= htmlspecialchars($item['manque'] ?? 0) ?></td>
-                                        <td><?= htmlspecialchars($item['suv_plus'] ?? 0) ?></td>
-                                        <td><?php 
-                                            if (!empty($item['latest_update'])) {
-                                                echo htmlspecialchars(date('Y-m-d H:i', strtotime($item['latest_update'])));
-                                            } else {
-                                                echo '';
-                                            }
-                                        ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <tr>
-                                    <td colspan="15" class="text-center">No production summary available for stage: <strong><?= htmlspecialchars($filter_stage) ?></strong><?= !empty($filter_date) ? ' and date: <strong>' . htmlspecialchars($filter_date) . '</strong>' : '' ?>.</td>
-                                </tr>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+            </div>            
             <?php endif; ?>
         <?php endif; ?>
-        </div>
-    </div><!-- main-content div -->
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
-    <!-- Add SheetJS library for Excel export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
     <script>
         <?php if (isset($has_data) && $has_data): ?>
         const pieCtx = document.getElementById('pieChart').getContext('2d');
@@ -451,7 +479,6 @@ $_SESSION['production_summary'] = $production_summary;
                 }
             }
         });
-
         const barCtx = document.getElementById('barChart').getContext('2d');
         new Chart(barCtx, {
             type: 'bar',
@@ -491,7 +518,29 @@ $_SESSION['production_summary'] = $production_summary;
         });
         <?php endif; ?>
     </script>
-
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterForm = document.getElementById('stageFilterForm');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const applyFilterBtn = document.getElementById('applyFilterBtn');
+        if (filterForm) {
+            filterForm.addEventListener('submit', function() {
+                loadingOverlay.style.display = 'flex';
+            });
+        }
+        if (applyFilterBtn) {
+            applyFilterBtn.addEventListener('click', function() {
+                loadingOverlay.style.display = 'flex';
+            });
+        }
+        const resetFilterBtn = document.getElementById('resetFilterBtn');
+        if (resetFilterBtn) {
+            resetFilterBtn.addEventListener('click', function() {
+                loadingOverlay.style.display = 'flex';
+            });
+        }
+    });
+    </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const filterForm = document.getElementById('filterForm');
@@ -522,20 +571,8 @@ $_SESSION['production_summary'] = $production_summary;
             if (productionNavLink) {
                 productionNavLink.addEventListener('click', showLoading);
             }
-            
-            // Excel Export Functionality
-            const exportButton = document.getElementById('exportToExcel');
-            if (exportButton) {
-                exportButton.addEventListener('click', function() {
-                    const table = document.getElementById('productionSummaryTable');
-                    const wb = XLSX.utils.table_to_book(table, {sheet: "Production Data"});
-                    const date = document.getElementById('date').value || 'all_dates';
-                    XLSX.writeFile(wb, `production_report_${date}.xlsx`);
-                });
-            }
         });
     </script>
-
     <script>
         function togglePanel(panelId, buttonElement) {
             var panel = document.getElementById(panelId);
@@ -550,8 +587,6 @@ $_SESSION['production_summary'] = $production_summary;
             }
         }
     </script>
-
 <?php include 'includes/footer.php'; ?>
-
 </body>
 </html>
