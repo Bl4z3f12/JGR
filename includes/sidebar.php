@@ -16,7 +16,7 @@
                 RTC [PUBLIC]
             </a>
             <a href="ofsizedetails.php" class="sidebar-item text-white <?php echo $current_view === 'ofsizedetails.php' ? 'active' : ''; ?>" onclick="document.getElementById('loadingOverlay').style.display = 'flex'">
-                <div class="sidebar-item-icon"><img width="25" height="25" src="https://img.icons8.com/fluency-systems-filled/48/FFFFFF/barcode-scanner-2.png" alt="barcode-scanner-2"/></div>
+                <div class="sidebar-item-icon"><i class="fa-solid fa-ruler-combined"></i></div>
                 OF_ Size Details
             </a>
             <a href="production.php" id="productionNavLink" class="sidebar-item text-white <?php echo $current_view === 'production.php' ? 'active' : ''; ?>">
@@ -31,18 +31,20 @@
                 <div class="sidebar-item-icon"><i class="fa-solid fa-wrench"></i></div>
                 Barcodes Settings
             </a>
-            <a href="history.php" class="sidebar-item text-white <?php echo $current_view === 'history.php' ? 'active' : ''; ?>">
-                <div class="sidebar-item-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
-                History (logs)
-            </a>
-            <a href="scanner_system_download.php" class="sidebar-item text-white <?php echo $current_view === 'scanner_system_download.php' ? 'active' : ''; ?>">
-                <div class="sidebar-item-icon"><i class="fas fa-download me-2"></i></div>
-                Scanner System Download
-            </a>
-            <a href="onlinewebsite.php" class="sidebar-item text-white <?php echo $current_view === 'onlinewebsite.php' ? 'active' : ''; ?>">
-                <div class="sidebar-item-icon"><i class="fa-solid fa-earth-africa"></i></div>
-                Online Website
-            </a>
+                <!--
+                <a href="history.php" class="sidebar-item text-white <?php echo $current_view === 'history.php' ? 'active' : ''; ?>">
+                    <div class="sidebar-item-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                    History (logs)
+                </a>
+                <a href="scanner_system_download.php" class="sidebar-item text-white <?php echo $current_view === 'scanner_system_download.php' ? 'active' : ''; ?>">
+                    <div class="sidebar-item-icon"><i class="fas fa-download me-2"></i></div>
+                    Scanner System Download
+                </a>
+                <a href="onlinewebsite.php" class="sidebar-item text-white <?php echo $current_view === 'onlinewebsite.php' ? 'active' : ''; ?>">
+                    <div class="sidebar-item-icon"><i class="fa-solid fa-earth-africa"></i></div>
+                    Online Website
+                </a>
+                --> 
         </div>
         
         <!-- Footer note positioned at the bottom -->
@@ -50,7 +52,7 @@
             <i class="fa-solid fa-circle-info"></i>
             This program is under development and improvement, the final version will be released soon
             <br><br>
-            Made with <i title="love", class="fa-solid fa-heart"></i>
+            Made with <i title="love", class="fa-solid fa-heart" style="cursor: pointer;"></i>
         </div>
     </div>
 </div>
@@ -76,8 +78,8 @@
                     RTC [PUBLIC]
                 </a>
                 <a href="ofsizedetails.php" class="sidebar-item text-white <?php echo $current_view === 'ofsizedetails.php' ? 'active' : ''; ?>" onclick="document.getElementById('loadingOverlay').style.display = 'flex'">
-                    <div class="sidebar-item-icon"><img width="25" height="25" src="https://img.icons8.com/fluency-systems-filled/48/FFFFFF/barcode-scanner-2.png" alt="barcode-scanner-2"/></div>
-                    Scanned Today
+                    <div class="sidebar-item-icon"><i class="fa-solid fa-ruler-combined"></i></div>
+                    OF_ Size Details
                 </a>
                 <a href="production.php" id="productionNavLink" class="sidebar-item text-white <?php echo $current_view === 'production.php' ? 'active' : ''; ?>">
                     <div class="sidebar-item-icon"><i class="fa-solid fa-chart-pie"></i></div>
@@ -91,6 +93,7 @@
                     <div class="sidebar-item-icon"><i class="fa-solid fa-wrench"></i></div>
                     Barcodes Settings
                 </a>
+                <!--
                 <a href="history.php" class="sidebar-item text-white <?php echo $current_view === 'history.php' ? 'active' : ''; ?>">
                     <div class="sidebar-item-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
                     History (logs)
@@ -103,7 +106,7 @@
                     <div class="sidebar-item-icon"><i class="fa-solid fa-earth-africa"></i></div>
                     Online Website
                 </a>
-                
+-->
                 <a href="logout.php" class="sidebar-item text-white">
                     <div class="sidebar-item-icon"><i class="fas fa-sign-out-alt"></i></div>
                     Logout
@@ -114,7 +117,7 @@
                 <i class="fa-solid fa-circle-info"></i>
                 This program is under development and improvement, the final version will be released soon
                 <br><br>
-                Made with <i title="love", class="fa-solid fa-heart"></i>
+                Made with <i class="fa-solid fa-heart" title="love" ></i>
             </div>
         </div>
     </div>

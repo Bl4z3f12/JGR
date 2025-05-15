@@ -543,7 +543,7 @@ if (!$isAjaxRequest) {
                         if (data.success) {
                             // Keep the loading state for successful login
                             setTimeout(() => {
-                                window.location.href = 'ofsizedetails.php';
+                                window.location.href = 'production.php';
                             }, 1000);
                         }
                     })

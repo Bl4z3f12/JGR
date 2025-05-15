@@ -11,6 +11,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- AdminLTE CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css" rel="stylesheet">
+    
 </head>
 <style>
     body {
@@ -30,9 +31,9 @@
 <body class="bg-light d-flex flex-column justify-content-center align-items-center vh-100">
     <div class="container">
         <div class="row">
-            <div class="col-md-6 mx-auto text-center">
+            <div class="col-md-8 mx-auto text-center">
                 <div class="card shadow">
-                    <div class="card-body p-5">
+                    <div class="card-body p-2">
                         <!-- Lock Icon -->
                         <div class="mb-4">
                             <i class="fas fa-lock fa-4x text-danger"></i>
@@ -46,14 +47,14 @@
                             <div class="alert alert-info">
                                 <h5><i class="fas fa-info-circle me-2"></i>You are authorized to access the following pages:</h5>
                                 <div class="list-group mt-3">
-                                    <a href="scantoday.php" class="list-group-item list-group-item-action">
-                                        <i class="fas fa-file-alt me-2"></i>Scanned Today
-                                    </a>
                                     <a href="production.php" class="list-group-item list-group-item-action">
-                                        <i class="fas fa-industry me-2"></i>Production
+                                        <i class="fa-solid fa-chart-pie"></i> Production
                                     </a>
-                                    <a href="scanner_system_download.php" class="list-group-item list-group-item-action">
-                                        <i class="fas fa-download me-2"></i>Scanner System Download
+                                    <a href="solped_search.php" class="list-group-item list-group-item-action">
+                                        <i class="fas fa-id-card"></i> Search By Solped Client
+                                    </a>
+                                    <a href="RTCpublic.php" class="list-group-item list-group-item-action">
+                                        <i class="fa-solid fa-circle-plus"></i> RTC [PUBLIC]
                                     </a>
                                 </div>
                             </div>
