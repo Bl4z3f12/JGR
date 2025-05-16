@@ -414,8 +414,8 @@ $_SESSION['production_summary'] = $production_summary;
                                         '&stage=' . urlencode($_GET['stage'] ?? '') . 
                                         '&piece_name=' . urlencode($_GET['piece_name'] ?? '') .
                                         '&current_data=1'
-                                    ?>" class="btn btn-light btn-sm d-flex align-items-center gap-2">
-                                        <i class="fas fa-file-excel"></i> Export Excel
+                                    ?>" class="btn btn-outline-success text-white btn-sm d-flex align-items-center gap-2">
+                                        <i class="fas fa-file-excel"></i> Export Data
                                     </a>
                                 <?php endif; ?>
                             </div>
