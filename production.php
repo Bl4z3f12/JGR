@@ -1,11 +1,15 @@
 <?php
 require_once 'productionset.php';
 $production_summary = getProductionSummary(
-    $pdo,
-    $filter_date ?? (isset($_GET['date']) ? $_GET['date'] : date('Y-m-d')),
-    $filter_stage ?? (isset($_GET['stage']) ? $_GET['stage'] : null),
-    $filter_piece_name ?? (isset($_GET['piece_name']) ? $_GET['piece_name'] : null)
+    $pdo, 
+    $filter_date, 
+    $filter_stage, 
+    $filter_piece_name, 
+    isset($_GET['of_number']) ? $_GET['of_number'] : null
 );
+
+// Get available OF numbers
+$available_of_numbers = getAvailableOFNumbers($pdo, $filter_date);
 
 $grand_totals = [
     'total_count' => 0,
@@ -37,13 +41,66 @@ $_SESSION['production_summary'] = $production_summary;
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
     <style>
-
-    .dip{
+    .dip {
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
-        align-content: flex-start;
-        justify-content: space-between;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .filter-section {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        min-width: 200px;
+        flex: 1;
+    }
+
+    .filter-group label {
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+        color: #495057;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: flex-end;
+    }
+
+    .stats-card {
+        background: #fff;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+
+    @media (max-width: 768px) {
+        .dip {
+            flex-direction: column;
+        }
+        
+        .filter-group {
+            width: 100%;
+        }
+
+        .filter-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .stats-card {
+            width: 100%;
+            margin-top: 1rem;
+        }
     }
     </style>
 </head>
@@ -80,7 +137,13 @@ $_SESSION['production_summary'] = $production_summary;
                             <div class="alert alert-warning d-flex align-items-center mt-2 mb-2" role="alert">
                                 <i class="bi bi-database-fill-lock dbico"></i>
                                 <div>
-                                    <strong>Data Retention Notice:</strong> Production history records are automatically archived and permanently deleted 30 days after creation. Once purged, this data cannot be retrieved or reconstructed through any means.
+                                    <strong>Data Retention:</strong> Production history records are automatically archived and permanently deleted 30 days after creation. Once purged, this data cannot be retrieved or reconstructed through any means.
+                                </div>
+                            </div>
+                            <div class="alert alert-primary d-flex align-items-center mt-2 mb-2" role="alert">
+                                <i class="fa-solid fa-arrows-left-right-to-line dbico"></i>
+                                <div>
+                                    <strong>System limitations:</strong> The system does not track <strong style="text-decoration: underline; text-transform: capitalize; font-style: italic;">sur mesure</strong> items, and they are not included in the production statistics.
                                 </div>
                             </div>
                         </div>
@@ -145,7 +208,7 @@ $_SESSION['production_summary'] = $production_summary;
                             ?>
                                 <div class="no-data-message">
                                     <div class="alert alert-danger">
-                                        <h5><i class="fa-solid fa-triangle-exclamation"></i> No production data available for <?php echo htmlspecialchars($filter_date); ?></h5>
+                                        <h5><i class="fa-solid fa-triangle-exclamation"></i>Oops! No production data available for <?php echo htmlspecialchars($filter_date); ?></h5>
                                         <p>Try selecting a different date.</p>
                                     </div>
                                 </div>
@@ -332,21 +395,42 @@ $_SESSION['production_summary'] = $production_summary;
             <div class="row mt-4" id="productionSummaryContainer">
                 <div class="col-12">
                     <div class="card shadow-sm">
-                        <div class="card-header bg-primary text-white">
-                            <h4 class="mb-0">Production Summary - Stage: <?= htmlspecialchars($filter_stage ?? 'All') ?></h4>
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0">Production Summary</h4>
+                            <div class="d-flex align-items-center gap-3">
+                                <?php if (!empty($filter_stage)): ?>
+                                    <span class="badge bg-light text-dark">
+                                        Stage: <?= htmlspecialchars($filter_stage) ?>
+                                    </span>
+                                <?php endif; ?>
+                                <span class="badge bg-light text-dark">
+                                    Total Stage Qty: <?= number_format($grand_totals['total_count']) ?>
+                                </span>
+                            </div>
                         </div>
                         <div class="card-body">
-                            <div class="row mb-4 dip">
-                                
-                                <div class="col-md-7">
-                                    <form id="stageFilterForm" class="form-inline d-flex flex-row align-items-center" method="get">
+                            <div class="row mb-1 dip">
+                                <div class="col-12">
+                                    <form id="stageFilterForm" class="d-flex flex-wrap gap-3" method="get">
                                         <?php if (!empty($filter_date)): ?>
                                             <input type="hidden" name="date" value="<?= htmlspecialchars($filter_date) ?>">
                                         <?php endif; ?>
+
+                                        <div class="filter-group">
+                                            <label for="ofFilter">OF Number</label>
+                                            <select name="of_number" id="ofFilter" class="form-select">
+                                                <option value="">All OF Numbers</option>
+                                                <?php foreach ($available_of_numbers as $of): ?>
+                                                    <option value="<?= htmlspecialchars($of) ?>" <?= (isset($_GET['of_number']) && $_GET['of_number'] == $of) ? 'selected' : '' ?>>
+                                                        <?= htmlspecialchars($of) ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
                                         
-                                        <div class="form-group mr-2">
-                                            <label for="stageFilter" class="mr-2">Stage:</label>
-                                            <select name="stage" id="stageFilter" class="form-select" style="min-width: 200px;">
+                                        <div class="filter-group">
+                                            <label for="stageFilter">Stage</label>
+                                            <select name="stage" id="stageFilter" class="form-select">
                                                 <option value="0">All Stages</option>
                                                 <option value="Coupe">Coupe</option>
                                                 <option value="V1">V1</option>
@@ -368,41 +452,27 @@ $_SESSION['production_summary'] = $production_summary;
                                             </select>
                                         </div>
                                         
-                                        <div class="form-group mr-2">
-                                            <label for="pieceNameFilter" class="mr-2">Piece Name:</label>
-                                            <select name="piece_name" id="pieceNameFilter" class="form-select" style="min-width: 180px;">
+                                        <div class="filter-group">
+                                            <label for="pieceNameFilter">Piece Name</label>
+                                            <select name="piece_name" id="pieceNameFilter" class="form-select">
                                                 <option value="">All Piece Names</option>
-                                                <option value="V" <?= (isset($_GET['piece_name']) && $_GET['piece_name'] == 'V') ? 'selected' : '' ?>>V</option>
-                                                <option value="P" <?= (isset($_GET['piece_name']) && $_GET['piece_name'] == 'P') ? 'selected' : '' ?>>P</option>
-                                                <option value="G" <?= (isset($_GET['piece_name']) && $_GET['piece_name'] == 'G') ? 'selected' : '' ?>>G</option>
-                                                <option value="M" <?= (isset($_GET['piece_name']) && $_GET['piece_name'] == 'M') ? 'selected' : '' ?>>M</option>
+                                                <option value="V" <?= (isset($_GET['piece_name']) && $_GET['piece_name'] == 'V') ? 'selected' : '' ?>>Vest</option>
+                                                <option value="P" <?= (isset($_GET['piece_name']) && $_GET['piece_name'] == 'P') ? 'selected' : '' ?>>Pantalon</option>
+                                                <option value="G" <?= (isset($_GET['piece_name']) && $_GET['piece_name'] == 'G') ? 'selected' : '' ?>>Gilet</option>
+                                                <option value="M" <?= (isset($_GET['piece_name']) && $_GET['piece_name'] == 'M') ? 'selected' : '' ?>>Manteau</option>
                                             </select>
                                         </div>
                                         
-                                        <button type="submit" id="applyFilterBtn" class="btn btn-primary mr-2" ><i class="bi bi-funnel-fill"></i> Apply Filter</button>
-                                        <a href="?<?= !empty($filter_date) ? 'date=' . htmlspecialchars($filter_date) : '' ?>" class="btn btn-outline-dark" id="resetFilterBtn" ><i class="fas fa-broom"></i> Reset</a>
-                                    </form>
-                                </div>
-
-                                <div class="col-md-5">
-                                    <div class="card bg-light">
-                                        <div class="card-body p-2">
-                                            <h5 class="card-title">Grand Totals <?= !empty($filter_stage) ? 'for Stage: ' . ($filter_stage == 'No Stage' ? '' : htmlspecialchars($filter_stage)) : '' ?></h5>
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <p class="mb-1"><strong>Total Barcodes:</strong> <?= number_format($grand_totals['total_count']) ?></p>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <p class="mb-1"><strong>Total Stage Qty:</strong> <?= number_format($grand_totals['total_stage_quantity'], 2) ?></p>
-                                                    <p class="mb-1"><strong>Total Main Qty:</strong> <?= number_format($grand_totals['total_main_quantity'], 2) ?></p>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <p class="mb-1"><strong>Total Manque:</strong> <?= number_format($grand_totals['manque'], 2) ?></p>
-                                                    <p class="mb-1"><strong>Total Suv Plus:</strong> <?= number_format($grand_totals['suv_plus'], 2) ?></p>
-                                                </div>
-                                            </div>
+                                        <div class="filter-actions">
+                                            <button type="submit" id="applyFilterBtn" class="btn btn-primary">
+                                                <i class="bi bi-funnel-fill"></i> Apply Filter
+                                            </button>
+                                            
+                                            <button type="button" class="btn btn-outline-dark" id="resetFilterBtn">
+                                                <i class="fas fa-broom"></i> Reset
+                                            </button>
                                         </div>
-                                    </div>
+                                    </form>
                                 </div>
                             </div>
                             <div class="table-responsive">
@@ -455,7 +525,7 @@ $_SESSION['production_summary'] = $production_summary;
                                             <?php endforeach; ?>
                                         <?php else: ?>
                                             <tr>
-                                                <td colspan="15" class="text-center">No production summary available for the selected filters.</td>
+                                                <td colspan="15" class="text-center">Ooh! No production summary available for the selected filters.</td>
                                             </tr>
                                         <?php endif; ?>
                                     </tbody>
@@ -543,20 +613,103 @@ $_SESSION['production_summary'] = $production_summary;
         const filterForm = document.getElementById('stageFilterForm');
         const loadingOverlay = document.getElementById('loadingOverlay');
         const applyFilterBtn = document.getElementById('applyFilterBtn');
-        if (filterForm) {
-            filterForm.addEventListener('submit', function() {
-                loadingOverlay.style.display = 'flex';
-            });
-        }
-        if (applyFilterBtn) {
-            applyFilterBtn.addEventListener('click', function() {
-                loadingOverlay.style.display = 'flex';
-            });
-        }
         const resetFilterBtn = document.getElementById('resetFilterBtn');
+
+        function updateTableContent(html) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+            
+            // Update table body
+            const newTableBody = tempDiv.querySelector('#productionSummaryTable tbody');
+            const currentTableBody = document.querySelector('#productionSummaryTable tbody');
+            if (newTableBody && currentTableBody) {
+                currentTableBody.innerHTML = newTableBody.innerHTML;
+            }
+
+            // Update header stats
+            const newHeaderStats = tempDiv.querySelector('.card-header .d-flex');
+            const currentHeaderStats = document.querySelector('.card-header .d-flex');
+            if (newHeaderStats && currentHeaderStats) {
+                currentHeaderStats.innerHTML = newHeaderStats.innerHTML;
+            }
+
+            loadingOverlay.style.display = 'none';
+        }
+
+        function calculateFilteredTotals() {
+            const tableBody = document.querySelector('#productionSummaryTable tbody');
+            const rows = tableBody.querySelectorAll('tr');
+            let totalCount = 0;
+
+            rows.forEach(row => {
+                const countCell = row.querySelector('td:nth-child(7) .badge');
+                if (countCell) {
+                    totalCount += parseInt(countCell.textContent.replace(/,/g, '')) || 0;
+                }
+            });
+
+            // Update the total in the header
+            const totalBadge = document.querySelector('.card-header .badge:last-child');
+            if (totalBadge) {
+                totalBadge.innerHTML = `Total Stage Qty: ${totalCount.toLocaleString()}`;
+            }
+        }
+
+        if (filterForm) {
+            filterForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                loadingOverlay.style.display = 'flex';
+                
+                // Get form data
+                const formData = new FormData(filterForm);
+                
+                // Send AJAX request
+                fetch('get_production_summary.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.text())
+                .then(html => {
+                    updateTableContent(html);
+                    calculateFilteredTotals();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    loadingOverlay.style.display = 'none';
+                });
+            });
+        }
+
         if (resetFilterBtn) {
             resetFilterBtn.addEventListener('click', function() {
                 loadingOverlay.style.display = 'flex';
+                
+                // Reset form fields
+                document.getElementById('ofFilter').value = '';
+                document.getElementById('stageFilter').value = '0';
+                document.getElementById('pieceNameFilter').value = '';
+                
+                // Get current date from the date input
+                const dateInput = document.getElementById('date');
+                const currentDate = dateInput.value;
+                
+                // Send AJAX request to reset
+                fetch('get_production_summary.php', {
+                    method: 'POST',
+                    body: new URLSearchParams({
+                        'date': currentDate,
+                        'reset': 'true'
+                    })
+                })
+                .then(response => response.text())
+                .then(html => {
+                    updateTableContent(html);
+                    calculateFilteredTotals();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    loadingOverlay.style.display = 'none';
+                });
             });
         }
     });

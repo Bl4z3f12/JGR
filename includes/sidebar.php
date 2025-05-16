@@ -45,6 +45,10 @@
                     Online Website
                 </a>
                 --> 
+            <a href="start.php" class="sidebar-item text-white <?php echo $current_view === 'start.php' ? 'active' : ''; ?>">
+                <div class="sidebar-item-icon"><i class="fa-solid fa-plane-departure"></i></div>
+                Lancement [Realisation soon]
+            </a>
         </div>
         
         <!-- Footer note positioned at the bottom -->
@@ -107,6 +111,10 @@
                     Online Website
                 </a>
 -->
+                <a href="start.php" class="sidebar-item text-white <?php echo $current_view === 'start.php' ? 'active' : ''; ?>">
+                    <div class="sidebar-item-icon"><i class="fa-solid fa-plane-departure"></i></div>
+                    Lancement
+                </a>
                 <a href="logout.php" class="sidebar-item text-white">
                     <div class="sidebar-item-icon"><i class="fas fa-sign-out-alt"></i></div>
                     Logout

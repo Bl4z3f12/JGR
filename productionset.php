@@ -248,8 +248,9 @@ $daily_items = $daily_items_stmt->fetchAll(PDO::FETCH_ASSOC);
     echo "Connection failed: " . $e->getMessage();
     exit;
 }
+
 function getAvailableStages($pdo, $filter_date) {
-    $predefined_stages = ['Coupe', 'V1', 'V2', 'V3', 'Pantalon', 'AMF', 'Repassage', 'P_ fini', 'Exported', 'No Stage'];
+    $predefined_stages = ['Coupe', 'V1', 'V2', 'V3', 'Pantalon', 'AMF', 'Repassage', 'P_ fini', 'Exported'];
     
     if (!$pdo) {
         error_log("Invalid database connection in getAvailableStages");
@@ -292,7 +293,7 @@ function getAvailableStages($pdo, $filter_date) {
     }
 }
 
-function getProductionSummary($pdo, $filter_date, $filter_stage = null, $filter_piece_name = null) {
+function getProductionSummary($pdo, $filter_date, $filter_stage = null, $filter_piece_name = null, $filter_of = null) {
     if (!$pdo) {
         error_log("Invalid database connection in getProductionSummary");
         return [];
@@ -322,8 +323,11 @@ function getProductionSummary($pdo, $filter_date, $filter_stage = null, $filter_
             AND b.piece_name = qc.piece_name
         WHERE b.stage IS NOT NULL AND b.stage != ''";
         
+        $params = [];
+        
         if (!empty($filter_date)) {
             $query .= " AND DATE(b.last_update) = ?";
+            $params[] = $filter_date;
         }
         
         if (!empty($filter_stage)) {
@@ -331,32 +335,62 @@ function getProductionSummary($pdo, $filter_date, $filter_stage = null, $filter_
                 $query .= " AND (b.stage IS NULL OR b.stage = '')";
             } else {
                 $query .= " AND b.stage = ?";
+                $params[] = $filter_stage;
             }
         }
         
         if (!empty($filter_piece_name)) {
             $query .= " AND b.piece_name = ?";
+            $params[] = $filter_piece_name;
+        }
+
+        if (!empty($filter_of)) {
+            $query .= " AND b.of_number = ?";
+            $params[] = $filter_of;
         }
         
         $query .= " GROUP BY b.of_number, b.size, b.category, b.piece_name, b.chef, IFNULL(b.stage, 'No Stage')
                    ORDER BY b.of_number, b.size, b.category, b.piece_name";
-        $stmt = $pdo->prepare($query);
-        $params = [];
-        if (!empty($filter_date)) {
-            $params[] = $filter_date;
-        }
-        if (!empty($filter_stage) && $filter_stage != 'No Stage') {
-            $params[] = $filter_stage;
-        }
-        if (!empty($filter_piece_name)) {
-            $params[] = $filter_piece_name;
-        }
         
+        $stmt = $pdo->prepare($query);
         $stmt->execute($params);
         
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch(PDOException $e) {
         error_log("Production Summary Query Error: " . $e->getMessage());
+        return [];
+    }
+}
+
+function getAvailableOFNumbers($pdo, $filter_date) {
+    if (!$pdo) {
+        error_log("Invalid database connection in getAvailableOFNumbers");
+        return [];
+    }
+    
+    try {
+        $query = "
+        SELECT DISTINCT b.of_number 
+        FROM barcodes b
+        WHERE b.of_number IS NOT NULL AND b.of_number != ''";
+        
+        if (!empty($filter_date)) {
+            $query .= " AND DATE(b.last_update) = ?";
+        }
+        
+        $query .= " ORDER BY b.of_number";
+        
+        $stmt = $pdo->prepare($query);
+        
+        if (!empty($filter_date)) {
+            $stmt->execute([$filter_date]);
+        } else {
+            $stmt->execute();
+        }
+        
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    } catch(PDOException $e) {
+        error_log("Get Available OF Numbers Query Error: " . $e->getMessage());
         return [];
     }
 }
