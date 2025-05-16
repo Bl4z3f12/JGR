@@ -56,7 +56,7 @@
             <i class="fa-solid fa-circle-info"></i>
             This program is under development and improvement, the final version will be released soon
             <br><br>
-            Made with <i title="love", class="fa-solid fa-heart" style="cursor: pointer;"></i>
+            Made with <i title="love", class="fa-solid fa-heart" style="cursor: pointer;"></i> by HAMZA SAADI
         </div>
     </div>
 </div>
@@ -125,7 +125,7 @@
                 <i class="fa-solid fa-circle-info"></i>
                 This program is under development and improvement, the final version will be released soon
                 <br><br>
-                Made with <i class="fa-solid fa-heart" title="love" ></i>
+                Made with <i class="fa-solid fa-heart" title="love" ></i> by HAMZA SAADI
             </div>
         </div>
     </div>

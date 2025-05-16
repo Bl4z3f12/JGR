@@ -355,7 +355,15 @@ function getProductionSummary($pdo, $filter_date, $filter_stage = null, $filter_
         $stmt = $pdo->prepare($query);
         $stmt->execute($params);
         
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Store the results in session for export
+        if (!isset($_SESSION)) {
+            session_start();
+        }
+        $_SESSION['production_summary'] = $results;
+        
+        return $results;
     } catch(PDOException $e) {
         error_log("Production Summary Query Error: " . $e->getMessage());
         return [];

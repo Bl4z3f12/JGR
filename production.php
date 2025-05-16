@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once 'productionset.php';
 $production_summary = getProductionSummary(
     $pdo, 
@@ -406,8 +407,29 @@ $_SESSION['production_summary'] = $production_summary;
                                 <span class="badge bg-light text-dark">
                                     Total Stage Qty: <?= number_format($grand_totals['total_count']) ?>
                                 </span>
+                                <?php if (isset($production_summary) && !empty($production_summary)): ?>
+                                    <a href="export_excel.php?export=excel<?= 
+                                        '&date=' . urlencode($_GET['date'] ?? '') . 
+                                        '&of_number=' . urlencode($_GET['of_number'] ?? '') . 
+                                        '&stage=' . urlencode($_GET['stage'] ?? '') . 
+                                        '&piece_name=' . urlencode($_GET['piece_name'] ?? '') .
+                                        '&current_data=1'
+                                    ?>" class="btn btn-light btn-sm d-flex align-items-center gap-2">
+                                        <i class="fas fa-file-excel"></i> Export Excel
+                                    </a>
+                                <?php endif; ?>
                             </div>
                         </div>
+                        <div class="row">
+                                <div class="col-12">
+                                    <div class="alert alert-primary d-flex align-items-center mt-2 mb-2" role="alert">
+                                        <i class="fa-solid fa-arrows-left-right-to-line dbico"></i>
+                                        <div>
+                                            <strong>System limitations:</strong> The system does not track <strong style="text-decoration: underline; text-transform: capitalize; font-style: italic;">sur mesure</strong> items, and they are not included in the production statistics.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         <div class="card-body">
                             <div class="row mb-1 dip">
                                 <div class="col-12">
@@ -477,7 +499,7 @@ $_SESSION['production_summary'] = $production_summary;
                             </div>
                             <div class="table-responsive">
                                 <table class="table table-bordered table-striped" id="productionSummaryTable">
-                                    <thead class="table-primary">
+                                    <thead class="table-primary text-center">
                                         <tr>
                                             <th>OF Number</th>
                                             <th>Size</th>
@@ -486,8 +508,8 @@ $_SESSION['production_summary'] = $production_summary;
                                             <th>Chef</th>
                                             <th>Stage</th>
                                             <th>Total Count</th>
-                                            <th>Total Stage Quantity</th>
-                                            <th>Total Main Quantity</th>
+                                            <th>Stage Qty</th>
+                                            <th>Main Qty</th>
                                             <th>Solped Client</th>
                                             <th>Pedido Client</th>
                                             <th>Color Tissus</th>
