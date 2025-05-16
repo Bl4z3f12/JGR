@@ -39,7 +39,7 @@ $current_view = 'start.php';
     }
 </style>
 <body>
-        <?php include 'includes/sidebar.php'; ?>
+    <?php include 'includes/sidebar.php'; ?>
 
     <div class="main-content">
         <?php include 'includes/header.php'; ?>
