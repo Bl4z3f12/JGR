@@ -9,5 +9,6 @@ CREATE TABLE IF NOT EXISTS ayoub (
     g INT NOT NULL,
     m INT NOT NULL,
     dos INT NOT NULL,
+    of_quantity INT NOT NULL ,  
     last_edit DATETIME NOT NULL
 );

@@ -26,14 +26,12 @@ $current_view = 'start.php';
                     <span>AYYOUB EL OUADGIRI</span>
                     <i class="fa-solid fa-arrow-right-to-bracket"></i>
                 </div>
-                
-                <div class="box-item users" data-user="loubna" data-password="loubna" data-redirect="lancement/loubna.php">
-                    <span>LOUBNA OUKIR</span>
-                    <i class="fa-solid fa-arrow-right-to-bracket"></i>
-                </div>
-                
                 <div class="box-item users" data-user="benachir" data-password="benachir" data-redirect="lancement/benachir.php">
                     <span>BENACHIR AZIANE</span>
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                </div>
+                <div class="box-item users" data-user="loubna" data-password="loubna" data-redirect="lancement/loubna.php">
+                    <span>LOUBNA OUKIR</span>
                     <i class="fa-solid fa-arrow-right-to-bracket"></i>
                 </div>
                 
@@ -41,6 +39,9 @@ $current_view = 'start.php';
                     <span>ADMINISTRATION</span>
                     <i class="fa-solid fa-arrow-right-to-bracket"></i>
                 </div>
+
+                <span style="font-size: smaller; font-style: italic; text-align: center; justify-content: center;">Digital Transformation and IT Services Modernization</span>
+
             </div>
         </div>
     </div>
