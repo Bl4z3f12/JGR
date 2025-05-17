@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS ayoub (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    of_number INT NOT NULL,
+    tailles INT NOT NULL,
+    pack_number INT NOT NULL,
+    pack_order_start INT NOT NULL,
+    pack_order_end INT NOT NULL,
+    dv INT NOT NULL,
+    g INT NOT NULL,
+    m INT NOT NULL,
+    dos INT NOT NULL,
+    last_edit DATETIME NOT NULL
+);
