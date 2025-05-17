@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS ayoub (
     id INT PRIMARY KEY AUTO_INCREMENT,
     of_number INT NOT NULL,
+    of_quantity INT NOT NULL,
     tailles INT NOT NULL,
     pack_number INT NOT NULL,
     pack_order_start INT NOT NULL,
@@ -9,6 +10,5 @@ CREATE TABLE IF NOT EXISTS ayoub (
     g INT NOT NULL,
     m INT NOT NULL,
     dos INT NOT NULL,
-    of_quantity INT NOT NULL ,  
     last_edit DATETIME NOT NULL
 );

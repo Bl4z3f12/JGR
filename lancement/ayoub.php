@@ -53,11 +53,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     if (!empty($data['id'])) {
         $stmt = $conn->prepare("UPDATE ayoub SET 
-            of_number=?, tailles=?, pack_number=?, pack_order_start=?, 
-            pack_order_end=?, dv=?, g=?, m=?, dos=?, of_quantity=?, last_edit=NOW() 
+            of_number=?, of_quantity=?, tailles=?, pack_number=?, pack_order_start=?, 
+            pack_order_end=?, dv=?, g=?, m=?, dos=?, last_edit=NOW() 
             WHERE id=?");
         $stmt->bind_param("iiiiiiiiiii", 
             $data['ofNumber'],
+            $data['ofQuantity'],
             $data['tailles'],
             $data['packNumber'],
             $data['packOrderStart'],
@@ -66,16 +67,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data['g'],
             $data['m'],
             $data['dos'],
-            $data['ofQuantity'],
             $data['id']
         );
     } else {
         $stmt = $conn->prepare("INSERT INTO ayoub 
-            (of_number, tailles, pack_number, pack_order_start, 
-            pack_order_end, dv, g, m, dos, of_quantity, last_edit) 
+            (of_number, of_quantity, tailles, pack_number, pack_order_start, 
+            pack_order_end, dv, g, m, dos, last_edit) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
         $stmt->bind_param("iiiiiiiiii", 
             $data['ofNumber'],
+            $data['ofQuantity'],
             $data['tailles'],
             $data['packNumber'],
             $data['packOrderStart'],
@@ -84,7 +85,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data['g'],
             $data['m'],
             $data['dos'],
-            $data['ofQuantity']
         );
     }
     if ($stmt->execute()) {
@@ -323,7 +323,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <?php if ($isNewOF): ?>
                             <div class="table-card-row">
                                 <span class="table-card-label">General OF Qty:</span>
-                                <span><?= htmlspecialchars($record['of_quantity'] ?? 0) ?></span>
+                                <span><?= htmlspecialchars($record['of_quantity']) ?></span>
                             </div>
                             <?php endif; ?>
                             <div class="table-card-row">
@@ -452,7 +452,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             ?>
                                 <tr class="<?= $isNewOF ? 'new-of-section' : '' ?>">
                                     <td><?= htmlspecialchars($record['of_number']) ?></td>
-                                    <td><?= $isNewOF ? htmlspecialchars($record['of_quantity'] ?? 0) : '' ?></td>
+                                    <td><?= $isNewOF ? htmlspecialchars($record['of_quantity']) : '' ?></td>
                                     <td><?= htmlspecialchars($record['tailles']) ?></td>
                                     <td><?= htmlspecialchars($record['pack_number']) ?></td>
                                     <td><?= htmlspecialchars($record['pack_order_start']) ?> - <?= htmlspecialchars($record['pack_order_end']) ?></td>
@@ -465,7 +465,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <a href="#" class="edit-btn" 
                                         data-id="<?= $record['id'] ?>"
                                         data-of_number="<?= htmlspecialchars($record['of_number']) ?>"
-                                        data-of_quantity="<?= htmlspecialchars($record['of_quantity'] ?? 0) ?>"
+                                        data-of_quantity="<?= htmlspecialchars($record['of_quantity']) ?>"
                                         data-tailles="<?= htmlspecialchars($record['tailles']) ?>"
                                         data-pack_number="<?= htmlspecialchars($record['pack_number']) ?>"
                                         data-pack_order_start="<?= htmlspecialchars($record['pack_order_start']) ?>"
@@ -510,6 +510,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="loading-message" data-message="1"></div>
         </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function updateDateTime() {
@@ -608,7 +609,218 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 this.value = end;
             }
         });
+                
+        document.addEventListener('click', function(event) {
+            // Check if the clicked element has the edit-btn class
+            if (event.target.classList.contains('edit-btn') || 
+                event.target.parentElement.classList.contains('edit-btn')) {
+                
+                event.preventDefault();
+                
+                // Get the parent element with the edit-btn class
+                const editBtn = event.target.classList.contains('edit-btn') ? 
+                                event.target : 
+                                event.target.parentElement;
+                
+                // Get data from data attributes
+                const id = editBtn.getAttribute('data-id');
+                const ofNumber = editBtn.getAttribute('data-of_number');
+                const ofQuantity = editBtn.getAttribute('data-of_quantity');
+                const tailles = editBtn.getAttribute('data-tailles');
+                const packNumber = editBtn.getAttribute('data-pack_number');
+                const packOrderStart = editBtn.getAttribute('data-pack_order_start');
+                const packOrderEnd = editBtn.getAttribute('data-pack_order_end');
+                const dv = editBtn.getAttribute('data-dv');
+                const g = editBtn.getAttribute('data-g');
+                const m = editBtn.getAttribute('data-m');
+                const dos = editBtn.getAttribute('data-dos');
+                
+                // Set the values in the form
+                document.getElementById('recordId').value = id;
+                document.getElementById('ofNumber').value = ofNumber;
+                document.getElementById('ofQuantity').value = ofQuantity;
+                document.getElementById('tailles').value = tailles;
+                document.getElementById('packNumber').value = packNumber;
+                document.getElementById('packOrderStart').value = packOrderStart;
+                document.getElementById('packOrderEnd').value = packOrderEnd;
+                document.getElementById('dv').value = dv;
+                document.getElementById('g').value = g;
+                document.getElementById('m').value = m;
+                document.getElementById('dos').value = dos;
+                
+                // Change modal title to indicate editing
+                document.getElementById('addDataModalLabel').textContent = 'Edit Data';
+                
+                // Change the save button text
+                document.getElementById('saveDataBtn').innerHTML = '<i class="bi bi-pencil-square me-1"></i> Update Data';
+                
+                // Show the modal
+                const modal = new bootstrap.Modal(document.getElementById('addDataModal'));
+                modal.show();
+            }
+        });
+
+        // Reset form when modal is closed
+        document.getElementById('addDataModal').addEventListener('hidden.bs.modal', function () {
+            // Reset form 
+            document.getElementById('newDataForm').reset();
+            
+            // Clear the hidden id field
+            document.getElementById('recordId').value = '';
+            
+            // Reset the modal title
+            document.getElementById('addDataModalLabel').textContent = 'Add New Data';
+            
+            // Reset the save button text
+            document.getElementById('saveDataBtn').innerHTML = '<i class="bi bi-save me-1"></i> Save Data';
+            
+            // Remove validation classes
+            document.getElementById('newDataForm').classList.remove('was-validated');
+        });
+
+        // Implement delete functionality
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('delete-btn') || 
+                event.target.parentElement.classList.contains('delete-btn')) {
+                
+                event.preventDefault();
+                
+                // Find the row or card to delete
+                let element = event.target;
+                while (element && !element.matches('tr') && !element.matches('.table-card')) {
+                    element = element.parentElement;
+                }
+                
+                if (!element) return;
+                
+                // For table rows, get the OF number from the first cell
+                let ofNumber, recordId;
+                
+                if (element.matches('tr')) {
+                    ofNumber = element.cells[0].textContent.trim();
+                    // Try to find the edit button in this row to get the record ID
+                    const editBtn = element.querySelector('.edit-btn');
+                    if (editBtn) {
+                        recordId = editBtn.getAttribute('data-id');
+                    }
+                } else if (element.matches('.table-card')) {
+                    // For mobile cards
+                    const titleEl = element.querySelector('.table-card-title');
+                    if (titleEl) {
+                        ofNumber = titleEl.textContent.trim().replace('OF #', '');
+                    }
+                    
+                    // Try to find the edit button in this card to get the record ID
+                    const editBtn = element.querySelector('.edit-btn');
+                    if (editBtn) {
+                        recordId = editBtn.getAttribute('data-id');
+                    }
+                }
+                
+                if (!recordId) {
+                    alert('Could not identify the record to delete.');
+                    return;
+                }
+                
+                // Confirm deletion with the user
+                if (confirm(`Are you sure you want to delete this record from OF #${ofNumber}?`)) {
+                    // Show loading animation
+                    showLoading().then(() => {
+                        // Create deletion request data
+                        const deleteData = {
+                            action: 'delete',
+                            id: recordId
+                        };
+                        
+                        // Send DELETE request to the server
+                        fetch('delete_record.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(deleteData)
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            hideLoading();
+                            
+                            if (data.success) {
+                                // Remove the element from the DOM
+                                element.remove();
+                                alert('Record deleted successfully!');
+                                
+                                // Reload to update totals and other elements
+                                window.location.reload();
+                            } else {
+                                alert('Error: ' + (data.error || 'Could not delete record'));
+                            }
+                        })
+                        .catch(error => {
+                            hideLoading();
+                            console.error('Error:', error);
+                            alert('An error occurred while deleting the record.');
+                        });
+                    });
+                }
+            }
+        });
+
+        // Make search functionality work correctly
+        document.getElementById('ofSearchButton').addEventListener('click', searchByOF);
+        document.getElementById('mobileSearchButton').addEventListener('click', searchByOF);
+
+        function searchByOF() {
+            const query = document.getElementById('ofSearchInput').value || 
+                        document.getElementById('mobileSearchInput').value;
+            
+            if (!query) {
+                alert('Please enter an OF number to search');
+                return;
+            }
+            
+            // Show loading animation
+            showLoading().then(() => {
+                // Perform search across all rows
+                const rows = document.querySelectorAll('.data-table tbody tr:not(.of-total-row)');
+                const cards = document.querySelectorAll('.table-card');
+                let found = false;
+                
+                // Desktop table search
+                rows.forEach(row => {
+                    const ofCell = row.cells[0];
+                    if (ofCell && ofCell.textContent.includes(query)) {
+                        // Highlight the row
+                        row.style.backgroundColor = '#ffffa0';
+                        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        found = true;
+                    } else {
+                        row.style.backgroundColor = '';
+                    }
+                });
+                
+                // Mobile card search
+                cards.forEach(card => {
+                    const title = card.querySelector('.table-card-title');
+                    if (title && title.textContent.includes(query)) {
+                        // Highlight the card
+                        card.style.backgroundColor = '#ffffa0';
+                        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        found = true;
+                    } else {
+                        card.style.backgroundColor = '';
+                    }
+                });
+                
+                if (!found) {
+                    alert('No OF with number ' + query + ' found');
+                }
+                
+                // Hide loading after search
+                hideLoading();
+            });
+        }
     </script>
+
     <script>
         function showLoading() {
             const overlay = document.getElementById('loadingOverlay');
