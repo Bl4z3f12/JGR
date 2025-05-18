@@ -2,6 +2,8 @@ CREATE TABLE IF NOT EXISTS ayoub (
     id INT PRIMARY KEY AUTO_INCREMENT,
     of_number INT NOT NULL,
     of_quantity INT NOT NULL,
+    of_type VARCHAR(32) NOT NULL,
+    of_category VARCHAR(32) NOT NULL,
     tailles INT NOT NULL,
     pack_number INT NOT NULL,
     pack_order_start INT NOT NULL,

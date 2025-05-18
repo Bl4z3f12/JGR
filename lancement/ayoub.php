@@ -1,11 +1,46 @@
 <?php
 $current_view = 'lancement/ayoub.php';
 $user_name = "AYYOUB EL OUADGIRI";
-$conn = new mysqli('localhost', 'root', '', 'jgr');
+$conn = new mysqli('localhost', 'root', '', 'lancement');
 if ($conn->connect_error) {
     die(json_encode(['success' => false, 'error' => 'Connection failed: ' . $conn->connect_error]));
 }
-$result = $conn->query("SELECT * FROM ayoub ORDER BY of_number, last_edit DESC");
+$ofTypeLabels = [
+    1 => 'VEST ISOLEE',
+    3 => 'GILET',
+    4 => 'MANTEAU',
+    5 => 'COSTUME 1PC',
+    6 => 'COSTUME 2PC',
+    7 => 'COSTUME 3PC'
+];
+$ofCategoryLabels = [
+    1 => 'R',
+    2 => 'C',
+    3 => 'L',
+    4 => 'LL',
+    5 => 'CC',
+    6 => 'N'
+];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['_method']) && $_POST['_method'] === 'DELETE') {
+    $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
+    
+    if ($id <= 0) {
+        die(json_encode(['success' => false, 'error' => 'Invalid ID provided']));
+    }
+    
+    $stmt = $conn->prepare("DELETE FROM ayoub WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    
+    if ($stmt->execute()) {
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false, 'error' => $stmt->error]);
+    }
+    $stmt->close();
+    $conn->close();
+    exit();
+}
+$result = $conn->query("SELECT * FROM ayoub ORDER BY last_edit DESC, of_number, id DESC");
 $records = [];
 $currentOF = null;
 if ($result->num_rows > 0) {
@@ -13,8 +48,6 @@ if ($result->num_rows > 0) {
         $records[] = $row;
     }
 }
-
-// Calculate totals for each OF number
 $ofTotals = [];
 $ofQuantities = []; // To store OF quantities
 foreach ($records as $record) {
@@ -28,7 +61,6 @@ foreach ($records as $record) {
             'dos' => 0
         ];
         
-        // Store OF quantity for this OF number
         $ofQuantities[$ofNumber] = $record['of_quantity'] ?? 0;
     }
     
@@ -37,15 +69,14 @@ foreach ($records as $record) {
     $ofTotals[$ofNumber]['m'] += $record['m'];
     $ofTotals[$ofNumber]['dos'] += $record['dos'];
 }
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['_method'])) {
     $json = file_get_contents('php://input');
     $data = json_decode($json, true);
 
     if (!$data) {
         die(json_encode(['success' => false, 'error' => 'Invalid JSON or no data received']));
     }
-    $required = ['ofNumber','tailles','packNumber','packOrderStart','packOrderEnd','dv','g','m','dos','ofQuantity'];
+    $required = ['ofNumber','ofType','ofCategory','tailles','packNumber','packOrderStart','packOrderEnd','dv','g','m','dos','ofQuantity'];
     foreach ($required as $key) {
         if (!isset($data[$key])) {
             die(json_encode(['success' => false, 'error' => "Missing field: $key"]));
@@ -53,12 +84,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     if (!empty($data['id'])) {
         $stmt = $conn->prepare("UPDATE ayoub SET 
-            of_number=?, of_quantity=?, tailles=?, pack_number=?, pack_order_start=?, 
+            of_number=?, of_quantity=?, of_type=?, of_category=?, tailles=?, pack_number=?, pack_order_start=?, 
             pack_order_end=?, dv=?, g=?, m=?, dos=?, last_edit=NOW() 
             WHERE id=?");
-        $stmt->bind_param("iiiiiiiiiii", 
+        $stmt->bind_param("iissiiiiiiiii", 
             $data['ofNumber'],
             $data['ofQuantity'],
+            $data['ofType'],
+            $data['ofCategory'],
             $data['tailles'],
             $data['packNumber'],
             $data['packOrderStart'],
@@ -71,12 +104,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         );
     } else {
         $stmt = $conn->prepare("INSERT INTO ayoub 
-            (of_number, of_quantity, tailles, pack_number, pack_order_start, 
+            (of_number, of_quantity, of_type, of_category, tailles, pack_number, pack_order_start, 
             pack_order_end, dv, g, m, dos, last_edit) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
-        $stmt->bind_param("iiiiiiiiii", 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+        $stmt->bind_param("iissiiiiiiii", 
             $data['ofNumber'],
             $data['ofQuantity'],
+            $data['ofType'],
+            $data['ofCategory'],
             $data['tailles'],
             $data['packNumber'],
             $data['packOrderStart'],
@@ -84,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data['dv'],
             $data['g'],
             $data['m'],
-            $data['dos'],
+            $data['dos']
         );
     }
     if ($stmt->execute()) {
@@ -92,6 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         echo json_encode(['success' => false, 'error' => $stmt->error]);
     }
+    
     $stmt->close();
     $conn->close();
     exit();
@@ -106,6 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="styling.css">
     <link rel="shortcut icon" href="../assets/user.png" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 </head>
 <body>
@@ -132,6 +169,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <input type="number" class="form-control" id="ofQuantity" required>
                         <div class="invalid-feedback">
                             Please provide a valid General OF Qty.
+                        </div>
+                        </div>
+                        <div class="col-md-6">
+                        <label for="ofType" class="form-label">OF Type</label>
+                        <select class="form-select" id="ofType" required>
+                            <option value="">Choose...</option>
+                            <option value="VEST ISOLEE">VEST ISOLEE</option>
+                            <option value="GILET">GILET</option>
+                            <option value="MANTEAU">MANTEAU</option>
+                            <option value="COSTUME 1PC">COSTUME 1PC</option>
+                            <option value="COSTUME 2PC">COSTUME 2PC</option>
+                            <option value="COSTUME 3PC">COSTUME 3PC</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Please provide a valid OF Type.
+                        </div>
+                        </div>
+                        <div class="col-md-6">
+                        <label for="ofCategory" class="form-label">OF Category</label>
+                        <select class="form-select" id="ofCategory" required>
+                            <option value="">Choose...</option>
+                            <option value="R">R</option>
+                            <option value="C">C</option>
+                            <option value="L">L</option>
+                            <option value="LL">LL</option>
+                            <option value="CC">CC</option>
+                            <option value="N">N</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Please provide a valid OF category.
                         </div>
                         </div>
                         <div class="col-md-6">
@@ -216,18 +283,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button class="menu-toggle d-md-none" type="button"
                     data-bs-toggle="offcanvas" data-bs-target="#mobileMenu"
                     aria-controls="mobileMenu">
-                <i class="bi bi-list"></i>
+                    <img width="45" height="45" src="https://img.icons8.com/external-flatart-icons-solid-flatarticons/64/external-menu-ux-and-ui-flatart-icons-solid-flatarticons"/>
             </button>
-            <div class="user-info">
-                <span class="username"><?php echo $user_name; ?></span>
-                <span class="separator">|</span>
-                <span class="workspace-title">workspace</span>
+            <div class="userdate">
+                <div class="user-info">
+                    <span class="username"><?php echo $user_name; ?></span>
+                    <span class="separator">|</span>
+                    <span class="workspace-title">workspace</span><br>
+                </div>
+                <div class="datetime-display">
+                    <span id="currentDateTime"></span>
+                </div>
             </div>
             <div class="search-container d-none d-md-block">
                 <div class="input-group mb-3">
-                    <input type="search" id="ofSearchInput" class="form-control" placeholder="Search by OF JGR..." required>
-                    <button class="btn btn-primary" type="button" id="ofSearchButton">
-                        <i class="bi bi-search"></i> Search
+                    <input type="search" id="offilter" class="form-control" placeholder="Filter by OF JGR..." required>
+                    <button class="btn btn-primary" type="button" id="offilter">
+                    <i class="bi bi-funnel-fill"></i> Filter
+                    </button>
+                    <button class="btn btn-outline-dark" type="button" id="resetoffilter">
+                    <i class="fa-solid fa-broom"></i> Reset
                     </button>
                 </div>
             </div>
@@ -239,9 +314,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <i class="bi bi-box-arrow-right me-1"></i> Logout
                 </button>
             </div>
-            <div class="datetime-display">
-                <span id="currentDateTime"></span>
-            </div>
         </div>
         <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileMenu"
                 aria-labelledby="mobileMenuLabel">
@@ -251,16 +323,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         data-bs-dismiss="offcanvas" aria-label="Close"></button>
             </div>
             <div class="offcanvas-body">
-                <div class="user-info">
-                    <span class="username"><?php echo $user_name; ?></span>
-                    <span class="separator">|</span>
-                    <span class="workspace-title">workspace</span>
+                <div class="userdate">
+                    <div class="user-info">
+                        <span class="username"><?php echo $user_name; ?></span>
+                        <span class="separator">|</span>
+                        <span class="workspace-title">workspace</span><br>
+                    </div>
+                    <div class="datetime-display">
+                        <span id="currentDateTime"></span>
+                    </div>
                 </div>
                 <div class="search-container">
                     <div class="input-group mb-3">
-                        <input type="search" id="mobileSearchInput" class="form-control" placeholder="Search by OF JGR...">
-                        <button class="btn btn-primary" type="button" id="mobileSearchButton">
-                            <i class="bi bi-search"></i> Search
+                        <input type="search" id="offilter" class="form-control" placeholder="Filter by OF JGR...">
+                        <button class="btn btn-primary" type="button" id="offilter">
+                        <i class="bi bi-funnel-fill"></i> Filter
+                        </button>
+                        <button class="btn btn-outline-dark" type="button" id="resetoffilter">
+                        <i class="fa-solid fa-broom"></i> Reset
                         </button>
                     </div>
                 </div>
@@ -272,143 +352,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <i class="bi bi-box-arrow-right me-1"></i> Logout
                     </button>
                 </div>
-                <div class="datetime-display">
-                    <span id="currentDateTime"></span>
-                </div>
             </div>
         </div>
-        <div class="container">
-            <div id="cardView" class="d-md-none mb-4">
-                <?php if (empty($records)): ?>
-                    <div class="empty-message">No data found in database</div>
-                <?php else: ?>
-                    <?php 
-                    $lastOF = null;
-                    foreach ($records as $record): 
-                        $isNewOF = $lastOF !== $record['of_number'];
-                        $isLastOfCurrentOF = false;
-                        if ($lastOF !== null && $lastOF !== $record['of_number']) { // New OF coming up
-                            ?>
-                            <div class="of-total-card">
-                                <div class="table-card-title">OF #<?= htmlspecialchars($lastOF) ?> Totals</div>
-                                <div class="table-card-row">
-                                    <span class="table-card-label">General OF Qty:</span>
-                                    <span><?= htmlspecialchars($ofQuantities[$lastOF]) ?></span>
-                                </div>
-                                <div class="table-card-row">
-                                    <span class="table-card-label">Devant Total:</span>
-                                    <span><?= htmlspecialchars($ofTotals[$lastOF]['dv']) ?></span>
-                                </div>
-                                <div class="table-card-row">
-                                    <span class="table-card-label">Garniture Total:</span>
-                                    <span><?= htmlspecialchars($ofTotals[$lastOF]['g']) ?></span>
-                                </div>
-                                <div class="table-card-row">
-                                    <span class="table-card-label">Manche Total:</span>
-                                    <span><?= htmlspecialchars($ofTotals[$lastOF]['m']) ?></span>
-                                </div>
-                                <div class="table-card-row">
-                                    <span class="table-card-label">D.O.S Total:</span>
-                                    <span><?= htmlspecialchars($ofTotals[$lastOF]['dos']) ?></span>
-                                </div>
-                            </div>
-                            <?php
-                        }
-                        $lastOF = $record['of_number'];
-                    ?>
-                        <div class="table-card <?= $isNewOF ? 'new-of' : '' ?>">
-                            <div class="table-card-title">
-                                OF #<?= htmlspecialchars($record['of_number']) ?>
-                            </div>
-                            <?php if ($isNewOF): ?>
-                            <div class="table-card-row">
-                                <span class="table-card-label">General OF Qty:</span>
-                                <span><?= htmlspecialchars($record['of_quantity']) ?></span>
-                            </div>
-                            <?php endif; ?>
-                            <div class="table-card-row">
-                                <span class="table-card-label">Taille:</span>
-                                <span><?= htmlspecialchars($record['tailles']) ?></span>
-                            </div>
-                            <div class="table-card-row">
-                                <span class="table-card-label">Pack:</span>
-                                <span>#<?= htmlspecialchars($record['pack_number']) ?> (<?= htmlspecialchars($record['pack_order_start']) ?> - <?= htmlspecialchars($record['pack_order_end']) ?>)</span>
-                            </div>
-                            <div class="table-card-row">
-                                <span class="table-card-label">Devant:</span>
-                                <span><?= htmlspecialchars($record['dv']) ?></span>
-                            </div>
-                            <div class="table-card-row">
-                                <span class="table-card-label">Garniture:</span>
-                                <span><?= htmlspecialchars($record['g']) ?></span>
-                            </div>
-                            <div class="table-card-row">
-                                <span class="table-card-label">Manche:</span>
-                                <span><?= htmlspecialchars($record['m']) ?></span>
-                            </div>
-                            <div class="table-card-row">
-                                <span class="table-card-label">D.O.S:</span>
-                                <span><?= htmlspecialchars($record['dos']) ?></span>
-                            </div>
-                            <div class="table-card-row">
-                                <span class="table-card-label">Last edit:</span>
-                                <span><?= date('d/m/Y H:i:s', strtotime($record['last_edit'])) ?></span>
-                            </div>
-                            <div class="mt-2 d-flex justify-content-between">
-                                <a href="#" class="btn btn-sm btn-outline-primary edit-btn" 
-                                data-id="<?= $record['id'] ?>"
-                                data-of_number="<?= htmlspecialchars($record['of_number']) ?>"
-                                data-of_quantity="<?= htmlspecialchars($record['of_quantity'] ?? 0) ?>"
-                                data-tailles="<?= htmlspecialchars($record['tailles']) ?>"
-                                data-pack_number="<?= htmlspecialchars($record['pack_number']) ?>"
-                                data-pack_order_start="<?= htmlspecialchars($record['pack_order_start']) ?>"
-                                data-pack_order_end="<?= htmlspecialchars($record['pack_order_end']) ?>"
-                                data-dv="<?= htmlspecialchars($record['dv']) ?>"
-                                data-g="<?= htmlspecialchars($record['g']) ?>"
-                                data-m="<?= htmlspecialchars($record['m']) ?>"
-                                data-dos="<?= htmlspecialchars($record['dos']) ?>"
-                                >
-                                    <i class="bi bi-pencil-square"></i> Edit
-                                </a>
-                                <a href="#" class="btn btn-sm btn-outline-danger delete-btn">
-                                    <i class="bi bi-trash"></i> Delete
-                                </a>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                    <?php if(!empty($records)): ?>
-                    <div class="of-total-card">
-                        <div class="table-card-title">OF #<?= htmlspecialchars($lastOF) ?> Totals</div>
-                        <div class="table-card-row">
-                            <span class="table-card-label">General OF Qty:</span>
-                            <span><?= htmlspecialchars($ofQuantities[$lastOF]) ?></span>
-                        </div>
-                        <div class="table-card-row">
-                            <span class="table-card-label">Devant Total:</span>
-                            <span><?= htmlspecialchars($ofTotals[$lastOF]['dv']) ?></span>
-                        </div>
-                        <div class="table-card-row">
-                            <span class="table-card-label">Garniture Total:</span>
-                            <span><?= htmlspecialchars($ofTotals[$lastOF]['g']) ?></span>
-                        </div>
-                        <div class="table-card-row">
-                            <span class="table-card-label">Manche Total:</span>
-                            <span><?= htmlspecialchars($ofTotals[$lastOF]['m']) ?></span>
-                        </div>
-                        <div class="table-card-row">
-                            <span class="table-card-label">D.O.S Total:</span>
-                            <span><?= htmlspecialchars($ofTotals[$lastOF]['dos']) ?></span>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-                <?php endif; ?>
-            </div>
+        <div class="table-responsive d-none d-md-block">
             <div class="table-wrapper">
                 <table class="data-table table-bordered">
                     <thead>
                         <tr>
                             <th>OF JGR</th>
                             <th>General OF Qty</th>
+                            <th>OF Type</th>
+                            <th>OF Category</th>
                             <th>Taille</th>
                             <th>Pack number</th>
                             <th>Pack order</th>
@@ -423,7 +377,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <tbody>
                         <?php if (empty($records)): ?>
                             <tr>
-                                <td colspan="11" class="empty-message">No data found in database</td>
+                                <td colspan="13" class="empty-message">No data found in database</td>
                             </tr>
                         <?php else: ?>
                             <?php
@@ -453,6 +407,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <tr class="<?= $isNewOF ? 'new-of-section' : '' ?>">
                                     <td><?= htmlspecialchars($record['of_number']) ?></td>
                                     <td><?= $isNewOF ? htmlspecialchars($record['of_quantity']) : '' ?></td>
+                                    <td><?= htmlspecialchars($record['of_type']) ?></td>
+                                    <td><?= htmlspecialchars($record['of_category']) ?></td>
                                     <td><?= htmlspecialchars($record['tailles']) ?></td>
                                     <td><?= htmlspecialchars($record['pack_number']) ?></td>
                                     <td><?= htmlspecialchars($record['pack_order_start']) ?> - <?= htmlspecialchars($record['pack_order_end']) ?></td>
@@ -494,6 +450,206 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php endif; ?>
                     </tbody>
                 </table>
+            </div>
+        </div>
+        <div class="d-md-none">
+            <div class="mobile-cards-container">
+            <?php if (empty($records)): ?>
+                <div class="alert alert-info">No data found in database</div>
+            <?php else: ?>
+                <?php
+                $lastOF = null;
+                foreach ($records as $index => $record): 
+                    $isNewOF = $lastOF !== $record['of_number'];
+                    $isLastOfCurrentOF = false;
+                    if ($lastOF !== null && $lastOF !== $record['of_number']) {
+                        ?>
+                        <div class="card mb-3 of-total-card bg-light">
+                            <div class="card-body">
+                                <h6 class="card-title">OF #<?= htmlspecialchars($lastOF) ?> Totals</h6>
+                                <div class="row mb-2">
+                                    <div class="col-12">
+                                        <div class="total-item">
+                                            <span class="label">General OF Qty:</span>
+                                            <span class="value fw-bold"><?= htmlspecialchars($ofQuantities[$lastOF]) ?></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-6 col-sm-3">
+                                        <div class="total-item">
+                                            <span class="label">Devant:</span>
+                                            <span class="value"><?= htmlspecialchars($ofTotals[$lastOF]['dv']) ?></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-sm-3">
+                                        <div class="total-item">
+                                            <span class="label">Garniture:</span>
+                                            <span class="value"><?= htmlspecialchars($ofTotals[$lastOF]['g']) ?></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-sm-3">
+                                        <div class="total-item">
+                                            <span class="label">Manche:</span>
+                                            <span class="value"><?= htmlspecialchars($ofTotals[$lastOF]['m']) ?></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-sm-3">
+                                        <div class="total-item">
+                                            <span class="label">D.O.S:</span>
+                                            <span class="value"><?= htmlspecialchars($ofTotals[$lastOF]['dos']) ?></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <?php
+                    }
+                    
+                    $lastOF = $record['of_number'];
+                    if ($index === count($records) - 1 || 
+                        (isset($records[$index + 1]) && $records[$index + 1]['of_number'] !== $record['of_number'])) {
+                        $isLastOfCurrentOF = true;
+                    }
+                ?>
+                    <div class="card mb-3 table-card <?= $isNewOF ? 'new-of-card' : '' ?>">
+                        <div class="card-header d-flex justify-content-between align-items-center <?= $isNewOF ? 'bg-primary text-white' : 'bg-light' ?>">
+                            <h6 class="mb-0 table-card-title">OF #<?= htmlspecialchars($record['of_number']) ?></h6>
+                            <?php if ($isNewOF): ?>
+                                <span class="badge bg-light text-dark">General OF Qty: <?= htmlspecialchars($record['of_quantity']) ?></span>
+                            <?php endif; ?>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="data-item">
+                                        <span class="label">OF Type:</span>
+                                        <span class="value"><?= htmlspecialchars($record['of_type']) ?></span>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="data-item">
+                                        <span class="label">OF Category:</span>
+                                        <span class="value"><?= htmlspecialchars($record['of_category']) ?></span>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="data-item">
+                                        <span class="label">Taille:</span>
+                                        <span class="value"><?= htmlspecialchars($record['tailles']) ?></span>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="data-item">
+                                        <span class="label">Pack #:</span>
+                                        <span class="value"><?= htmlspecialchars($record['pack_number']) ?></span>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="data-item">
+                                        <span class="label">Pack order:</span>
+                                        <span class="value"><?= htmlspecialchars($record['pack_order_start']) ?> - <?= htmlspecialchars($record['pack_order_end']) ?></span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <hr>
+                            
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-3">
+                                    <div class="data-item">
+                                        <span class="label">Devant:</span>
+                                        <span class="value"><?= htmlspecialchars($record['dv']) ?></span>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-3">
+                                    <div class="data-item">
+                                        <span class="label">Garniture:</span>
+                                        <span class="value"><?= htmlspecialchars($record['g']) ?></span>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-3">
+                                    <div class="data-item">
+                                        <span class="label">Manche:</span>
+                                        <span class="value"><?= htmlspecialchars($record['m']) ?></span>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-3">
+                                    <div class="data-item">
+                                        <span class="label">D.O.S:</span>
+                                        <span class="value"><?= htmlspecialchars($record['dos']) ?></span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-2 text-muted small">
+                                Last edit: <?= date('d/m/Y H:i:s', strtotime($record['last_edit'])) ?>
+                            </div>
+                        </div>
+                        <div class="card-footer d-flex justify-content-end">
+                            <a href="#" class="btn btn-sm btn-outline-primary me-2 edit-btn" 
+                                data-id="<?= $record['id'] ?>"
+                                data-of_number="<?= htmlspecialchars($record['of_number']) ?>"
+                                data-of_quantity="<?= htmlspecialchars($record['of_quantity']) ?>"
+                                data-of_type="<?= htmlspecialchars($record['of_type']) ?>"
+                                data-of_category="<?= htmlspecialchars($record['of_category']) ?>"
+                                data-tailles="<?= htmlspecialchars($record['tailles']) ?>"
+                                data-pack_number="<?= htmlspecialchars($record['pack_number']) ?>"
+                                data-pack_order_start="<?= htmlspecialchars($record['pack_order_start']) ?>"
+                                data-pack_order_end="<?= htmlspecialchars($record['pack_order_end']) ?>"
+                                data-dv="<?= htmlspecialchars($record['dv']) ?>"
+                                data-g="<?= htmlspecialchars($record['g']) ?>"
+                                data-m="<?= htmlspecialchars($record['m']) ?>"
+                                data-dos="<?= htmlspecialchars($record['dos']) ?>"
+                                ><i class="bi bi-pencil-square"></i> Edit</a>
+                            <a href="#" class="btn btn-sm btn-outline-danger delete-btn" data-id="<?= $record['id'] ?>"><i class="bi bi-trash"></i> Delete</a>
+                        </div>
+                    </div>
+                    
+                    <?php 
+                    if ($isLastOfCurrentOF && $index === count($records) - 1): ?>
+                        <div class="card mb-3 of-total-card bg-light">
+                            <div class="card-body">
+                                <h6 class="card-title">OF #<?= htmlspecialchars($record['of_number']) ?> Totals</h6>
+                                <div class="row mb-2">
+                                    <div class="col-12">
+                                        <div class="total-item">
+                                            <span class="label">General OF Qty:</span>
+                                            <span class="value fw-bold"><?= htmlspecialchars($ofQuantities[$record['of_number']]) ?></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-6 col-sm-3">
+                                        <div class="total-item">
+                                            <span class="label">Devant:</span>
+                                            <span class="value"><?= htmlspecialchars($ofTotals[$record['of_number']]['dv']) ?></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-sm-3">
+                                        <div class="total-item">
+                                            <span class="label">Garniture:</span>
+                                            <span class="value"><?= htmlspecialchars($ofTotals[$record['of_number']]['g']) ?></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-sm-3">
+                                        <div class="total-item">
+                                            <span class="label">Manche:</span>
+                                            <span class="value"><?= htmlspecialchars($ofTotals[$record['of_number']]['m']) ?></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-sm-3">
+                                        <div class="total-item">
+                                            <span class="label">D.O.S:</span>
+                                            <span class="value"><?= htmlspecialchars($ofTotals[$record['of_number']]['dos']) ?></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            <?php endif; ?>
             </div>
         </div>
     </div>
@@ -554,6 +710,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         id: document.getElementById('recordId').value,
                         ofNumber: document.getElementById('ofNumber').value,
                         ofQuantity: document.getElementById('ofQuantity').value,
+                        ofType: document.getElementById('ofType').value,
+                        ofCategory: document.getElementById('ofCategory').value,
                         tailles: document.getElementById('tailles').value,
                         packNumber: document.getElementById('packNumber').value,
                         packOrderStart: document.getElementById('packOrderStart').value,
@@ -592,6 +750,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }, false);
             });
         })();
+
         document.getElementById('packOrderEnd').addEventListener('change', function() {
             const start = parseInt(document.getElementById('packOrderStart').value) || 0;
             const end = parseInt(this.value) || 0;
@@ -611,18 +770,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         });
                 
         document.addEventListener('click', function(event) {
-            // Check if the clicked element has the edit-btn class
             if (event.target.classList.contains('edit-btn') || 
                 event.target.parentElement.classList.contains('edit-btn')) {
-                
                 event.preventDefault();
-                
-                // Get the parent element with the edit-btn class
                 const editBtn = event.target.classList.contains('edit-btn') ? 
                                 event.target : 
                                 event.target.parentElement;
-                
-                // Get data from data attributes
                 const id = editBtn.getAttribute('data-id');
                 const ofNumber = editBtn.getAttribute('data-of_number');
                 const ofQuantity = editBtn.getAttribute('data-of_quantity');
@@ -634,8 +787,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 const g = editBtn.getAttribute('data-g');
                 const m = editBtn.getAttribute('data-m');
                 const dos = editBtn.getAttribute('data-dos');
-                
-                // Set the values in the form
                 document.getElementById('recordId').value = id;
                 document.getElementById('ofNumber').value = ofNumber;
                 document.getElementById('ofQuantity').value = ofQuantity;
@@ -647,180 +798,233 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 document.getElementById('g').value = g;
                 document.getElementById('m').value = m;
                 document.getElementById('dos').value = dos;
-                
-                // Change modal title to indicate editing
                 document.getElementById('addDataModalLabel').textContent = 'Edit Data';
-                
-                // Change the save button text
                 document.getElementById('saveDataBtn').innerHTML = '<i class="bi bi-pencil-square me-1"></i> Update Data';
-                
-                // Show the modal
                 const modal = new bootstrap.Modal(document.getElementById('addDataModal'));
                 modal.show();
             }
         });
-
-        // Reset form when modal is closed
         document.getElementById('addDataModal').addEventListener('hidden.bs.modal', function () {
-            // Reset form 
             document.getElementById('newDataForm').reset();
-            
-            // Clear the hidden id field
             document.getElementById('recordId').value = '';
-            
-            // Reset the modal title
             document.getElementById('addDataModalLabel').textContent = 'Add New Data';
-            
-            // Reset the save button text
             document.getElementById('saveDataBtn').innerHTML = '<i class="bi bi-save me-1"></i> Save Data';
-            
-            // Remove validation classes
             document.getElementById('newDataForm').classList.remove('was-validated');
         });
-
-        // Implement delete functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterInputs = document.querySelectorAll('input#offilter');
+            const filterButtons = document.querySelectorAll('button#offilter');
+            const resetButtons = document.querySelectorAll('button#resetoffilter');
+            function filterTable(filterValue) {
+                filterValue = filterValue.toLowerCase().trim();
+                const tableRows = document.querySelectorAll('.data-table tbody tr');
+                let lastDisplayedOF = null;
+                let ofVisible = {};
+                tableRows.forEach(row => {
+                    if (!row.classList.contains('of-total-row')) {
+                        const ofCell = row.cells[0];
+                        if (ofCell) {
+                            const ofNumber = ofCell.textContent.trim().toLowerCase();
+                            if (filterValue === '' || ofNumber.includes(filterValue)) {
+                                ofVisible[ofNumber] = true;
+                            }
+                        }
+                    }
+                });
+                tableRows.forEach(row => {
+                    if (row.classList.contains('of-total-row')) {
+                        const totalText = row.cells[0].textContent.trim();
+                        const ofMatch = totalText.match(/OF #(\d+)/);
+                        if (ofMatch) {
+                            const ofNumber = ofMatch[1].toLowerCase();
+                            row.style.display = ofVisible[ofNumber] ? '' : 'none';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    } else {
+                        const ofCell = row.cells[0];
+                        if (ofCell) {
+                            const ofNumber = ofCell.textContent.trim().toLowerCase();
+                            row.style.display = ofVisible[ofNumber] ? '' : 'none';
+                        }
+                    }
+                });
+                const cards = document.querySelectorAll('.mobile-cards-container .card');
+                cards.forEach(card => {
+                    if (card.classList.contains('of-total-card')) {
+                        const titleEl = card.querySelector('.card-title');
+                        if (titleEl) {
+                            const totalText = titleEl.textContent.trim();
+                            const ofMatch = totalText.match(/OF #(\d+)/);
+                            if (ofMatch) {
+                                const ofNumber = ofMatch[1].toLowerCase();
+                                card.style.display = ofVisible[ofNumber] ? '' : 'none';
+                            } else {
+                                card.style.display = 'none';
+                            }
+                        }
+                    } else {
+                        const titleEl = card.querySelector('.table-card-title');
+                        if (titleEl) {
+                            const ofNumber = titleEl.textContent.trim().replace('OF #', '').toLowerCase();
+                            card.style.display = (filterValue === '' || ofNumber.includes(filterValue)) ? '' : 'none';
+                        }
+                    }
+                });
+                const noResultsMsg = document.querySelector('.no-results-message');
+                if (noResultsMsg) {
+                    noResultsMsg.remove();
+                }
+                let anyVisible = false;
+                tableRows.forEach(row => {
+                    if (row.style.display !== 'none' && !row.classList.contains('of-total-row')) {
+                        anyVisible = true;
+                    }
+                });
+                if (!anyVisible && filterValue !== '') {
+                    const table = document.querySelector('.data-table tbody');
+                    if (table) {
+                        const newRow = document.createElement('tr');
+                        newRow.className = 'no-results-message';
+                        newRow.innerHTML = `<td colspan="13" class="text-center">No results found for OF JGR: "${filterValue}"</td>`;
+                        table.appendChild(newRow);
+                    }
+                    const mobileContainer = document.querySelector('.mobile-cards-container');
+                    if (mobileContainer) {
+                        const noResultsCard = document.createElement('div');
+                        noResultsCard.className = 'card mb-3 no-results-message';
+                        noResultsCard.innerHTML = `
+                            <div class="card-body text-center">
+                                <p class="mb-0">No results found for OF JGR: "${filterValue}"</p>
+                            </div>
+                        `;
+                        mobileContainer.appendChild(noResultsCard);
+                    }
+                }
+            }
+            function resetFilter() {
+                filterInputs.forEach(input => {
+                    input.value = '';
+                });
+                filterTable('');
+                const noResultsMsgs = document.querySelectorAll('.no-results-message');
+                noResultsMsgs.forEach(msg => msg.remove());
+            }
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const parentContainer = button.closest('.search-container');
+                    const input = parentContainer.querySelector('input#offilter');
+                    if (input) {
+                        const filterValue = input.value.trim();
+                        filterInputs.forEach(otherInput => {
+                            otherInput.value = filterValue;
+                        });
+                        filterTable(filterValue);
+                        const offcanvas = button.closest('.offcanvas');
+                        if (offcanvas) {
+                            const bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvas);
+                            if (bsOffcanvas) {
+                                bsOffcanvas.hide();
+                            }
+                        }
+                    }
+                });
+            });
+            resetButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    resetFilter();
+                    const offcanvas = button.closest('.offcanvas');
+                    if (offcanvas) {
+                        const bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvas);
+                        if (bsOffcanvas) {
+                            bsOffcanvas.hide();
+                        }
+                    }
+                });
+            });
+            filterInputs.forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const filterValue = input.value.trim();
+                        filterInputs.forEach(otherInput => {
+                            otherInput.value = filterValue;
+                        });
+                        filterTable(filterValue);
+                        const offcanvas = input.closest('.offcanvas');
+                        if (offcanvas) {
+                            const bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvas);
+                            if (bsOffcanvas) {
+                                bsOffcanvas.hide();
+                            }
+                        }
+                    }
+                });
+            });
+        });
         document.addEventListener('click', function(event) {
             if (event.target.classList.contains('delete-btn') || 
                 event.target.parentElement.classList.contains('delete-btn')) {
-                
                 event.preventDefault();
+                const deleteBtn = event.target.classList.contains('delete-btn') ? 
+                                event.target : 
+                                event.target.parentElement;
+                const row = deleteBtn.closest('tr');
+                const card = deleteBtn.closest('.card');
                 
-                // Find the row or card to delete
-                let element = event.target;
-                while (element && !element.matches('tr') && !element.matches('.table-card')) {
-                    element = element.parentElement;
-                }
+                // Get record ID either from the button's data attribute or from the edit button
+                let recordId = deleteBtn.getAttribute('data-id');
                 
-                if (!element) return;
-                
-                // For table rows, get the OF number from the first cell
-                let ofNumber, recordId;
-                
-                if (element.matches('tr')) {
-                    ofNumber = element.cells[0].textContent.trim();
-                    // Try to find the edit button in this row to get the record ID
-                    const editBtn = element.querySelector('.edit-btn');
-                    if (editBtn) {
-                        recordId = editBtn.getAttribute('data-id');
-                    }
-                } else if (element.matches('.table-card')) {
-                    // For mobile cards
-                    const titleEl = element.querySelector('.table-card-title');
-                    if (titleEl) {
-                        ofNumber = titleEl.textContent.trim().replace('OF #', '');
-                    }
-                    
-                    // Try to find the edit button in this card to get the record ID
-                    const editBtn = element.querySelector('.edit-btn');
-                    if (editBtn) {
-                        recordId = editBtn.getAttribute('data-id');
+                if (!recordId) {
+                    if (row) {
+                        const editBtn = row.querySelector('.edit-btn');
+                        recordId = editBtn ? editBtn.getAttribute('data-id') : null;
+                    } else if (card) {
+                        const editBtn = card.querySelector('.edit-btn');
+                        recordId = editBtn ? editBtn.getAttribute('data-id') : null;
                     }
                 }
                 
                 if (!recordId) {
-                    alert('Could not identify the record to delete.');
+                    alert('Error: Could not identify the record to delete.');
                     return;
                 }
                 
-                // Confirm deletion with the user
-                if (confirm(`Are you sure you want to delete this record from OF #${ofNumber}?`)) {
-                    // Show loading animation
-                    showLoading().then(() => {
-                        // Create deletion request data
-                        const deleteData = {
-                            action: 'delete',
-                            id: recordId
-                        };
-                        
-                        // Send DELETE request to the server
-                        fetch('delete_record.php', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify(deleteData)
+                if (confirm('Are you sure you want to delete this record? This action cannot be undone.')) {
+                    showLoading()
+                        .then(() => {
+                            const formData = new FormData();
+                            formData.append('_method', 'DELETE');
+                            formData.append('id', recordId);
+                            return fetch('ayoub.php', {
+                                method: 'POST',
+                                body: formData
+                            });
                         })
-                        .then(response => response.json())
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok: ' + response.status);
+                            }
+                            return response.json();
+                        })
                         .then(data => {
                             hideLoading();
-                            
                             if (data.success) {
-                                // Remove the element from the DOM
-                                element.remove();
                                 alert('Record deleted successfully!');
-                                
-                                // Reload to update totals and other elements
                                 window.location.reload();
                             } else {
-                                alert('Error: ' + (data.error || 'Could not delete record'));
+                                throw new Error(data.error || 'Unknown error occurred');
                             }
                         })
                         .catch(error => {
                             hideLoading();
                             console.error('Error:', error);
-                            alert('An error occurred while deleting the record.');
+                            alert('An error occurred while deleting the record: ' + error.message);
                         });
-                    });
                 }
             }
         });
-
-        // Make search functionality work correctly
-        document.getElementById('ofSearchButton').addEventListener('click', searchByOF);
-        document.getElementById('mobileSearchButton').addEventListener('click', searchByOF);
-
-        function searchByOF() {
-            const query = document.getElementById('ofSearchInput').value || 
-                        document.getElementById('mobileSearchInput').value;
-            
-            if (!query) {
-                alert('Please enter an OF number to search');
-                return;
-            }
-            
-            // Show loading animation
-            showLoading().then(() => {
-                // Perform search across all rows
-                const rows = document.querySelectorAll('.data-table tbody tr:not(.of-total-row)');
-                const cards = document.querySelectorAll('.table-card');
-                let found = false;
-                
-                // Desktop table search
-                rows.forEach(row => {
-                    const ofCell = row.cells[0];
-                    if (ofCell && ofCell.textContent.includes(query)) {
-                        // Highlight the row
-                        row.style.backgroundColor = '#ffffa0';
-                        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        found = true;
-                    } else {
-                        row.style.backgroundColor = '';
-                    }
-                });
-                
-                // Mobile card search
-                cards.forEach(card => {
-                    const title = card.querySelector('.table-card-title');
-                    if (title && title.textContent.includes(query)) {
-                        // Highlight the card
-                        card.style.backgroundColor = '#ffffa0';
-                        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        found = true;
-                    } else {
-                        card.style.backgroundColor = '';
-                    }
-                });
-                
-                if (!found) {
-                    alert('No OF with number ' + query + ' found');
-                }
-                
-                // Hide loading after search
-                hideLoading();
-            });
-        }
     </script>
-
     <script>
         function showLoading() {
             const overlay = document.getElementById('loadingOverlay');
