@@ -23,6 +23,10 @@
                 <div class="sidebar-item-icon"><i class="fa-solid fa-chart-pie"></i></div>
                 Production 
             </a>
+             <a href="lostmov.php" class="sidebar-item text-white <?php echo $current_view === 'lostmov.php' ? 'active' : ''; ?>">
+                <div class="sidebar-item-icon"><i class="fa-solid fa-circle-exclamation"></i></div>
+                lost_barcodes
+            </a>
             <a href="solped_search.php" class="sidebar-item text-white <?php echo $current_view == 'solped_search.php' ? 'active' : ''; ?>">
                 <div class="sidebar-item-icon"><i class="fas fa-id-card"></i></div>
                 Search by Solped Client
@@ -89,6 +93,10 @@
                     <div class="sidebar-item-icon"><i class="fa-solid fa-chart-pie"></i></div>
                     Production
                 </a>
+                <a href="lostmov.php" class="sidebar-item text-white <?php echo $current_view === 'lostmov.php' ? 'active' : ''; ?>">
+                    <div class="sidebar-item-icon"><i class="fa-solid fa-circle-exclamation"></i></div>
+                    lost_barcodes
+                </a>
                 <a href="solped_search.php" class="sidebar-item text-white <?php echo $current_view == 'solped_search.php' ? 'active' : ''; ?>">
                     <div class="sidebar-item-icon"><i class="fas fa-id-card"></i></div>
                     Search by Solped Client
@@ -125,7 +133,7 @@
                 <i class="fa-solid fa-circle-info"></i>
                 This program is under development and improvement, the final version will be released soon
                 <br><br>
-                Made with <i class="fa-solid fa-heart" title="love" ></i> by HAMZA SAADI
+                Made with <i class="fa-solid fa-heart" title="love" ></i> by HAMZA SAADI and BL4Z3
             </div>
         </div>
     </div>
