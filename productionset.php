@@ -80,7 +80,8 @@ try {
             'to_stages' => []
         ];
     }
-$daily_items_query = "SELECT 
+$daily_items_query = "
+SELECT 
     b.stage,
     COUNT(DISTINCT b.full_barcode_name) as count
 FROM barcodes b
@@ -299,6 +300,9 @@ function getProductionSummary($pdo, $filter_date, $filter_stage = null, $filter_
         return [];
     }
     try {
+        // Prepare base parameters first
+        $params = [':date' => $filter_date]; // Add the date parameter for the history table
+
         $query = "
         SELECT 
             b.of_number,
@@ -307,7 +311,7 @@ function getProductionSummary($pdo, $filter_date, $filter_stage = null, $filter_
             b.piece_name AS p_name,
             b.chef,
             IFNULL(b.stage, 'No Stage') as stage,
-            COUNT(b.id) AS total_count,
+            COUNT(b.id) AS total_count, 
             SUM(qc.quantity_coupe) AS total_stage_quantity,
             SUM(qc.principale_quantity) AS total_main_quantity,
             MAX(qc.solped_client) AS solped_client,
@@ -315,43 +319,56 @@ function getProductionSummary($pdo, $filter_date, $filter_stage = null, $filter_
             MAX(qc.color_tissus) AS color_tissus,
             SUM(qc.manque) AS manque,
             SUM(qc.suv_plus) AS suv_plus,
-            MAX(IFNULL(qc.lastupdate, b.last_update)) AS latest_update
-        FROM barcodes b
+            MAX(IFNULL(qc.lastupdate, b.last_update)) AS latest_update 
+        FROM barcodes b 
         LEFT JOIN quantity_coupe qc ON b.of_number = qc.of_number
             AND b.size = qc.size
             AND b.category = qc.category
-            AND b.piece_name = qc.piece_name
-        WHERE b.stage IS NOT NULL AND b.stage != ''";
-        
-        $params = [];
-        
-        if (!empty($filter_date)) {
-            $query .= " AND DATE(b.last_update) = ?";
-            $params[] = $filter_date;
-        }
-        
+            AND b.piece_name = qc.piece_name 
+        LEFT JOIN jgr_barcodes_history h ON h.full_barcode_name = b.full_barcode_name 
+        WHERE 
+            h.full_barcode_name IS NOT NULL
+            AND DATE(h.last_update) = :date
+            AND h.action_type IN ('INSERT', 'UPDATE')
+            AND h.last_update = (
+                SELECT MAX(h2.last_update)
+                FROM jgr_barcodes_history h2
+                WHERE h2.full_barcode_name = h.full_barcode_name
+                AND DATE(h2.last_update) <= :date
+            )
+            AND b.stage IS NOT NULL 
+            AND b.stage != ''";
+
+        // Add filter conditions
         if (!empty($filter_stage)) {
             if ($filter_stage == 'No Stage') {
                 $query .= " AND (b.stage IS NULL OR b.stage = '')";
             } else {
-                $query .= " AND b.stage = ?";
-                $params[] = $filter_stage;
+                $query .= " AND b.stage = :filter_stage";
+                $params[':filter_stage'] = $filter_stage;
             }
         }
         
         if (!empty($filter_piece_name)) {
-            $query .= " AND b.piece_name = ?";
-            $params[] = $filter_piece_name;
+            $query .= " AND b.piece_name = :filter_piece_name";
+            $params[':filter_piece_name'] = $filter_piece_name;
         }
-
+        
         if (!empty($filter_of)) {
-            $query .= " AND b.of_number = ?";
-            $params[] = $filter_of;
+            $query .= " AND b.of_number = :filter_of";
+            $params[':filter_of'] = $filter_of;
         }
         
-        $query .= " GROUP BY b.of_number, b.size, b.category, b.piece_name, b.chef, IFNULL(b.stage, 'No Stage')
-                   ORDER BY b.of_number, b.size, b.category, b.piece_name";
-        
+        // GROUP BY clause should be after all WHERE conditions
+        $query .= " GROUP BY 
+            b.of_number, 
+            b.size, 
+            b.category, 
+            b.piece_name, 
+            b.chef, 
+            IFNULL(b.stage, 'No Stage')
+        ORDER BY b.of_number, b.size, b.category, b.piece_name";
+                
         $stmt = $pdo->prepare($query);
         $stmt->execute($params);
         
@@ -380,21 +397,27 @@ function getAvailableOFNumbers($pdo, $filter_date) {
         $query = "
         SELECT DISTINCT b.of_number 
         FROM barcodes b
+        LEFT JOIN jgr_barcodes_history h ON h.full_barcode_name = b.full_barcode_name
         WHERE b.of_number IS NOT NULL AND b.of_number != ''";
         
+        $params = [];
+        
         if (!empty($filter_date)) {
-            $query .= " AND DATE(b.last_update) = ?";
+            $query .= " AND DATE(h.last_update) = :date 
+                        AND h.action_type IN ('INSERT', 'UPDATE')
+                        AND h.last_update = (
+                            SELECT MAX(h2.last_update)
+                            FROM jgr_barcodes_history h2
+                            WHERE h2.full_barcode_name = h.full_barcode_name
+                            AND DATE(h2.last_update) <= :date
+                        )";
+            $params[':date'] = $filter_date;
         }
         
         $query .= " ORDER BY b.of_number";
         
         $stmt = $pdo->prepare($query);
-        
-        if (!empty($filter_date)) {
-            $stmt->execute([$filter_date]);
-        } else {
-            $stmt->execute();
-        }
+        $stmt->execute($params);
         
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     } catch(PDOException $e) {

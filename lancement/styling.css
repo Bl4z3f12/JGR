@@ -455,3 +455,57 @@ tr.new-of-section td:first-child {
     color: #155724 !important;
     font-weight: bold;
 }
+
+
+.desktop-cards-container {
+    padding: 20px;
+}
+
+.desktop-cards-container .of-section-card {
+    margin-bottom: 30px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: none;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.desktop-cards-container .of-total-card {
+    margin-bottom: 30px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.desktop-cards-container .total-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    margin-bottom: 5px;
+}
+
+.desktop-cards-container .total-item .label {
+    font-weight: 600;
+}
+
+.desktop-cards-container .total-item .value {
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    min-width: 40px;
+    text-align: center;
+    background-color: #f0f0f0;
+}
+
+.desktop-cards-container .card-header {
+    padding: 12px 15px;
+}
+
+.desktop-cards-container .card-header h5 {
+    font-size: 1.2rem;
+    margin: 0;
+}
