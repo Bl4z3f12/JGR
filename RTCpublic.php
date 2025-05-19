@@ -158,7 +158,7 @@ if (isset($_POST['ajax_create_barcode']) && $_POST['ajax_create_barcode'] == 1) 
     <div class="main-content">
         <?php include 'includes/header.php'; ?>
 
-        <div class="row justify-content-center">
+        <div class="row justify-content-center mt-5">
             <div class="col-md-8">
                 <div class="card form-card">
                     <div class="card-header bg-primary text-white" >
