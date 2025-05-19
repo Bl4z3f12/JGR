@@ -9,9 +9,8 @@ $ofTypeLabels = [
     1 => 'VEST ISOLEE',
     3 => 'GILET',
     4 => 'MANTEAU',
-    5 => 'COSTUME 1PC',
-    6 => 'COSTUME 2PC',
-    7 => 'COSTUME 3PC'
+    5 => 'COSTUME 2PC',
+    6 => 'COSTUME 3PC'
 ];
 $ofCategoryLabels = [
     1 => 'R',
@@ -178,7 +177,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['_method'])) {
                             <option value="VEST ISOLEE">VEST ISOLEE</option>
                             <option value="GILET">GILET</option>
                             <option value="MANTEAU">MANTEAU</option>
-                            <option value="COSTUME 1PC">COSTUME 1PC</option>
                             <option value="COSTUME 2PC">COSTUME 2PC</option>
                             <option value="COSTUME 3PC">COSTUME 3PC</option>
                         </select>
@@ -298,6 +296,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['_method'])) {
             <div class="search-container d-none d-md-block">
                 <div class="input-group mb-3">
                     <input type="search" id="offilter" class="form-control" placeholder="Filter by OF JGR..." required>
+                    <input type="date" id="datefilter" class="form-control" placeholder="Filter by date">
                     <button class="btn btn-primary" type="button" id="offilter">
                     <i class="bi bi-funnel-fill"></i> Filter
                     </button>
@@ -343,6 +342,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['_method'])) {
                         <i class="fa-solid fa-broom"></i> Reset
                         </button>
                     </div>
+                    <div class="input-group mb-3">
+                        <input type="date" id="datefilter" class="form-control" placeholder="Filter by date">
+                    </div>
                 </div>
                 <div class="buttons-container">
                     <button class="add-new-btn">
@@ -354,258 +356,199 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['_method'])) {
                 </div>
             </div>
         </div>
-        <div class="table-responsive d-none d-md-block">
-            <div class="table-wrapper">
-                <table class="data-table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>OF JGR</th>
-                            <th>General OF Qty</th>
-                            <th>OF Type</th>
-                            <th>OF Category</th>
-                            <th>Taille</th>
-                            <th>Pack number</th>
-                            <th>Pack order</th>
-                            <th>Devant</th>
-                            <th>Garniture</th>
-                            <th>Manche</th>
-                            <th>D.O.S</th>
-                            <th>Last edit</th>
-                            <th class="tools-cell">Tools</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (empty($records)): ?>
+        <ul class="nav nav-tabs mt-3 mb-3" id="ofTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="dynamic-tab" data-bs-toggle="tab" data-bs-target="#dynamic" type="button" role="tab" aria-controls="dynamic" aria-selected="true">Dynamic</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="static-tab" data-bs-toggle="tab" data-bs-target="#static" type="button" role="tab" aria-controls="static" aria-selected="false">Static</button>
+          </li>
+        </ul>
+        <div class="tab-content" id="ofTabsContent">
+          <div class="tab-pane fade show active" id="dynamic" role="tabpanel" aria-labelledby="dynamic-tab">
+            <div class="table-responsive d-none d-md-block">
+                <div class="table-wrapper">
+                    <table class="data-table table-bordered">
+                        <thead>
                             <tr>
-                                <td colspan="13" class="empty-message">No data found in database</td>
+                                <th>OF JGR</th>
+                                <th>General OF Qty</th>
+                                <th>OF Type</th>
+                                <th>OF Category</th>
+                                <th>Taille</th>
+                                <th>Pack number</th>
+                                <th>Pack order</th>
+                                <th>Devant</th>
+                                <th>Garniture</th>
+                                <th>Manche</th>
+                                <th>D.O.S</th>
+                                <th>Last edit</th>
+                                <th class="tools-cell">Tools</th>
                             </tr>
-                        <?php else: ?>
-                            <?php
-                            $lastOF = null;
-                            foreach ($records as $index => $record): 
-                                $isNewOF = $lastOF !== $record['of_number'];
-                                $isLastOfCurrentOF = false;
-                                if ($lastOF !== null && $lastOF !== $record['of_number']) {
-                                    ?>
-                                    <tr class="of-total-row">
-                                        <td colspan="4">OF #<?= htmlspecialchars($lastOF) ?> Totals</td>
-                                        <td></td>
-                                        <td><?= htmlspecialchars($ofTotals[$lastOF]['dv']) ?></td>
-                                        <td><?= htmlspecialchars($ofTotals[$lastOF]['g']) ?></td>
-                                        <td><?= htmlspecialchars($ofTotals[$lastOF]['m']) ?></td>
-                                        <td><?= htmlspecialchars($ofTotals[$lastOF]['dos']) ?></td>
-                                        <td colspan="2"></td>
-                                    </tr>
-                                    <?php
-                                }
-                                $lastOF = $record['of_number'];
-                                if ($index === count($records) - 1 || 
-                                    (isset($records[$index + 1]) && $records[$index + 1]['of_number'] !== $record['of_number'])) {
-                                    $isLastOfCurrentOF = true;
-                                }
-                            ?>
-                                <tr class="<?= $isNewOF ? 'new-of-section' : '' ?>">
-                                    <td><?= htmlspecialchars($record['of_number']) ?></td>
-                                    <td><?= $isNewOF ? htmlspecialchars($record['of_quantity']) : '' ?></td>
-                                    <td><?= htmlspecialchars($record['of_type']) ?></td>
-                                    <td><?= htmlspecialchars($record['of_category']) ?></td>
-                                    <td><?= htmlspecialchars($record['tailles']) ?></td>
-                                    <td><?= htmlspecialchars($record['pack_number']) ?></td>
-                                    <td><?= htmlspecialchars($record['pack_order_start']) ?> - <?= htmlspecialchars($record['pack_order_end']) ?></td>
-                                    <td><?= htmlspecialchars($record['dv']) ?></td>
-                                    <td><?= htmlspecialchars($record['g']) ?></td>
-                                    <td><?= htmlspecialchars($record['m']) ?></td>
-                                    <td><?= htmlspecialchars($record['dos']) ?></td>
-                                    <td><?= date('d/m/Y H:i:s', strtotime($record['last_edit'])) ?></td>
-                                    <td class="tools-cell">
-                                        <a href="#" class="edit-btn" 
-                                        data-id="<?= $record['id'] ?>"
-                                        data-of_number="<?= htmlspecialchars($record['of_number']) ?>"
-                                        data-of_quantity="<?= htmlspecialchars($record['of_quantity']) ?>"
-                                        data-tailles="<?= htmlspecialchars($record['tailles']) ?>"
-                                        data-pack_number="<?= htmlspecialchars($record['pack_number']) ?>"
-                                        data-pack_order_start="<?= htmlspecialchars($record['pack_order_start']) ?>"
-                                        data-pack_order_end="<?= htmlspecialchars($record['pack_order_end']) ?>"
-                                        data-dv="<?= htmlspecialchars($record['dv']) ?>"
-                                        data-g="<?= htmlspecialchars($record['g']) ?>"
-                                        data-m="<?= htmlspecialchars($record['m']) ?>"
-                                        data-dos="<?= htmlspecialchars($record['dos']) ?>"
-                                        ><i class="bi bi-pencil-square"></i></a>
-                                        <a href="#" class="delete-btn"><i class="bi bi-trash"></i></a>
-                                    </td>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($records)): ?>
+                                <tr>
+                                    <td colspan="13" class="empty-message">No data found in database</td>
                                 </tr>
-                                <?php 
-                                if ($isLastOfCurrentOF && $index === count($records) - 1): ?>
-                                    <tr class="of-total-row">
-                                        <td colspan="4">OF #<?= htmlspecialchars($record['of_number']) ?> Totals</td>
-                                        <td></td>
-                                        <td><?= htmlspecialchars($ofTotals[$record['of_number']]['dv']) ?></td>
-                                        <td><?= htmlspecialchars($ofTotals[$record['of_number']]['g']) ?></td>
-                                        <td><?= htmlspecialchars($ofTotals[$record['of_number']]['m']) ?></td>
-                                        <td><?= htmlspecialchars($ofTotals[$record['of_number']]['dos']) ?></td>
-                                        <td colspan="2"></td>
+                            <?php else: ?>
+                                <?php
+                                $lastOF = null;
+                                foreach ($records as $index => $record): 
+                                    $isNewOF = $lastOF !== $record['of_number'];
+                                    $isLastOfCurrentOF = false;
+                                    if ($lastOF !== null && $lastOF !== $record['of_number']) {
+                                        ?>
+                                        <tr class="of-total-row">
+                                            <td colspan="6">OF #<?= htmlspecialchars($lastOF) ?> Totals</td>
+                                            <td></td>
+                                            <td<?= $ofTotals[$lastOF]['dv'] == $ofQuantities[$lastOF] ? ' class="bg-success text-white"' : '' ?>>
+                                                <?= htmlspecialchars($ofTotals[$lastOF]['dv']) ?>
+                                            </td>
+                                            <td<?= $ofTotals[$lastOF]['g'] == $ofQuantities[$lastOF] ? ' class="bg-success text-white"' : '' ?>>
+                                                <?= htmlspecialchars($ofTotals[$lastOF]['g']) ?>
+                                            </td>
+                                            <td<?= $ofTotals[$lastOF]['m'] == $ofQuantities[$lastOF] ? ' class="bg-success text-white"' : '' ?>>
+                                                <?= htmlspecialchars($ofTotals[$lastOF]['m']) ?>
+                                            </td>
+                                            <td<?= $ofTotals[$lastOF]['dos'] == $ofQuantities[$lastOF] ? ' class="bg-success text-white"' : '' ?>>
+                                                <?= htmlspecialchars($ofTotals[$lastOF]['dos']) ?>
+                                            </td>
+                                            <td colspan="2"></td>
+                                        </tr>
+                                        <?php
+                                    }
+                                    $lastOF = $record['of_number'];
+                                    if ($index === count($records) - 1 || 
+                                        (isset($records[$index + 1]) && $records[$index + 1]['of_number'] !== $record['of_number'])) {
+                                        $isLastOfCurrentOF = true;
+                                    }
+                                ?>
+                                    <tr class="<?= $isNewOF ? 'new-of-section' : '' ?>">
+                                        <td><?= htmlspecialchars($record['of_number']) ?></td>
+                                        <td><?= $isNewOF ? htmlspecialchars($record['of_quantity']) : '' ?></td>
+                                        <td><?= htmlspecialchars($record['of_type']) ?></td>
+                                        <td><?= htmlspecialchars($record['of_category']) ?></td>
+                                        <td><?= htmlspecialchars($record['tailles']) ?></td>
+                                        <td><?= htmlspecialchars($record['pack_number']) ?></td>
+                                        <td><?= htmlspecialchars($record['pack_order_start']) ?> - <?= htmlspecialchars($record['pack_order_end']) ?></td>
+                                        <td><?= htmlspecialchars($record['dv']) ?></td>
+                                        <td><?= htmlspecialchars($record['g']) ?></td>
+                                        <td><?= htmlspecialchars($record['m']) ?></td>
+                                        <td><?= htmlspecialchars($record['dos']) ?></td>
+                                        <td><?= date('d/m/Y H:i:s', strtotime($record['last_edit'])) ?></td>
+                                        <td class="tools-cell">
+                                            <a href="#" class="edit-btn" 
+                                            data-id="<?= $record['id'] ?>"
+                                            data-of_number="<?= htmlspecialchars($record['of_number']) ?>"
+                                            data-of_quantity="<?= htmlspecialchars($record['of_quantity']) ?>"
+                                            data-tailles="<?= htmlspecialchars($record['tailles']) ?>"
+                                            data-pack_number="<?= htmlspecialchars($record['pack_number']) ?>"
+                                            data-pack_order_start="<?= htmlspecialchars($record['pack_order_start']) ?>"
+                                            data-pack_order_end="<?= htmlspecialchars($record['pack_order_end']) ?>"
+                                            data-dv="<?= htmlspecialchars($record['dv']) ?>"
+                                            data-g="<?= htmlspecialchars($record['g']) ?>"
+                                            data-m="<?= htmlspecialchars($record['m']) ?>"
+                                            data-dos="<?= htmlspecialchars($record['dos']) ?>"
+                                            ><i class="bi bi-pencil-square"></i></a>
+                                            <a href="#" class="delete-btn"><i class="bi bi-trash"></i></a>
+                                        </td>
                                     </tr>
-                                <?php endif; ?>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="d-md-none">
-            <div class="mobile-cards-container">
-            <?php if (empty($records)): ?>
-                <div class="alert alert-info">No data found in database</div>
-            <?php else: ?>
-                <?php
-                $lastOF = null;
-                foreach ($records as $index => $record): 
-                    $isNewOF = $lastOF !== $record['of_number'];
-                    $isLastOfCurrentOF = false;
-                    if ($lastOF !== null && $lastOF !== $record['of_number']) {
-                        ?>
-                        <div class="card mb-3 of-total-card bg-light">
-                            <div class="card-body">
-                                <h6 class="card-title">OF #<?= htmlspecialchars($lastOF) ?> Totals</h6>
-                                <div class="row mb-2">
-                                    <div class="col-12">
-                                        <div class="total-item">
-                                            <span class="label">General OF Qty:</span>
-                                            <span class="value fw-bold"><?= htmlspecialchars($ofQuantities[$lastOF]) ?></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row g-2">
-                                    <div class="col-6 col-sm-3">
-                                        <div class="total-item">
-                                            <span class="label">Devant:</span>
-                                            <span class="value"><?= htmlspecialchars($ofTotals[$lastOF]['dv']) ?></span>
-                                        </div>
-                                    </div>
-                                    <div class="col-6 col-sm-3">
-                                        <div class="total-item">
-                                            <span class="label">Garniture:</span>
-                                            <span class="value"><?= htmlspecialchars($ofTotals[$lastOF]['g']) ?></span>
-                                        </div>
-                                    </div>
-                                    <div class="col-6 col-sm-3">
-                                        <div class="total-item">
-                                            <span class="label">Manche:</span>
-                                            <span class="value"><?= htmlspecialchars($ofTotals[$lastOF]['m']) ?></span>
-                                        </div>
-                                    </div>
-                                    <div class="col-6 col-sm-3">
-                                        <div class="total-item">
-                                            <span class="label">D.O.S:</span>
-                                            <span class="value"><?= htmlspecialchars($ofTotals[$lastOF]['dos']) ?></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <?php
-                    }
-                    
-                    $lastOF = $record['of_number'];
-                    if ($index === count($records) - 1 || 
-                        (isset($records[$index + 1]) && $records[$index + 1]['of_number'] !== $record['of_number'])) {
-                        $isLastOfCurrentOF = true;
-                    }
-                ?>
-                    <div class="card mb-3 table-card <?= $isNewOF ? 'new-of-card' : '' ?>">
-                        <div class="card-header d-flex justify-content-between align-items-center <?= $isNewOF ? 'bg-primary text-white' : 'bg-light' ?>">
-                            <h6 class="mb-0 table-card-title">OF #<?= htmlspecialchars($record['of_number']) ?></h6>
-                            <?php if ($isNewOF): ?>
-                                <span class="badge bg-light text-dark">General OF Qty: <?= htmlspecialchars($record['of_quantity']) ?></span>
+                                    <?php 
+                                    if ($isLastOfCurrentOF && $index === count($records) - 1): ?>
+                                        <tr class="of-total-row">
+                                            <td colspan="6">OF #<?= htmlspecialchars($record['of_number']) ?> Totals</td>
+                                            <td></td>
+                                            <td<?= $ofTotals[$record['of_number']]['dv'] == $ofQuantities[$record['of_number']] ? ' class="bg-success text-white"' : '' ?>>
+                                                <?= htmlspecialchars($ofTotals[$record['of_number']]['dv']) ?>
+                                            </td>
+                                            <td<?= $ofTotals[$record['of_number']]['g'] == $ofQuantities[$record['of_number']] ? ' class="bg-success text-white"' : '' ?>>
+                                                <?= htmlspecialchars($ofTotals[$record['of_number']]['g']) ?>
+                                            </td>
+                                            <td<?= $ofTotals[$record['of_number']]['m'] == $ofQuantities[$record['of_number']] ? ' class="bg-success text-white"' : '' ?>>
+                                                <?= htmlspecialchars($ofTotals[$record['of_number']]['m']) ?>
+                                            </td>
+                                            <td<?= $ofTotals[$record['of_number']]['dos'] == $ofQuantities[$record['of_number']] ? ' class="bg-success text-white"' : '' ?>>
+                                                <?= htmlspecialchars($ofTotals[$record['of_number']]['dos']) ?>
+                                            </td>
+                                            <td colspan="2"></td>
+                                        </tr>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
                             <?php endif; ?>
-                        </div>
-                        <div class="card-body">
-                            <div class="row g-2">
-                                <div class="col-6">
-                                    <div class="data-item">
-                                        <span class="label">OF Type:</span>
-                                        <span class="value"><?= htmlspecialchars($record['of_type']) ?></span>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+          </div>
+          <div class="tab-pane fade" id="static" role="tabpanel" aria-labelledby="static-tab">
+            <div class="d-md-none" id="static-mobile">
+                <div class="mobile-cards-container">
+                <?php if (empty($records)): ?>
+                    <div class="alert alert-info">No data found in database</div>
+                <?php else: ?>
+                    <?php
+                    $lastOF = null;
+                    foreach ($records as $index => $record): 
+                        $isNewOF = $lastOF !== $record['of_number'];
+                        $isLastOfCurrentOF = false;
+                        if ($lastOF !== null && $lastOF !== $record['of_number']) {
+                            ?>
+                            <div class="card mb-3 of-total-card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">OF #<?= htmlspecialchars($lastOF) ?> Totals</h6>
+                                    <div class="row mb-2">
+                                        <div class="col-12">
+                                            <div class="total-item">
+                                                <span class="label">General OF Qty:</span>
+                                                <span class="value fw-bold"><?= htmlspecialchars($ofQuantities[$lastOF]) ?></span>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="data-item">
-                                        <span class="label">OF Category:</span>
-                                        <span class="value"><?= htmlspecialchars($record['of_category']) ?></span>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="data-item">
-                                        <span class="label">Taille:</span>
-                                        <span class="value"><?= htmlspecialchars($record['tailles']) ?></span>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="data-item">
-                                        <span class="label">Pack #:</span>
-                                        <span class="value"><?= htmlspecialchars($record['pack_number']) ?></span>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="data-item">
-                                        <span class="label">Pack order:</span>
-                                        <span class="value"><?= htmlspecialchars($record['pack_order_start']) ?> - <?= htmlspecialchars($record['pack_order_end']) ?></span>
+                                    <div class="row g-2">
+                                        <div class="col-6 col-sm-3">
+                                            <div class="total-item">
+                                                <span class="label">Devant:</span>
+                                                <span class="value<?= $ofTotals[$lastOF]['dv'] == $ofQuantities[$lastOF] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
+                                                    <?= htmlspecialchars($ofTotals[$lastOF]['dv']) ?>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-sm-3">
+                                            <div class="total-item">
+                                                <span class="label">Garniture:</span>
+                                                <span class="value<?= $ofTotals[$lastOF]['g'] == $ofQuantities[$lastOF] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
+                                                    <?= htmlspecialchars($ofTotals[$lastOF]['g']) ?>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-sm-3">
+                                            <div class="total-item">
+                                                <span class="label">Manche:</span>
+                                                <span class="value<?= $ofTotals[$lastOF]['m'] == $ofQuantities[$lastOF] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
+                                                    <?= htmlspecialchars($ofTotals[$lastOF]['m']) ?>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-sm-3">
+                                            <div class="total-item">
+                                                <span class="label">D.O.S:</span>
+                                                <span class="value<?= $ofTotals[$lastOF]['dos'] == $ofQuantities[$lastOF] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
+                                                    <?= htmlspecialchars($ofTotals[$lastOF]['dos']) ?>
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            
-                            <hr>
-                            
-                            <div class="row g-2">
-                                <div class="col-6 col-sm-3">
-                                    <div class="data-item">
-                                        <span class="label">Devant:</span>
-                                        <span class="value"><?= htmlspecialchars($record['dv']) ?></span>
-                                    </div>
-                                </div>
-                                <div class="col-6 col-sm-3">
-                                    <div class="data-item">
-                                        <span class="label">Garniture:</span>
-                                        <span class="value"><?= htmlspecialchars($record['g']) ?></span>
-                                    </div>
-                                </div>
-                                <div class="col-6 col-sm-3">
-                                    <div class="data-item">
-                                        <span class="label">Manche:</span>
-                                        <span class="value"><?= htmlspecialchars($record['m']) ?></span>
-                                    </div>
-                                </div>
-                                <div class="col-6 col-sm-3">
-                                    <div class="data-item">
-                                        <span class="label">D.O.S:</span>
-                                        <span class="value"><?= htmlspecialchars($record['dos']) ?></span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="mt-2 text-muted small">
-                                Last edit: <?= date('d/m/Y H:i:s', strtotime($record['last_edit'])) ?>
-                            </div>
-                        </div>
-                        <div class="card-footer d-flex justify-content-end">
-                            <a href="#" class="btn btn-sm btn-outline-primary me-2 edit-btn" 
-                                data-id="<?= $record['id'] ?>"
-                                data-of_number="<?= htmlspecialchars($record['of_number']) ?>"
-                                data-of_quantity="<?= htmlspecialchars($record['of_quantity']) ?>"
-                                data-of_type="<?= htmlspecialchars($record['of_type']) ?>"
-                                data-of_category="<?= htmlspecialchars($record['of_category']) ?>"
-                                data-tailles="<?= htmlspecialchars($record['tailles']) ?>"
-                                data-pack_number="<?= htmlspecialchars($record['pack_number']) ?>"
-                                data-pack_order_start="<?= htmlspecialchars($record['pack_order_start']) ?>"
-                                data-pack_order_end="<?= htmlspecialchars($record['pack_order_end']) ?>"
-                                data-dv="<?= htmlspecialchars($record['dv']) ?>"
-                                data-g="<?= htmlspecialchars($record['g']) ?>"
-                                data-m="<?= htmlspecialchars($record['m']) ?>"
-                                data-dos="<?= htmlspecialchars($record['dos']) ?>"
-                                ><i class="bi bi-pencil-square"></i> Edit</a>
-                            <a href="#" class="btn btn-sm btn-outline-danger delete-btn" data-id="<?= $record['id'] ?>"><i class="bi bi-trash"></i> Delete</a>
-                        </div>
-                    </div>
-                    
+                            <?php
+                        }
+                        $lastOF = $record['of_number'];
+                        if ($index === count($records) - 1 || 
+                            (isset($records[$index + 1]) && $records[$index + 1]['of_number'] !== $record['of_number'])) {
+                            $isLastOfCurrentOF = true;
+                        }
+                    ?>
                     <?php 
                     if ($isLastOfCurrentOF && $index === count($records) - 1): ?>
                         <div class="card mb-3 of-total-card bg-light">
@@ -623,31 +566,142 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['_method'])) {
                                     <div class="col-6 col-sm-3">
                                         <div class="total-item">
                                             <span class="label">Devant:</span>
-                                            <span class="value"><?= htmlspecialchars($ofTotals[$record['of_number']]['dv']) ?></span>
+                                            <span class="value<?= $ofTotals[$record['of_number']]['dv'] == $ofQuantities[$record['of_number']] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
+                                                <?= htmlspecialchars($ofTotals[$record['of_number']]['dv']) ?>
+                                            </span>
                                         </div>
                                     </div>
                                     <div class="col-6 col-sm-3">
                                         <div class="total-item">
                                             <span class="label">Garniture:</span>
-                                            <span class="value"><?= htmlspecialchars($ofTotals[$record['of_number']]['g']) ?></span>
+                                            <span class="value<?= $ofTotals[$record['of_number']]['g'] == $ofQuantities[$record['of_number']] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
+                                                <?= htmlspecialchars($ofTotals[$record['of_number']]['g']) ?>
+                                            </span>
                                         </div>
                                     </div>
                                     <div class="col-6 col-sm-3">
                                         <div class="total-item">
                                             <span class="label">Manche:</span>
-                                            <span class="value"><?= htmlspecialchars($ofTotals[$record['of_number']]['m']) ?></span>
+                                            <span class="value<?= $ofTotals[$record['of_number']]['m'] == $ofQuantities[$record['of_number']] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
+                                                <?= htmlspecialchars($ofTotals[$record['of_number']]['m']) ?>
+                                            </span>
                                         </div>
                                     </div>
                                     <div class="col-6 col-sm-3">
                                         <div class="total-item">
                                             <span class="label">D.O.S:</span>
-                                            <span class="value"><?= htmlspecialchars($ofTotals[$record['of_number']]['dos']) ?></span>
+                                            <span class="value<?= $ofTotals[$record['of_number']]['dos'] == $ofQuantities[$record['of_number']] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
+                                                <?= htmlspecialchars($ofTotals[$record['of_number']]['dos']) ?>
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     <?php endif; ?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+                </div>
+            </div>
+          </div>
+        </div>
+        <div class="d-md-none" id="dynamic-mobile">
+            <div class="mobile-cards-container">
+            <?php if (empty($records)): ?>
+                <div class="alert alert-info">No data found in database</div>
+            <?php else: ?>
+                <?php
+                $lastOF = null;
+                foreach ($records as $index => $record): 
+                    $isNewOF = $lastOF !== $record['of_number'];
+                    $isLastOfCurrentOF = false;
+                    $cardId = 'mobileCard_' . $record['id']; // Unique ID for collapse
+                ?>
+                    <div class="card mb-4 shadow-sm border-0" style="border-radius: 1rem;">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center flex-wrap" style="border-top-left-radius: 1rem; border-top-right-radius: 1rem; cursor:pointer;" data-bs-toggle="collapse" data-bs-target="#<?= $cardId ?>" aria-expanded="false" aria-controls="<?= $cardId ?>">
+                            <div class="d-flex align-items-center flex-wrap gap-2">
+                                <span class="fw-bold fs-5">OF #<?= htmlspecialchars($record['of_number']) ?></span>
+                                <span class="badge bg-light text-primary fs-6">Taille: <?= htmlspecialchars($record['tailles']) ?></span>
+                            </div>
+                            <?php if ($isNewOF): ?>
+                                <span class="badge bg-light text-primary fs-6">OF Qty: <?= htmlspecialchars($record['of_quantity']) ?></span>
+                            <?php endif; ?>
+                        </div>
+                        <div id="<?= $cardId ?>" class="collapse">
+                            <div class="card-body p-3">
+                                <div class="row mb-2">
+                                    <div class="col-6">
+                                        <div class="small text-muted">OF Type</div>
+                                        <div class="fw-semibold"><?= htmlspecialchars($record['of_type']) ?></div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="small text-muted">OF Category</div>
+                                        <div class="fw-semibold"><?= htmlspecialchars($record['of_category']) ?></div>
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-6">
+                                        <div class="small text-muted">Taille</div>
+                                        <div><?= htmlspecialchars($record['tailles']) ?></div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="small text-muted">Pack #</div>
+                                        <div><?= htmlspecialchars($record['pack_number']) ?></div>
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-12">
+                                        <div class="small text-muted">Pack Order</div>
+                                        <div><?= htmlspecialchars($record['pack_order_start']) ?> - <?= htmlspecialchars($record['pack_order_end']) ?></div>
+                                    </div>
+                                </div>
+                                <hr class="my-2">
+                                <div class="row text-center mb-2">
+                                    <div class="col-6">
+                                        <div class="small text-muted">Devant</div>
+                                        <div class="fw-bold text-primary fs-6"><?= htmlspecialchars($record['dv']) ?></div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="small text-muted">Garniture</div>
+                                        <div class="fw-bold text-primary fs-6"><?= htmlspecialchars($record['g']) ?></div>
+                                    </div>
+                                    <div class="col-6 mt-2">
+                                        <div class="small text-muted">Manche</div>
+                                        <div class="fw-bold text-primary fs-6"><?= htmlspecialchars($record['m']) ?></div>
+                                    </div>
+                                    <div class="col-6 mt-2">
+                                        <div class="small text-muted">D.O.S</div>
+                                        <div class="fw-bold text-primary fs-6"><?= htmlspecialchars($record['dos']) ?></div>
+                                    </div>
+                                </div>
+                                <hr class="my-2">
+                                <div class="row mb-2">
+                                    <div class="col-12">
+                                        <div class="small text-muted">Last Edit</div>
+                                        <div><?= date('d/m/Y H:i:s', strtotime($record['last_edit'])) ?></div>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-end gap-2 mt-2">
+                                    <a href="#" class="btn btn-sm btn-outline-primary edit-btn" 
+                                        data-id="<?= $record['id'] ?>"
+                                        data-of_number="<?= htmlspecialchars($record['of_number']) ?>"
+                                        data-of_quantity="<?= htmlspecialchars($record['of_quantity']) ?>"
+                                        data-of_type="<?= htmlspecialchars($record['of_type']) ?>"
+                                        data-of_category="<?= htmlspecialchars($record['of_category']) ?>"
+                                        data-tailles="<?= htmlspecialchars($record['tailles']) ?>"
+                                        data-pack_number="<?= htmlspecialchars($record['pack_number']) ?>"
+                                        data-pack_order_start="<?= htmlspecialchars($record['pack_order_start']) ?>"
+                                        data-pack_order_end="<?= htmlspecialchars($record['pack_order_end']) ?>"
+                                        data-dv="<?= htmlspecialchars($record['dv']) ?>"
+                                        data-g="<?= htmlspecialchars($record['g']) ?>"
+                                        data-m="<?= htmlspecialchars($record['m']) ?>"
+                                        data-dos="<?= htmlspecialchars($record['dos']) ?>"
+                                    ><i class="bi bi-pencil-square"></i> Edit</a>
+                                    <a href="#" class="btn btn-sm btn-outline-danger delete-btn" data-id="<?= $record['id'] ?>"><i class="bi bi-trash"></i> Delete</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 <?php endforeach; ?>
             <?php endif; ?>
             </div>
@@ -1024,6 +1078,262 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['_method'])) {
                 }
             }
         });
+        document.addEventListener('DOMContentLoaded', function() {
+            var dynamicTab = document.getElementById('dynamic-tab');
+            var staticTab = document.getElementById('static-tab');
+            var dynamicMobile = document.getElementById('dynamic-mobile');
+
+            function updateMobileCardsVisibility() {
+                if (dynamicTab.classList.contains('active')) {
+                    dynamicMobile.style.display = '';
+                } else {
+                    dynamicMobile.style.display = 'none';
+                }
+            }
+
+            // Initial check
+            updateMobileCardsVisibility();
+
+            // Listen for tab changes
+            dynamicTab.addEventListener('shown.bs.tab', updateMobileCardsVisibility);
+            staticTab.addEventListener('shown.bs.tab', updateMobileCardsVisibility);
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterInputs = document.querySelectorAll('input#offilter');
+            const dateFilterInputs = document.querySelectorAll('input#datefilter');
+            const filterButtons = document.querySelectorAll('button#offilter');
+            const resetButtons = document.querySelectorAll('button#resetoffilter');
+            
+            function filterTable(ofFilterValue, dateFilterValue) {
+                ofFilterValue = ofFilterValue.toLowerCase().trim();
+                
+                const tableRows = document.querySelectorAll('.data-table tbody tr');
+                let ofVisible = {};
+                
+                // First pass: determine which OFs match the filters
+                tableRows.forEach(row => {
+                    if (!row.classList.contains('of-total-row')) {
+                        const ofCell = row.cells[0];
+                        const dateCell = row.cells[11]; // Last edit cell
+                        
+                        if (ofCell && dateCell) {
+                            const ofNumber = ofCell.textContent.trim().toLowerCase();
+                            const rowDate = dateCell.textContent.trim();
+                            const passesOfFilter = ofFilterValue === '' || ofNumber.includes(ofFilterValue);
+                            const passesDateFilter = dateFilterValue === '' || formatDateForComparison(rowDate) === dateFilterValue;
+                            
+                            if (passesOfFilter && passesDateFilter) {
+                                ofVisible[ofNumber] = true;
+                            }
+                        }
+                    }
+                });
+                
+                // Second pass: show/hide rows based on filters
+                tableRows.forEach(row => {
+                    if (row.classList.contains('of-total-row')) {
+                        const totalText = row.cells[0].textContent.trim();
+                        const ofMatch = totalText.match(/OF #(\d+)/);
+                        if (ofMatch) {
+                            const ofNumber = ofMatch[1].toLowerCase();
+                            row.style.display = ofVisible[ofNumber] ? '' : 'none';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    } else {
+                        const ofCell = row.cells[0];
+                        if (ofCell) {
+                            const ofNumber = ofCell.textContent.trim().toLowerCase();
+                            row.style.display = ofVisible[ofNumber] ? '' : 'none';
+                        }
+                    }
+                });
+                
+                // Filter mobile cards
+                const cards = document.querySelectorAll('.mobile-cards-container .card');
+                cards.forEach(card => {
+                    if (card.classList.contains('of-total-card')) {
+                        const titleEl = card.querySelector('.card-title');
+                        if (titleEl) {
+                            const totalText = titleEl.textContent.trim();
+                            const ofMatch = totalText.match(/OF #(\d+)/);
+                            if (ofMatch) {
+                                const ofNumber = ofMatch[1].toLowerCase();
+                                card.style.display = ofVisible[ofNumber] ? '' : 'none';
+                            } else {
+                                card.style.display = 'none';
+                            }
+                        }
+                    } else {
+                        const titleEl = card.querySelector('.fw-bold.fs-5');
+                        const dateEl = card.querySelector('.card-body div:last-child div:last-child');
+                        
+                        if (titleEl && dateEl) {
+                            const ofNumber = titleEl.textContent.trim().replace('OF #', '').toLowerCase();
+                            const cardDate = dateEl.textContent.trim();
+                            const passesOfFilter = ofFilterValue === '' || ofNumber.includes(ofFilterValue);
+                            const passesDateFilter = dateFilterValue === '' || formatDateForComparison(cardDate) === dateFilterValue;
+                            
+                            card.style.display = (passesOfFilter && passesDateFilter) ? '' : 'none';
+                        }
+                    }
+                });
+                
+                // Check if any results are visible and show message if none
+                const noResultsMsg = document.querySelector('.no-results-message');
+                if (noResultsMsg) {
+                    noResultsMsg.remove();
+                }
+                
+                let anyVisible = false;
+                tableRows.forEach(row => {
+                    if (row.style.display !== 'none' && !row.classList.contains('of-total-row')) {
+                        anyVisible = true;
+                    }
+                });
+                
+                if (!anyVisible && (ofFilterValue !== '' || dateFilterValue !== '')) {
+                    let filterText = '';
+                    if (ofFilterValue !== '' && dateFilterValue !== '') {
+                        filterText = `OF JGR: "${ofFilterValue}" and Date: "${formatDateDisplay(dateFilterValue)}"`;
+                    } else if (ofFilterValue !== '') {
+                        filterText = `OF JGR: "${ofFilterValue}"`;
+                    } else if (dateFilterValue !== '') {
+                        filterText = `Date: "${formatDateDisplay(dateFilterValue)}"`;
+                    }
+                    
+                    const table = document.querySelector('.data-table tbody');
+                    if (table) {
+                        const newRow = document.createElement('tr');
+                        newRow.className = 'no-results-message';
+                        newRow.innerHTML = `<td colspan="13" class="text-center">No results found for ${filterText}</td>`;
+                        table.appendChild(newRow);
+                    }
+                    
+                    const mobileContainer = document.querySelector('.mobile-cards-container');
+                    if (mobileContainer) {
+                        const noResultsCard = document.createElement('div');
+                        noResultsCard.className = 'card mb-3 no-results-message';
+                        noResultsCard.innerHTML = `
+                            <div class="card-body text-center">
+                                <p class="mb-0">No results found for ${filterText}</p>
+                            </div>
+                        `;
+                        mobileContainer.appendChild(noResultsCard);
+                    }
+                }
+            }
+            
+            function formatDateForComparison(dateStr) {
+                // Convert from "dd/mm/yyyy HH:MM:SS" to "yyyy-mm-dd" for comparison
+                if (!dateStr) return '';
+                const parts = dateStr.split(' ')[0].split('/');
+                if (parts.length !== 3) return '';
+                return `${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
+            
+            function formatDateDisplay(dateStr) {
+                // Convert from "yyyy-mm-dd" to "dd/mm/yyyy" for display
+                if (!dateStr) return '';
+                const parts = dateStr.split('-');
+                if (parts.length !== 3) return dateStr;
+                return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            }
+            
+            function resetFilter() {
+                filterInputs.forEach(input => {
+                    input.value = '';
+                });
+                dateFilterInputs.forEach(input => {
+                    input.value = '';
+                });
+                filterTable('', '');
+                const noResultsMsgs = document.querySelectorAll('.no-results-message');
+                noResultsMsgs.forEach(msg => msg.remove());
+            }
+            
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const parentContainer = button.closest('.search-container');
+                    const ofInput = parentContainer.querySelector('input#offilter');
+                    const dateInput = document.querySelector('input#datefilter');
+                    
+                    if (ofInput) {
+                        const ofFilterValue = ofInput.value.trim();
+                        const dateFilterValue = dateInput ? dateInput.value.trim() : '';
+                        
+                        filterInputs.forEach(otherInput => {
+                            otherInput.value = ofFilterValue;
+                        });
+                        dateFilterInputs.forEach(otherInput => {
+                            otherInput.value = dateFilterValue;
+                        });
+                        
+                        filterTable(ofFilterValue, dateFilterValue);
+                        
+                        const offcanvas = button.closest('.offcanvas');
+                        if (offcanvas) {
+                            const bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvas);
+                            if (bsOffcanvas) {
+                                bsOffcanvas.hide();
+                            }
+                        }
+                    }
+                });
+            });
+            
+            resetButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    resetFilter();
+                    const offcanvas = button.closest('.offcanvas');
+                    if (offcanvas) {
+                        const bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvas);
+                        if (bsOffcanvas) {
+                            bsOffcanvas.hide();
+                        }
+                    }
+                });
+            });
+            
+            filterInputs.forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const ofFilterValue = input.value.trim();
+                        const dateFilterValue = document.querySelector('input#datefilter').value.trim();
+                        
+                        filterInputs.forEach(otherInput => {
+                            otherInput.value = ofFilterValue;
+                        });
+                        
+                        filterTable(ofFilterValue, dateFilterValue);
+                        
+                        const offcanvas = input.closest('.offcanvas');
+                        if (offcanvas) {
+                            const bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvas);
+                            if (bsOffcanvas) {
+                                bsOffcanvas.hide();
+                            }
+                        }
+                    }
+                });
+            });
+            
+            dateFilterInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    const dateFilterValue = input.value.trim();
+                    const ofFilterValue = document.querySelector('input#offilter').value.trim();
+                    
+                    dateFilterInputs.forEach(otherInput => {
+                        otherInput.value = dateFilterValue;
+                    });
+                    
+                    filterTable(ofFilterValue, dateFilterValue);
+                });
+            });
+        });
+
     </script>
     <script>
         function showLoading() {

@@ -17,7 +17,7 @@
     box-shadow: 0px -11px 15px 15px rgb(109 109 109 / 16%);
 }
 body {
-    padding-top: 60px; /* match this value to your header’s height */  
+    padding-top: 60px; /* match this value to your header's height */  
   }
   .modal-content{
     margin-top: 5rem;
@@ -447,4 +447,11 @@ tr.new-of-section td:first-child {
     .mobile-cards-container {
         padding: 0.5rem;
     }
+}
+
+
+.of-total-match {
+    background-color: #d4edda !important;
+    color: #155724 !important;
+    font-weight: bold;
 }
