@@ -62,7 +62,6 @@ foreach ($records as $record) {
         
         $ofQuantities[$ofNumber] = $record['of_quantity'] ?? 0;
     }
-    
     $ofTotals[$ofNumber]['dv'] += $record['dv'];
     $ofTotals[$ofNumber]['g'] += $record['g'];
     $ofTotals[$ofNumber]['m'] += $record['m'];
@@ -358,7 +357,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['_method'])) {
         </div>
         <ul class="nav nav-tabs mt-3 mb-3" id="ofTabs" role="tablist">
           <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="dynamic-tab" data-bs-toggle="tab" data-bs-target="#dynamic" type="button" role="tab" aria-controls="dynamic" aria-selected="true">Dynamic</button>
+            <button class="nav-link active" id="dynamic-tab" data-bs-toggle="tab" data-bs-target="#dynamic" type="button" role="tab" aria-controls="dynamic" aria-selected="true">Home</button>
           </li>
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="static-tab" data-bs-toggle="tab" data-bs-target="#static" type="button" role="tab" aria-controls="static" aria-selected="false">Static</button>
@@ -483,322 +482,296 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['_method'])) {
             </div>
             
             <div class="tab-pane fade" id="static" role="tabpanel" aria-labelledby="static-tab">
-                <!-- Desktop version of static cards -->
                 <div class="d-none d-md-block">
-                    <div class="desktop-cards-container">
+                    <div class="accordion" id="staticAccordion">
                         <?php if (empty($records)): ?>
                             <div class="alert alert-info">No data found in database</div>
                         <?php else: ?>
                             <?php
                             $lastOF = null;
-                            foreach ($records as $index => $record): 
-                                $isNewOF = $lastOF !== $record['of_number'];
-                                $isLastOfCurrentOF = false;
-                                if ($lastOF !== null && $lastOF !== $record['of_number']) {
-                                    ?>
-                                    <div class="card mb-3 of-total-card bg-light">
-                                        <div class="card-header bg-primary text-white">
-                                            <h5 class="card-title mb-0">OF #<?= htmlspecialchars($lastOF) ?> Totals</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row mb-2">
-                                                <div class="col-12">
-                                                    <div class="total-item">
-                                                        <span class="label">General OF Qty:</span>
-                                                        <span class="value fw-bold"><?= htmlspecialchars($ofQuantities[$lastOF]) ?></span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="row g-2">
-                                                <div class="col-3">
-                                                    <div class="total-item">
-                                                        <span class="label">Devant:</span>
-                                                        <span class="value<?= $ofTotals[$lastOF]['dv'] == $ofQuantities[$lastOF] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
-                                                            <?= htmlspecialchars($ofTotals[$lastOF]['dv']) ?>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-3">
-                                                    <div class="total-item">
-                                                        <span class="label">Garniture:</span>
-                                                        <span class="value<?= $ofTotals[$lastOF]['g'] == $ofQuantities[$lastOF] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
-                                                            <?= htmlspecialchars($ofTotals[$lastOF]['g']) ?>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-3">
-                                                    <div class="total-item">
-                                                        <span class="label">Manche:</span>
-                                                        <span class="value<?= $ofTotals[$lastOF]['m'] == $ofQuantities[$lastOF] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
-                                                            <?= htmlspecialchars($ofTotals[$lastOF]['m']) ?>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-3">
-                                                    <div class="total-item">
-                                                        <span class="label">D.O.S:</span>
-                                                        <span class="value<?= $ofTotals[$lastOF]['dos'] == $ofQuantities[$lastOF] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
-                                                            <?= htmlspecialchars($ofTotals[$lastOF]['dos']) ?>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <?php
+                            $ofGroups = [];
+                            foreach ($records as $record) {
+                                $ofNumber = $record['of_number'];
+                                if (!isset($ofGroups[$ofNumber])) {
+                                    $ofGroups[$ofNumber] = [
+                                        'records' => [],
+                                        'type' => $record['of_type'],
+                                        'category' => $record['of_category'],
+                                        'quantity' => $record['of_quantity']
+                                    ];
                                 }
-                                $lastOF = $record['of_number'];
-                                if ($index === count($records) - 1 || 
-                                    (isset($records[$index + 1]) && $records[$index + 1]['of_number'] !== $record['of_number'])) {
-                                    $isLastOfCurrentOF = true;
-                                }
+                                $ofGroups[$ofNumber]['records'][] = $record;
+                            }
+                            foreach ($ofGroups as $ofNumber => $ofData): 
                             ?>
-                                <?php if ($isNewOF): ?>
-                                    <div class="card mb-4 of-section-card">
-                                        <div class="card-header bg-primary text-white">
-                                            <h5 class="mb-0">OF #<?= htmlspecialchars($record['of_number']) ?> (<?= htmlspecialchars($record['of_type']) ?> - <?= htmlspecialchars($record['of_category']) ?>)</h5>
-                                        </div>
-                                        <div class="card-body p-0">
-                                            <div class="row mx-0">
-                                <?php endif; ?>
-                                
-                                <div class="col-md-6 col-lg-4 p-2">
-                                    <div class="card h-100 border-light">
-                                        <div class="card-body">
-                                            <h6 class="card-title">Pack #<?= htmlspecialchars($record['pack_number']) ?> (Taille: <?= htmlspecialchars($record['tailles']) ?>)</h6>
-                                            <p class="card-text mb-1">
-                                                <small class="text-muted">Pack Order: </small>
-                                                <?= htmlspecialchars($record['pack_order_start']) ?> - <?= htmlspecialchars($record['pack_order_end']) ?>
-                                            </p>
-                                            <div class="row text-center mb-2 mt-3">
-                                                <div class="col-6">
-                                                    <div class="small text-muted">Devant</div>
-                                                    <div class="fw-bold text-primary"><?= htmlspecialchars($record['dv']) ?></div>
-                                                </div>
-                                                <div class="col-6">
-                                                    <div class="small text-muted">Garniture</div>
-                                                    <div class="fw-bold text-primary"><?= htmlspecialchars($record['g']) ?></div>
-                                                </div>
-                                                <div class="col-6 mt-2">
-                                                    <div class="small text-muted">Manche</div>
-                                                    <div class="fw-bold text-primary"><?= htmlspecialchars($record['m']) ?></div>
-                                                </div>
-                                                <div class="col-6 mt-2">
-                                                    <div class="small text-muted">D.O.S</div>
-                                                    <div class="fw-bold text-primary"><?= htmlspecialchars($record['dos']) ?></div>
+                                <div class="accordion-item mb-3">
+                                    <h2 class="accordion-header" id="heading<?= $ofNumber ?>">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                            data-bs-target="#collapse<?= $ofNumber ?>" aria-expanded="false" 
+                                            aria-controls="collapse<?= $ofNumber ?>">
+                                            <div class="d-flex justify-content-between align-items-center w-100">
+                                                <span class="fw-bold">OF #<?= htmlspecialchars($ofNumber) ?> 
+                                                    (<?= htmlspecialchars($ofData['type']) ?> - <?= htmlspecialchars($ofData['category']) ?>)
+                                                </span>
+                                                <span class="badge bg-primary ms-2">Qty: <?= htmlspecialchars($ofData['quantity']) ?></span>
+                                            </div>
+                                        </button>
+                                    </h2>
+                                    <div id="collapse<?= $ofNumber ?>" class="accordion-collapse collapse" 
+                                        aria-labelledby="heading<?= $ofNumber ?>" data-bs-parent="#staticAccordion">
+                                        <div class="accordion-body">
+                                            <div class="row mb-3">
+                                                <div class="col-12">
+                                                    <div class="card bg-light">
+                                                        <div class="card-body">
+                                                            <h6 class="card-title">OF Totals</h6>
+                                                            <div class="row g-2">
+                                                                <div class="col-3">
+                                                                    <div class="total-item">
+                                                                        <span class="label">Devant:</span>
+                                                                        <span class="value<?= $ofTotals[$ofNumber]['dv'] == $ofQuantities[$ofNumber] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
+                                                                            <?= htmlspecialchars($ofTotals[$ofNumber]['dv']) ?>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-3">
+                                                                    <div class="total-item">
+                                                                        <span class="label">Garniture:</span>
+                                                                        <span class="value<?= $ofTotals[$ofNumber]['g'] == $ofQuantities[$ofNumber] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
+                                                                            <?= htmlspecialchars($ofTotals[$ofNumber]['g']) ?>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-3">
+                                                                    <div class="total-item">
+                                                                        <span class="label">Manche:</span>
+                                                                        <span class="value<?= $ofTotals[$ofNumber]['m'] == $ofQuantities[$ofNumber] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
+                                                                            <?= htmlspecialchars($ofTotals[$ofNumber]['m']) ?>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-3">
+                                                                    <div class="total-item">
+                                                                        <span class="label">D.O.S:</span>
+                                                                        <span class="value<?= $ofTotals[$ofNumber]['dos'] == $ofQuantities[$ofNumber] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
+                                                                            <?= htmlspecialchars($ofTotals[$ofNumber]['dos']) ?>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div class="text-muted small">Last edit: <?= date('d/m/Y H:i:s', strtotime($record['last_edit'])) ?></div>
-                                            <div class="d-flex justify-content-end gap-2 mt-2">
-                                                <a href="#" class="btn btn-sm btn-outline-primary edit-btn" 
-                                                    data-id="<?= $record['id'] ?>"
-                                                    data-of_number="<?= htmlspecialchars($record['of_number']) ?>"
-                                                    data-of_quantity="<?= htmlspecialchars($record['of_quantity']) ?>"
-                                                    data-of_type="<?= htmlspecialchars($record['of_type']) ?>"
-                                                    data-of_category="<?= htmlspecialchars($record['of_category']) ?>"
-                                                    data-tailles="<?= htmlspecialchars($record['tailles']) ?>"
-                                                    data-pack_number="<?= htmlspecialchars($record['pack_number']) ?>"
-                                                    data-pack_order_start="<?= htmlspecialchars($record['pack_order_start']) ?>"
-                                                    data-pack_order_end="<?= htmlspecialchars($record['pack_order_end']) ?>"
-                                                    data-dv="<?= htmlspecialchars($record['dv']) ?>"
-                                                    data-g="<?= htmlspecialchars($record['g']) ?>"
-                                                    data-m="<?= htmlspecialchars($record['m']) ?>"
-                                                    data-dos="<?= htmlspecialchars($record['dos']) ?>"
-                                                ><i class="bi bi-pencil-square"></i></a>
-                                                <a href="#" class="btn btn-sm btn-outline-danger delete-btn" data-id="<?= $record['id'] ?>"><i class="bi bi-trash"></i></a>
+                                            <div class="row">
+                                                <?php foreach ($ofData['records'] as $record): ?>
+                                                <div class="col-md-6 col-lg-4 mb-3">
+                                                    <div class="card h-100">
+                                                        <div class="card-body">
+                                                            <h6 class="card-title">Pack #<?= htmlspecialchars($record['pack_number']) ?> 
+                                                                (Taille: <?= htmlspecialchars($record['tailles']) ?>)
+                                                            </h6>
+                                                            <p class="card-text mb-1">
+                                                                <small class="text-muted">Pack Order: </small>
+                                                                <?= htmlspecialchars($record['pack_order_start']) ?> - <?= htmlspecialchars($record['pack_order_end']) ?>
+                                                            </p>
+                                                            <div class="row text-center mb-2 mt-3">
+                                                                <div class="col-6">
+                                                                    <div class="small text-muted">Devant</div>
+                                                                    <div class="fw-bold text-primary"><?= htmlspecialchars($record['dv']) ?></div>
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <div class="small text-muted">Garniture</div>
+                                                                    <div class="fw-bold text-primary"><?= htmlspecialchars($record['g']) ?></div>
+                                                                </div>
+                                                                <div class="col-6 mt-2">
+                                                                    <div class="small text-muted">Manche</div>
+                                                                    <div class="fw-bold text-primary"><?= htmlspecialchars($record['m']) ?></div>
+                                                                </div>
+                                                                <div class="col-6 mt-2">
+                                                                    <div class="small text-muted">D.O.S</div>
+                                                                    <div class="fw-bold text-primary"><?= htmlspecialchars($record['dos']) ?></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="text-muted small">Last edit: <?= date('d/m/Y H:i:s', strtotime($record['last_edit'])) ?></div>
+                                                            <div class="d-flex justify-content-end gap-2 mt-2">
+                                                                <a href="#" class="btn btn-sm btn-outline-primary edit-btn" 
+                                                                    data-id="<?= $record['id'] ?>"
+                                                                    data-of_number="<?= htmlspecialchars($record['of_number']) ?>"
+                                                                    data-of_quantity="<?= htmlspecialchars($record['of_quantity']) ?>"
+                                                                    data-of_type="<?= htmlspecialchars($record['of_type']) ?>"
+                                                                    data-of_category="<?= htmlspecialchars($record['of_category']) ?>"
+                                                                    data-tailles="<?= htmlspecialchars($record['tailles']) ?>"
+                                                                    data-pack_number="<?= htmlspecialchars($record['pack_number']) ?>"
+                                                                    data-pack_order_start="<?= htmlspecialchars($record['pack_order_start']) ?>"
+                                                                    data-pack_order_end="<?= htmlspecialchars($record['pack_order_end']) ?>"
+                                                                    data-dv="<?= htmlspecialchars($record['dv']) ?>"
+                                                                    data-g="<?= htmlspecialchars($record['g']) ?>"
+                                                                    data-m="<?= htmlspecialchars($record['m']) ?>"
+                                                                    data-dos="<?= htmlspecialchars($record['dos']) ?>"
+                                                                ><i class="bi bi-pencil-square"></i></a>
+                                                                <a href="#" class="btn btn-sm btn-outline-danger delete-btn" data-id="<?= $record['id'] ?>">
+                                                                    <i class="bi bi-trash"></i>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <?php endforeach; ?>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <?php if ($isLastOfCurrentOF): ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                <?php endif; ?>
-                                
-                                <?php 
-                                if ($isLastOfCurrentOF && $index === count($records) - 1): ?>
-                                    <div class="card mb-3 of-total-card bg-light">
-                                        <div class="card-header bg-primary text-white">
-                                            <h5 class="card-title mb-0">OF #<?= htmlspecialchars($record['of_number']) ?> Totals</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row mb-2">
-                                                <div class="col-12">
-                                                    <div class="total-item">
-                                                        <span class="label">General OF Qty:</span>
-                                                        <span class="value fw-bold"><?= htmlspecialchars($ofQuantities[$record['of_number']]) ?></span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="row g-2">
-                                                <div class="col-3">
-                                                    <div class="total-item">
-                                                        <span class="label">Devant:</span>
-                                                        <span class="value<?= $ofTotals[$record['of_number']]['dv'] == $ofQuantities[$record['of_number']] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
-                                                            <?= htmlspecialchars($ofTotals[$record['of_number']]['dv']) ?>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-3">
-                                                    <div class="total-item">
-                                                        <span class="label">Garniture:</span>
-                                                        <span class="value<?= $ofTotals[$record['of_number']]['g'] == $ofQuantities[$record['of_number']] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
-                                                            <?= htmlspecialchars($ofTotals[$record['of_number']]['g']) ?>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-3">
-                                                    <div class="total-item">
-                                                        <span class="label">Manche:</span>
-                                                        <span class="value<?= $ofTotals[$record['of_number']]['m'] == $ofQuantities[$record['of_number']] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
-                                                            <?= htmlspecialchars($ofTotals[$record['of_number']]['m']) ?>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-3">
-                                                    <div class="total-item">
-                                                        <span class="label">D.O.S:</span>
-                                                        <span class="value<?= $ofTotals[$record['of_number']]['dos'] == $ofQuantities[$record['of_number']] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
-                                                            <?= htmlspecialchars($ofTotals[$record['of_number']]['dos']) ?>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                <?php endif; ?>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </div>
                 </div>
-                
-                <!-- Original mobile version of static cards -->
                 <div class="d-md-none" id="static-mobile">
-                    <div class="mobile-cards-container">
-                    <?php if (empty($records)): ?>
-                        <div class="alert alert-info">No data found in database</div>
-                    <?php else: ?>
-                        <?php
-                        $lastOF = null;
-                        foreach ($records as $index => $record): 
-                            $isNewOF = $lastOF !== $record['of_number'];
-                            $isLastOfCurrentOF = false;
-                            if ($lastOF !== null && $lastOF !== $record['of_number']) {
-                                ?>
-                                <div class="card mb-3 of-total-card bg-light">
-                                    <div class="card-body">
-                                        <h6 class="card-title">OF #<?= htmlspecialchars($lastOF) ?> Totals</h6>
-                                        <div class="row mb-2">
-                                            <div class="col-12">
-                                                <div class="total-item">
-                                                    <span class="label">General OF Qty:</span>
-                                                    <span class="value fw-bold"><?= htmlspecialchars($ofQuantities[$lastOF]) ?></span>
+                    <div class="accordion" id="staticAccordionMobile">
+                        <?php if (empty($records)): ?>
+                            <div class="alert alert-info">No data found in database</div>
+                        <?php else: ?>
+                            <?php
+                            foreach ($ofGroups as $ofNumber => $ofData): 
+                            ?>
+                                <div class="accordion-item mb-3">
+                                    <h2 class="accordion-header" id="headingMobile<?= $ofNumber ?>">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                            data-bs-target="#collapseMobile<?= $ofNumber ?>" aria-expanded="false" 
+                                            aria-controls="collapseMobile<?= $ofNumber ?>">
+                                            <div class="d-flex justify-content-between align-items-center w-100">
+                                                <span class="fw-bold">OF #<?= htmlspecialchars($ofNumber) ?></span>
+                                                <span class="badge bg-primary ms-2">Qty: <?= htmlspecialchars($ofData['quantity']) ?></span>
+                                            </div>
+                                        </button>
+                                    </h2>
+                                    <div id="collapseMobile<?= $ofNumber ?>" class="accordion-collapse collapse" 
+                                        aria-labelledby="headingMobile<?= $ofNumber ?>" data-bs-parent="#staticAccordionMobile">
+                                        <div class="accordion-body p-2">
+                                            <div class="card mb-3 bg-light">
+                                                <div class="card-body p-3">
+                                                    <div class="row mb-2">
+                                                        <div class="col-6">
+                                                            <div class="small text-muted">OF Type</div>
+                                                            <div class="fw-semibold"><?= htmlspecialchars($ofData['type']) ?></div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <div class="small text-muted">OF Category</div>
+                                                            <div class="fw-semibold"><?= htmlspecialchars($ofData['category']) ?></div>
+                                                        </div>
+                                                    </div>
+                                                    <hr class="my-2">
+                                                    <h6 class="card-title">Totals</h6>
+                                                    <div class="row g-2">
+                                                        <div class="col-6">
+                                                            <div class="total-item">
+                                                                <span class="label">Devant:</span>
+                                                                <span class="value<?= $ofTotals[$ofNumber]['dv'] == $ofQuantities[$ofNumber] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
+                                                                    <?= htmlspecialchars($ofTotals[$ofNumber]['dv']) ?>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <div class="total-item">
+                                                                <span class="label">Garniture:</span>
+                                                                <span class="value<?= $ofTotals[$ofNumber]['g'] == $ofQuantities[$ofNumber] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
+                                                                    <?= htmlspecialchars($ofTotals[$ofNumber]['g']) ?>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <div class="total-item">
+                                                                <span class="label">Manche:</span>
+                                                                <span class="value<?= $ofTotals[$ofNumber]['m'] == $ofQuantities[$ofNumber] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
+                                                                    <?= htmlspecialchars($ofTotals[$ofNumber]['m']) ?>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <div class="total-item">
+                                                                <span class="label">D.O.S:</span>
+                                                                <span class="value<?= $ofTotals[$ofNumber]['dos'] == $ofQuantities[$ofNumber] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
+                                                                    <?= htmlspecialchars($ofTotals[$ofNumber]['dos']) ?>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="row g-2">
-                                            <div class="col-6 col-sm-3">
-                                                <div class="total-item">
-                                                    <span class="label">Devant:</span>
-                                                    <span class="value<?= $ofTotals[$lastOF]['dv'] == $ofQuantities[$lastOF] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
-                                                        <?= htmlspecialchars($ofTotals[$lastOF]['dv']) ?>
-                                                    </span>
+                                            <div class="accordion" id="packsAccordion<?= $ofNumber ?>">
+                                                <?php foreach ($ofData['records'] as $record): ?>
+                                                <div class="accordion-item mb-2">
+                                                    <h2 class="accordion-header" id="packHeading<?= $record['id'] ?>">
+                                                        <button class="accordion-button collapsed bg-light" type="button" data-bs-toggle="collapse" 
+                                                            data-bs-target="#packCollapse<?= $record['id'] ?>" aria-expanded="false" 
+                                                            aria-controls="packCollapse<?= $record['id'] ?>">
+                                                            Pack #<?= htmlspecialchars($record['pack_number']) ?> 
+                                                            (Taille: <?= htmlspecialchars($record['tailles']) ?>)
+                                                        </button>
+                                                    </h2>
+                                                    <div id="packCollapse<?= $record['id'] ?>" class="accordion-collapse collapse" 
+                                                        aria-labelledby="packHeading<?= $record['id'] ?>" data-bs-parent="#packsAccordion<?= $ofNumber ?>">
+                                                        <div class="accordion-body">
+                                                            <div class="row mb-2">
+                                                                <div class="col-12">
+                                                                    <div class="small text-muted">Pack Order</div>
+                                                                    <div><?= htmlspecialchars($record['pack_order_start']) ?> - <?= htmlspecialchars($record['pack_order_end']) ?></div>
+                                                                </div>
+                                                            </div>
+                                                            <hr class="my-2">
+                                                            <div class="row text-center mb-2">
+                                                                <div class="col-6">
+                                                                    <div class="small text-muted">Devant</div>
+                                                                    <div class="fw-bold text-primary"><?= htmlspecialchars($record['dv']) ?></div>
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <div class="small text-muted">Garniture</div>
+                                                                    <div class="fw-bold text-primary"><?= htmlspecialchars($record['g']) ?></div>
+                                                                </div>
+                                                                <div class="col-6 mt-2">
+                                                                    <div class="small text-muted">Manche</div>
+                                                                    <div class="fw-bold text-primary"><?= htmlspecialchars($record['m']) ?></div>
+                                                                </div>
+                                                                <div class="col-6 mt-2">
+                                                                    <div class="small text-muted">D.O.S</div>
+                                                                    <div class="fw-bold text-primary"><?= htmlspecialchars($record['dos']) ?></div>
+                                                                </div>
+                                                            </div>
+                                                            <hr class="my-2">
+                                                            <div class="text-muted small">Last edit: <?= date('d/m/Y H:i:s', strtotime($record['last_edit'])) ?></div>
+                                                            <div class="d-flex justify-content-end gap-2 mt-2">
+                                                                <a href="#" class="btn btn-sm btn-outline-primary edit-btn" 
+                                                                    data-id="<?= $record['id'] ?>"
+                                                                    data-of_number="<?= htmlspecialchars($record['of_number']) ?>"
+                                                                    data-of_quantity="<?= htmlspecialchars($record['of_quantity']) ?>"
+                                                                    data-of_type="<?= htmlspecialchars($record['of_type']) ?>"
+                                                                    data-of_category="<?= htmlspecialchars($record['of_category']) ?>"
+                                                                    data-tailles="<?= htmlspecialchars($record['tailles']) ?>"
+                                                                    data-pack_number="<?= htmlspecialchars($record['pack_number']) ?>"
+                                                                    data-pack_order_start="<?= htmlspecialchars($record['pack_order_start']) ?>"
+                                                                    data-pack_order_end="<?= htmlspecialchars($record['pack_order_end']) ?>"
+                                                                    data-dv="<?= htmlspecialchars($record['dv']) ?>"
+                                                                    data-g="<?= htmlspecialchars($record['g']) ?>"
+                                                                    data-m="<?= htmlspecialchars($record['m']) ?>"
+                                                                    data-dos="<?= htmlspecialchars($record['dos']) ?>"
+                                                                ><i class="bi bi-pencil-square"></i> Edit</a>
+                                                                <a href="#" class="btn btn-sm btn-outline-danger delete-btn" data-id="<?= $record['id'] ?>">
+                                                                    <i class="bi bi-trash"></i> Delete
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="col-6 col-sm-3">
-                                                <div class="total-item">
-                                                    <span class="label">Garniture:</span>
-                                                    <span class="value<?= $ofTotals[$lastOF]['g'] == $ofQuantities[$lastOF] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
-                                                        <?= htmlspecialchars($ofTotals[$lastOF]['g']) ?>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="col-6 col-sm-3">
-                                                <div class="total-item">
-                                                    <span class="label">Manche:</span>
-                                                    <span class="value<?= $ofTotals[$lastOF]['m'] == $ofQuantities[$lastOF] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
-                                                        <?= htmlspecialchars($ofTotals[$lastOF]['m']) ?>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="col-6 col-sm-3">
-                                                <div class="total-item">
-                                                    <span class="label">D.O.S:</span>
-                                                    <span class="value<?= $ofTotals[$lastOF]['dos'] == $ofQuantities[$lastOF] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
-                                                        <?= htmlspecialchars($ofTotals[$lastOF]['dos']) ?>
-                                                    </span>
-                                                </div>
+                                                <?php endforeach; ?>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <?php
-                            }
-                            $lastOF = $record['of_number'];
-                            if ($index === count($records) - 1 || 
-                                (isset($records[$index + 1]) && $records[$index + 1]['of_number'] !== $record['of_number'])) {
-                                $isLastOfCurrentOF = true;
-                            }
-                        ?>
-                        <?php 
-                        if ($isLastOfCurrentOF && $index === count($records) - 1): ?>
-                            <div class="card mb-3 of-total-card bg-light">
-                                <div class="card-body">
-                                    <h6 class="card-title">OF #<?= htmlspecialchars($record['of_number']) ?> Totals</h6>
-                                    <div class="row mb-2">
-                                        <div class="col-12">
-                                            <div class="total-item">
-                                                <span class="label">General OF Qty:</span>
-                                                <span class="value fw-bold"><?= htmlspecialchars($ofQuantities[$record['of_number']]) ?></span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row g-2">
-                                        <div class="col-6 col-sm-3">
-                                            <div class="total-item">
-                                                <span class="label">Devant:</span>
-                                                <span class="value<?= $ofTotals[$record['of_number']]['dv'] == $ofQuantities[$record['of_number']] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
-                                                    <?= htmlspecialchars($ofTotals[$record['of_number']]['dv']) ?>
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div class="col-6 col-sm-3">
-                                            <div class="total-item">
-                                                <span class="label">Garniture:</span>
-                                                <span class="value<?= $ofTotals[$record['of_number']]['g'] == $ofQuantities[$record['of_number']] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
-                                                    <?= htmlspecialchars($ofTotals[$record['of_number']]['g']) ?>
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div class="col-6 col-sm-3">
-                                            <div class="total-item">
-                                                <span class="label">Manche:</span>
-                                                <span class="value<?= $ofTotals[$record['of_number']]['m'] == $ofQuantities[$record['of_number']] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
-                                                    <?= htmlspecialchars($ofTotals[$record['of_number']]['m']) ?>
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div class="col-6 col-sm-3">
-                                            <div class="total-item">
-                                                <span class="label">D.O.S:</span>
-                                                <span class="value<?= $ofTotals[$record['of_number']]['dos'] == $ofQuantities[$record['of_number']] ? ' bg-success text-white border border-dark rounded px-2' : '' ?>">
-                                                    <?= htmlspecialchars($ofTotals[$record['of_number']]['dos']) ?>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <?php endforeach; ?>
                         <?php endif; ?>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
                     </div>
                 </div>
             </div>
-
-
         </div>
         <div class="d-md-none" id="dynamic-mobile">
             <div class="mobile-cards-container">

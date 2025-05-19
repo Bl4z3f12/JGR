@@ -57,10 +57,11 @@
         
         <!-- Footer note positioned at the bottom -->
         <div class="mt-auto p-3 text-center small text-white">
-            <i class="fa-solid fa-circle-info"></i>
-            This program is under development and improvement, the final version will be released soon
+            <span style="color: #1bff00;">
+                We everyone is responsible for this system's success    
+            </span>
             <br><br>
-            Made with <i title="love", class="fa-solid fa-heart" style="cursor: pointer;"></i> by HAMZA SAADI
+            Made with <i title="love", class="fa-solid fa-heart" style="cursor: pointer;"></i>
         </div>
     </div>
 </div>
@@ -129,12 +130,15 @@
                 </a>
             </div>
             
+            <!-- Footer note positioned at the bottom -->
             <div class="mt-auto p-3 text-center small text-white">
-                <i class="fa-solid fa-circle-info"></i>
-                This program is under development and improvement, the final version will be released soon
+                <span style="color: #1bff00;">
+                    We everyone is responsible for this system's success    
+                </span>
                 <br><br>
-                Made with <i class="fa-solid fa-heart" title="love" ></i> by HAMZA SAADI and BL4Z3
+                Made with <i title="love", class="fa-solid fa-heart" style="cursor: pointer;"></i>
             </div>
+            
         </div>
     </div>
 </div>

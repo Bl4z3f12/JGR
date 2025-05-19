@@ -375,6 +375,8 @@ document.addEventListener('DOMContentLoaded', function() {
         ofFilterValue = ofFilterValue.toLowerCase().trim();
         const tableRows = document.querySelectorAll('.data-table tbody tr');
         let ofVisible = {};
+
+        // Filter for dynamic view
         tableRows.forEach(row => {
             if (!row.classList.contains('of-total-row')) {
                 const ofCell = row.cells[0];
@@ -391,6 +393,35 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
+
+        // Filter for static view
+        const staticAccordionItems = document.querySelectorAll('#staticAccordion .accordion-item, #staticAccordionMobile .accordion-item');
+        staticAccordionItems.forEach(item => {
+            const ofNumber = item.querySelector('.accordion-button .fw-bold').textContent.trim().replace('OF #', '').toLowerCase();
+            const dateElements = item.querySelectorAll('.text-muted.small');
+            let passesDateFilter = true;
+
+            if (dateFilterValue !== '') {
+                passesDateFilter = false;
+                dateElements.forEach(dateEl => {
+                    const rowDate = dateEl.textContent.trim();
+                    if (formatDateForComparison(rowDate) === dateFilterValue) {
+                        passesDateFilter = true;
+                    }
+                });
+            }
+
+            const passesOfFilter = ofFilterValue === '' || ofNumber.includes(ofFilterValue);
+            
+            if (passesOfFilter && passesDateFilter) {
+                ofVisible[ofNumber] = true;
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        // Update dynamic view rows
         tableRows.forEach(row => {
             if (row.classList.contains('of-total-row')) {
                 const totalText = row.cells[0].textContent.trim();
@@ -409,34 +440,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
+
+        // Update mobile cards
         const cards = document.querySelectorAll('.mobile-cards-container .card');
         cards.forEach(card => {
-            if (card.classList.contains('of-total-card')) {
-                const titleEl = card.querySelector('.card-title');
-                if (titleEl) {
-                    const totalText = titleEl.textContent.trim();
-                    const ofMatch = totalText.match(/OF #(\d+)/);
-                    if (ofMatch) {
-                        const ofNumber = ofMatch[1].toLowerCase();
-                        card.style.display = ofVisible[ofNumber] ? '' : 'none';
-                    } else {
-                        card.style.display = 'none';
-                    }
-                }
-            } else {
-                const titleEl = card.querySelector('.fw-bold.fs-5');
-                const dateEl = card.querySelector('.card-body div:last-child div:last-child');
+            const titleEl = card.querySelector('.fw-bold.fs-5');
+            const dateEl = card.querySelector('.card-body div:last-child div:last-child');
+            
+            if (titleEl && dateEl) {
+                const ofNumber = titleEl.textContent.trim().replace('OF #', '').toLowerCase();
+                const cardDate = dateEl.textContent.trim();
+                const passesOfFilter = ofFilterValue === '' || ofNumber.includes(ofFilterValue);
+                const passesDateFilter = dateFilterValue === '' || formatDateForComparison(cardDate) === dateFilterValue;
                 
-                if (titleEl && dateEl) {
-                    const ofNumber = titleEl.textContent.trim().replace('OF #', '').toLowerCase();
-                    const cardDate = dateEl.textContent.trim();
-                    const passesOfFilter = ofFilterValue === '' || ofNumber.includes(ofFilterValue);
-                    const passesDateFilter = dateFilterValue === '' || formatDateForComparison(cardDate) === dateFilterValue;
-                    
-                    card.style.display = (passesOfFilter && passesDateFilter) ? '' : 'none';
-                }
+                card.style.display = (passesOfFilter && passesDateFilter) ? '' : 'none';
             }
         });
+
+        // Handle no results message
         const noResultsMsg = document.querySelector('.no-results-message');
         if (noResultsMsg) {
             noResultsMsg.remove();
@@ -448,6 +469,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 anyVisible = true;
             }
         });
+
+        staticAccordionItems.forEach(item => {
+            if (item.style.display !== 'none') {
+                anyVisible = true;
+            }
+        });
+
         if (!anyVisible && (ofFilterValue !== '' || dateFilterValue !== '')) {
             let filterText = '';
             if (ofFilterValue !== '' && dateFilterValue !== '') {
@@ -457,6 +485,8 @@ document.addEventListener('DOMContentLoaded', function() {
             } else if (dateFilterValue !== '') {
                 filterText = `Date: "${formatDateDisplay(dateFilterValue)}"`;
             }
+
+            // Add no results message to dynamic view
             const table = document.querySelector('.data-table tbody');
             if (table) {
                 const newRow = document.createElement('tr');
@@ -464,6 +494,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 newRow.innerHTML = `<td colspan="13" class="text-center">No results found for ${filterText}</td>`;
                 table.appendChild(newRow);
             }
+
+            // Add no results message to static view
+            const staticAccordion = document.querySelector('#staticAccordion');
+            if (staticAccordion) {
+                const noResultsDiv = document.createElement('div');
+                noResultsDiv.className = 'alert alert-info no-results-message';
+                noResultsDiv.textContent = `No results found for ${filterText}`;
+                staticAccordion.appendChild(noResultsDiv);
+            }
+
+            // Add no results message to mobile view
             const mobileContainer = document.querySelector('.mobile-cards-container');
             if (mobileContainer) {
                 const noResultsCard = document.createElement('div');
