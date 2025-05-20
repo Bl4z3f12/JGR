@@ -165,7 +165,7 @@ function getTotalBarcodes($view, $filter_of = '', $filter_size = '', $filter_cat
 
 function getViewTitle($view) {
     return match ($view) {
-        'dashboard' => 'Barcodes Overview',
+        'dashboard' => 'Home Page',
         'today' => 'Scanned Today',
         'manufactured' => 'Manufactured Barcodes',
         'history' => 'Barcode History',

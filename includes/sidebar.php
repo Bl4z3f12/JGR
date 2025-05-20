@@ -8,7 +8,7 @@
         </div>
         <div class="nav flex-column mt-1">       
             <a href="index.php" class="sidebar-item text-white <?php echo $current_view === 'dashboard' ? 'active' : ''; ?>" tabindex="0">
-                <div class="sidebar-item-icon"><i class="fa-solid fa-qrcode"></i></div>
+                <div class="sidebar-item-icon"><i class="fa-solid fa-house-chimney"></i></div>
                 Dashboard
             </a>
             <a href="RTCpublic.php" class="sidebar-item text-white <?php echo $current_view === 'RTCpublic.php' ? 'active' : ''; ?>" tabindex="0">
@@ -24,8 +24,8 @@
                 Production 
             </a>
              <a href="lostmov.php" class="sidebar-item text-white <?php echo $current_view === 'lostmov.php' ? 'active' : ''; ?>">
-                <div class="sidebar-item-icon"><i class="fa-solid fa-circle-exclamation"></i></div>
-                lost_barcodes
+                <div class="sidebar-item-icon"><i class="fa-solid fa-question"></i></div>
+                Lost Barcodes
             </a>
             <a href="solped_search.php" class="sidebar-item text-white <?php echo $current_view == 'solped_search.php' ? 'active' : ''; ?>">
                 <div class="sidebar-item-icon"><i class="fas fa-id-card"></i></div>
@@ -79,7 +79,7 @@
         <div class="nav flex-column h-100 d-flex flex-column">
             <div>
                 <a href="index.php" class="sidebar-item text-white <?php echo $current_view === 'dashboard' ? 'active' : ''; ?>" tabindex="0">
-                    <div class="sidebar-item-icon"><i class="fa-solid fa-qrcode"></i></div>
+                    <div class="sidebar-item-icon"><i class="fa-solid fa-house-chimney"></i></div>
                     Dashboard
                 </a>
                 <a href="RTCpublic.php" class="sidebar-item text-white <?php echo $current_view === 'RTCpublic.php' ? 'active' : ''; ?>" tabindex="0">
@@ -95,8 +95,8 @@
                     Production
                 </a>
                 <a href="lostmov.php" class="sidebar-item text-white <?php echo $current_view === 'lostmov.php' ? 'active' : ''; ?>">
-                    <div class="sidebar-item-icon"><i class="fa-solid fa-circle-exclamation"></i></div>
-                    lost_barcodes
+                    <div class="sidebar-item-icon"><i class="fa-solid fa-question"></i></div>
+                    Lost Barcodes
                 </a>
                 <a href="solped_search.php" class="sidebar-item text-white <?php echo $current_view == 'solped_search.php' ? 'active' : ''; ?>">
                     <div class="sidebar-item-icon"><i class="fas fa-id-card"></i></div>

@@ -1,4 +1,18 @@
 <?php
+$current_view = 'lostmovset.php';
+require_once 'auth_functions.php';
+requireLogin('login.php');
+
+$allowed_ips = ['127.0.0.1', '192.168.1.130', '::1', '192.168.0.120' ,'NEW_IP_HERE'];
+$client_ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
+$client_ip = trim(explode(',', $client_ip)[0]);
+$is_localhost = in_array($client_ip, ['127.0.0.1', '::1']) || 
+               stripos($_SERVER['HTTP_HOST'], 'localhost') !== false;
+
+if (!$is_localhost && !in_array($client_ip, $allowed_ips)) {
+    require_once 'die.php';
+    die();
+}
 require_once 'lostmovset.php';
 ?>
 <!DOCTYPE html>
@@ -18,45 +32,181 @@ require_once 'lostmovset.php';
 
 <div class="main-content">
     <?php include 'includes/header.php'; ?>
-    
-    <div class="container-fluid mt-3">
-    <h1><i class="fas fa-search"></i> Lost Barcodes Tracking</h1>
-    <p class="text-muted">Track the movement of barcodes with "X" in their names</p>
-    
-    <?php if(isset($connection_error)): ?>
-    <div>
-        <strong>Error:</strong> <?php echo htmlspecialchars($connection_error); ?>
-    </div>
-    <?php else: ?>
-    
-    <!-- Filters - Changed to specific date -->
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            <h5 class="m-0"><i class="fas fa-filter"></i> Filter by Specific Date</h5>
+        
+    <div class="content">
+            <div class="container-fluid">
+                <h4 class="mb-4" style="font-size: 18px;">Lost Barcodes</h4>
+                
+                <?php
+                    // Check if any filter has been applied (except the default date)
+                    $is_filtered = !empty($_GET['of_number']) || 
+                                !empty($_GET['size']) || 
+                                !empty($_GET['category']) || 
+                                !empty($_GET['piece']) || 
+                                !empty($_GET['order']) || 
+                                !empty($_GET['used_by']) || 
+                                (isset($_GET['specific_date']) && $_GET['specific_date'] !== date('Y-m-d'));
+                    
+                    // If filters are applied, show the count
+                    if ($is_filtered): 
+                    ?>
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-filter me-2"></i> 
+                        <strong>Filtered Results: </strong><?php echo $total_records; ?> record<?php echo $total_records !== 1 ? 's' : ''; ?> found
+                        <?php if ($total_records > $items_per_page): ?>
+                            <span class="ms-2">(showing <?php echo min($items_per_page, $total_records); ?> per page)</span>
+                        <?php endif; ?>
+                        <a href="lostmov.php" class="btn btn-sm btn-outline-dark float-end">
+                            <i class="fa-solid fa-broom"></i> Clear Filters
+                        </a>
+                    </div>
+                <?php endif; ?>
+
+        <?php if(isset($connection_error)): ?>
+        <div>
+            <strong>Error:</strong> <?php echo htmlspecialchars($connection_error); ?>
         </div>
-        <div class="card-body">
-            <form method="get" class="row g-3">
-                <div class="col-md-3">
-                    <label for="specific_date" class="form-label">Specific Date</label>
-                    <input type="date" class="form-control" id="specific_date" name="specific_date" value="<?php echo $filter_specific_date; ?>">
-                </div>
-                <div class="col-md-12">
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
-                    <a href="lostmov.php" class="btn btn-secondary"><i class="fas fa-redo"></i> Reset</a>
-                </div>
-            </form>
+        <?php else: ?>
+        <!-- Enhanced Filters -->
+        <div class="mb-4">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    
+                    <div class="col">
+                        <!-- OF Number Filter -->
+                        <label for="of_number" class="form-label">
+                            <i class="fas fa-hashtag"></i> OF Number
+                        </label>
+                        <input type="text" class="form-control" id="of_number" name="of_number" placeholder="OF_ #"
+                            value="<?php echo htmlspecialchars($_GET['of_number'] ?? ''); ?>">
+                    </div>
+
+                    <div class="col">
+                        <!-- OF Number Filter -->
+                        <label for="size" class="form-label">
+                            <i class="fas fa-ruler"></i> Size
+                        </label>
+                        <input type="text" class="form-control" id="size" name="size" placeholder="Size"
+                            value="<?php echo htmlspecialchars($_GET['size'] ?? ''); ?>">
+                    </div>
+                    
+                    <div class="col">
+                        <!-- Category Filter -->
+                        <label for="category" class="form-label">
+                            <i class="fas fa-tag"></i> Category
+                        </label>
+                        <select class="form-select" id="category" name="category">
+                            <option value="">All Categories</option>
+                            <?php 
+                            // Get distinct categories
+                            $categories = [];
+                            foreach ($lost_barcodes as $b) {
+                                if (!empty($b['category']) && !in_array($b['category'], $categories)) {
+                                    $categories[] = $b['category'];
+                                }
+                            }
+                            sort($categories);
+                            
+                            foreach ($categories as $category): 
+                                $selected = (isset($_GET['category']) && $_GET['category'] === $category) ? 'selected' : '';
+                            ?>
+                                <option value="<?php echo htmlspecialchars($category); ?>" <?php echo $selected; ?>>
+                                    <?php echo htmlspecialchars($category); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    
+                    <div class="col">
+                        <!-- Piece Filter -->
+                        <label for="piece" class="form-label">
+                            <i class="fas fa-puzzle-piece"></i> Piece
+                        </label>
+                        <select class="form-select" id="piece" name="piece">
+                            <option value="">All Pieces</option>
+                            <?php 
+                            // Get distinct pieces
+                            $pieces = [];
+                            foreach ($lost_barcodes as $b) {
+                                if (!empty($b['piece_name']) && !in_array($b['piece_name'], $pieces)) {
+                                    $pieces[] = $b['piece_name'];
+                                }
+                            }
+                            sort($pieces);
+                            
+                            foreach ($pieces as $piece): 
+                                $selected = (isset($_GET['piece']) && $_GET['piece'] === $piece) ? 'selected' : '';
+                            ?>
+                                <option value="<?php echo htmlspecialchars($piece); ?>" <?php echo $selected; ?>>
+                                    <?php echo htmlspecialchars($piece); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    
+                    <div class="col">
+                        <!-- Order Filter -->
+                        <label for="order" class="form-label">
+                            <i class="fas fa-sort"></i> Order
+                        </label>
+                        <input type="text" class="form-control" id="order" name="order" placeholder="Filter by order"
+                            value="<?php echo htmlspecialchars($_GET['order'] ?? ''); ?>">
+                    </div>
+                    
+                    <div class="col">
+                        <!-- Used By Filter -->
+                        <label for="used_by" class="form-label">
+                            <i class="fas fa-user"></i> Used By
+                        </label>
+                        <select class="form-select" id="used_by" name="used_by">
+                            <option value="">All Users</option>
+                            <?php 
+                            // Get distinct users
+                            $users = [];
+                            foreach ($lost_barcodes as $b) {
+                                if (!empty($b['name']) && !in_array($b['name'], $users)) {
+                                    $users[] = $b['name'];
+                                }
+                            }
+                            sort($users);
+                            
+                            foreach ($users as $user): 
+                                $selected = (isset($_GET['used_by']) && $_GET['used_by'] === $user) ? 'selected' : '';
+                            ?>
+                                <option value="<?php echo htmlspecialchars($user); ?>" <?php echo $selected; ?>>
+                                    <?php echo htmlspecialchars($user); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="col">
+                        <!-- Date Filter -->
+                        <label for="specific_date" class="form-label">
+                            <i class="fas fa-calendar-alt"></i> Date
+                        </label>
+                        <input type="date" class="form-control" id="specific_date" name="specific_date" value="<?php echo $filter_specific_date; ?>">
+                    </div>
+                    
+                    <div class="col-auto d-flex align-items-end">
+                        <!-- Submit Buttons -->
+                        <button type="submit" class="btn btn-primary me-2"><i class="fa-solid fa-filter"></i> Filter</button>
+                        <a href="lostmov.php" class="btn btn-outline-dark"><i class="fa-solid fa-broom"></i> Clear</a>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
+
                 <!-- Barcode List -->
-            <div class="col-lg-9 mb-4">
+            <div class="col mb-4">
                 <!-- Desktop Table -->
                 <div class="d-none d-md-block">
                     <table class="table table-bordered table-hover align-middle">
                         <thead class="table-primary">
                             <tr>
-                                <th>OF #</th><th>Size</th><th>Category</th><th>Piece</th>
+                                <th>OF Number</th><th>Size</th><th>Category</th><th>Piece</th>
                                 <th>Order</th><th>Status</th><th>Stage</th><th>Chef</th>
-                                <th>User</th><th>Full Barcode</th><th>Last Update</th>
+                                <th>Used by</th><th>Full Barcode</th><th>Last Update</th><th>Tools</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -88,6 +238,11 @@ require_once 'lostmovset.php';
                                         <td><?php echo htmlspecialchars($b['name']); ?></td>
                                         <td><?php echo htmlspecialchars($b['full_barcode_name']); ?></td>
                                         <td><?php echo htmlspecialchars($b['last_seen']); ?></td>
+                                        <td>
+                                            <button type="button" class="btn btn-sm btn-danger delete-btn" data-barcode="<?php echo htmlspecialchars($b['full_barcode_name']); ?>">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>
@@ -133,6 +288,12 @@ require_once 'lostmovset.php';
                                     <li class="list-group-item d-flex justify-content-between">
                                         <span>Last Update:</span><span><?php echo htmlspecialchars($b['last_seen']); ?></span>
                                     </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Actions:</span>
+                                        <button type="button" class="btn btn-sm btn-danger delete-btn" data-barcode="<?php echo htmlspecialchars($b['full_barcode_name']); ?>">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </li>
                                 </ul>
                             </div>
                         <?php endforeach; ?>
@@ -140,115 +301,37 @@ require_once 'lostmovset.php';
                 </div>
             </div>
         
-    <div class="row">
-        <!-- Stages Overview 
-        <div class="col-md-3 mb-4">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h5 class="m-0"><i class="fas fa-chart-pie"></i> Lost Barcodes by Stage</h5>
-                </div>
-                <div class="card-body">
-                    <div class="list-group">
-                        <?php foreach ($stage_counts as $stage => $count): ?>
-                            <div class="list-group-item d-flex justify-content-between align-items-center">
-                                <?php echo htmlspecialchars($stage); ?>
-                                <span class="badge bg-primary rounded-pill"><?php echo $count; ?></span>
-                            </div>
-                        <?php endforeach; ?>
-                        <?php if (empty($stage_counts)): ?>
-                            <div class="alert alert-info">No lost barcodes found.</div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                <div class="card-footer">
-                    <strong>Total: <?php echo count($lost_barcodes); ?> lost barcodes</strong>
-                </div>
-            </div>
-        </div>
-        -->
-        <!-- Barcodes List
-        <div class="col-md-9 mb-4">
-            <div class="card">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="m-0"><i class="fas fa-barcode"></i> Lost Barcodes for <?php echo $filter_specific_date; ?></h5>
-                </div>
-                <div class="card-body" style="max-height: 700px; overflow-y: auto;">
-                    <?php if (empty($lost_barcodes)): ?>
-                        <div class="alert alert-info">No lost barcodes found for the selected date.</div>
-                    <?php else: ?>
-                        <div class="table-responsive">
-                            <table class="table table-hover table-striped">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Barcode</th>
-                                        <th>Details</th>
-                                        <th>Stage</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($lost_barcodes as $barcode): ?>
-                                        <tr>
-                                            <td>
-                                                <strong><?php echo htmlspecialchars($barcode['full_barcode_name']); ?></strong><br>
-                                                <strong>OF:</strong> <?php echo htmlspecialchars($barcode['of_number']); ?>
-                                            </td>
-                                            <td>
-                                                <strong>Piece:</strong> <?php echo htmlspecialchars($barcode['piece_name']); ?><br>
-                                                <strong>Category:</strong> <?php echo htmlspecialchars($barcode['category']); ?><br>
-                                                <strong>Size:</strong> <?php echo htmlspecialchars($barcode['size']); ?>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-info"><?php echo htmlspecialchars($barcode['current_stage'] ?: 'Unknown'); ?></span><br>
-                                                <small class="text-muted">Last seen: <?php echo date('Y-m-d H:i', strtotime($barcode['last_seen'])); ?></small>
-                                            </td>
-                                            <td>
-                                                <button type="button" class="btn btn-sm btn-primary history-btn" data-barcode="<?php echo htmlspecialchars($barcode['full_barcode_name']); ?>">
-                                                    <i class="fas fa-history"></i> View History
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
+            
+            <!-- Add this Modal for Delete Confirmation -->
+            <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title" id="deleteModalLabel">
+                                <i class="fas fa-exclamation-triangle"></i> Confirm Delete
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-    </div>
-    <?php endif; ?>
-    </div>
-</div>
- -->
-<!-- Modal for Barcode History 
-<div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="historyModalLabel">
-                    <i class="fas fa-history"></i> Movement History
-                    <small id="modalBarcodeTitle"></small>
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div id="historyLoader" class="text-center">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
+                        <div class="modal-body">
+                            <p>Are you sure you want to delete this barcode?</p>
+                            <p><strong>Barcode: </strong><span id="deleteBarcodeName"></span></p>
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-circle"></i> Warning: This action cannot be undone!
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-danger" id="confirmDelete">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
                     </div>
                 </div>
-                <div id="historyContent" class="timeline" style="display: none;"></div>
-                <div id="noHistoryAlert" class="alert alert-info" style="display: none;">No movement history found for this barcode.</div>
-                <div id="errorAlert" class="alert alert-danger" style="display: none;"></div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
+        <?php endif; ?>
     </div>
 </div>
--->
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
 <script>
 $(document).ready(function() {
@@ -334,5 +417,72 @@ $(document).ready(function() {
     });
 });
 </script>
+<!-- Add this JavaScript for Delete functionality -->
+<script>
+$(document).ready(function() {
+    // Initialize delete modal
+    var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    var barcodeToDelete = '';
+    
+    // Handle click on delete button
+    $('.delete-btn').on('click', function() {
+        barcodeToDelete = $(this).data('barcode');
+        $('#deleteBarcodeName').text(barcodeToDelete);
+        deleteModal.show();
+    });
+    
+    // Handle confirmation of delete
+    $('#confirmDelete').on('click', function() {
+        // Show loading state
+        $(this).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Deleting...');
+        $(this).prop('disabled', true);
+        
+        // Send delete request
+        $.ajax({
+            url: window.location.pathname,
+            data: {
+                ajax: 'deleteBarcode',
+                barcode: barcodeToDelete
+            },
+            method: 'POST',
+            dataType: 'json',
+            success: function(response) {
+                deleteModal.hide();
+                
+                if (response.error) {
+                    // Show error message
+                    alert('Error: ' + response.error);
+                } else {
+                    // Remove the deleted row and show success message
+                    $('tr, div.card').filter(function() {
+                        return $(this).find('.delete-btn').data('barcode') === barcodeToDelete;
+                    }).fadeOut(400, function() {
+                        $(this).remove();
+                    });
+                    
+                    // Show success toast
+                    alert('Barcode successfully deleted');
+                    
+                    // Reload the page if no items left
+                    if ($('tr').length <= 2) { // Header row + the deleted one
+                        location.reload();
+                    }
+                }
+            },
+            error: function(xhr, status, error) {
+                deleteModal.hide();
+                console.error('AJAX Error:', status, error);
+                alert('Error deleting barcode. Please try again.');
+            },
+            complete: function() {
+                // Reset button state
+                $('#confirmDelete').html('<i class="fas fa-trash"></i> Delete');
+                $('#confirmDelete').prop('disabled', false);
+            }
+        });
+    });
+});
+</script>
+
 </body>
 </html>
