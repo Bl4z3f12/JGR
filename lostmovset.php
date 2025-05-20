@@ -2,114 +2,89 @@
 require_once 'auth_functions.php';
 requireLogin('login.php');
 $current_view = 'lostmov.php';
-$host = "localhost";
-$dbname = "jgr";
+
+$host     = "localhost";
+$dbname   = "jgr";
 $username = "root";
 $password = "";
 
-// Function to handle AJAX error responses
-function sendJsonError($message) {
+// AJAX error helper
+function sendJsonError($msg) {
     header('Content-Type: application/json');
-    echo json_encode(['error' => $message]);
+    echo json_encode(['error' => $msg]);
     exit;
 }
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-    // Default filters - changed to single specific date filter
-    $filter_specific_date = isset($_GET['specific_date']) ? $_GET['specific_date'] : date('Y-m-d');
-    
-    // Get all lost barcodes (containing 'X' in their name)
+
+    // date filter
+    $filter_specific_date = $_GET['specific_date'] ?? date('Y-m-d');
+
+    // Fetch only those with 'X' in the order_str
     function getLostBarcodes($pdo, $specific_date) {
-        $query = "
+        $sql = "
             SELECT DISTINCT 
                 b.full_barcode_name,
                 b.of_number,
-                b.stage AS current_stage,
+                b.stage        AS current_stage,
                 b.piece_name,
                 b.category,
                 b.size,
-                b.last_update AS last_seen
-            FROM 
-                barcodes b
+                b.order_str,
+                b.chef,
+                b.name,
+                b.last_update  AS last_seen
+            FROM barcodes b
             WHERE 
-                (b.full_barcode_name LIKE '%-X%' OR b.of_number LIKE 'X%')
+                b.order_str LIKE '%X%'
                 AND DATE(b.last_update) = :specific_date
-            ORDER BY
-                b.last_update DESC
+            ORDER BY b.last_update DESC
         ";
-        
-        $stmt = $pdo->prepare($query);
-        $stmt->execute([
-            ':specific_date' => $specific_date
-        ]);
-        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([':specific_date' => $specific_date]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    
-    // Get movement history for a specific barcode - This function will be used via AJAX
+
+    // History via AJAX
     function getBarcodeMovementHistory($pdo, $barcode) {
-        $query = "
-          SELECT
-              h.full_barcode_name,
-              h.stage,
-              h.action_type,
-              h.last_update,
-              h.action_time
-          FROM
-              jgr_barcodes_history h
-          WHERE
-              h.full_barcode_name = :barcode
-          ORDER BY
-              h.action_time ASC
+        $sql = "
+            SELECT full_barcode_name, stage, action_type, last_update, action_time
+            FROM jgr_barcodes_history
+            WHERE full_barcode_name = :barcode
+            ORDER BY action_time ASC
         ";
-        
-        $stmt = $pdo->prepare($query);
+        $stmt = $pdo->prepare($sql);
         $stmt->execute([':barcode' => $barcode]);
-        
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    
-    // If this is an AJAX request for barcode history
-    if(isset($_GET['ajax']) && $_GET['ajax'] == 'getHistory' && isset($_GET['barcode'])) {
-        try {
-            header('Content-Type: application/json');
-            $history = getBarcodeMovementHistory($pdo, $_GET['barcode']);
-            echo json_encode($history);
-            exit;
-        } catch(PDOException $e) {
-            sendJsonError("Database error: " . $e->getMessage());
-        }
+
+    // AJAX: getHistory
+    if (isset($_GET['ajax'], $_GET['barcode']) && $_GET['ajax']==='getHistory') {
+        header('Content-Type: application/json');
+        echo json_encode(getBarcodeMovementHistory($pdo, $_GET['barcode']));
+        exit;
     }
-    
-    // Add error handling for AJAX requests
-    if(isset($_GET['ajax'])) {
+    if (isset($_GET['ajax'])) {
         sendJsonError('Invalid AJAX request');
     }
-    
-    // Get all lost barcodes for the specific date
-    $lost_barcodes = getLostBarcodes($pdo, $filter_specific_date);
-    
-    // Get counts of lost barcodes by stage
-    $stage_counts = [];
-    foreach ($lost_barcodes as $barcode) {
-        $stage = $barcode['current_stage'] ?: 'Unknown';
-        if (!isset($stage_counts[$stage])) {
-            $stage_counts[$stage] = 0;
-        }
-        $stage_counts[$stage]++;
-    }
-    arsort($stage_counts); // Sort by count in descending order
 
-} catch(PDOException $e) {
-    // Check if it's an AJAX request
-    if(isset($_GET['ajax'])) {
-        sendJsonError("Database connection failed: " . $e->getMessage());
-    } else {
-        // Regular page request - show error on page
-        $connection_error = "Connection failed: " . $e->getMessage();
+    // Load data
+    $lost_barcodes = getLostBarcodes($pdo, $filter_specific_date);
+
+    // Stage counts (optional)
+    $stage_counts = [];
+    foreach ($lost_barcodes as $b) {
+        $s = $b['current_stage'] ?: 'Unknown';
+        $stage_counts[$s] = ($stage_counts[$s] ?? 0) + 1;
     }
+    arsort($stage_counts);
+
+} catch (PDOException $e) {
+    if (isset($_GET['ajax'])) {
+        sendJsonError($e->getMessage());
+    }
+    $connection_error = $e->getMessage();
 }
 ?>

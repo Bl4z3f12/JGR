@@ -387,7 +387,20 @@ require_once 'barcode_system.php';
                         </div>
                     </div>
                 </div>
-
+             
+                <div class="row mb-3">
+                    <label for="name" class="col-sm-3 col-form-label">Your Name <span class="text-danger">*</span></label>
+                    <div class="col-sm-9">
+                        <select class="form-select" id="name" name="name" disabled>
+                            <option value="">Select Your Name</option>
+                            <option value="Othmane">Othmane</option>
+                            <option value="Othmane Jebar">Othmane Jebar</option>
+                            <option value="Brahim Akikab">Brahim Akikab</option>
+                            <option value="Mohamed Errhioui">Mohamed Errhioui</option>
+                        </select>
+                    </div>
+                </div>
+                
                 <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Piece Order</label>
                     <div class="col-sm-9">
@@ -497,164 +510,173 @@ require_once 'barcode_system.php';
     ?>
     
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const lostBarcodeCheckbox = document.getElementById('lost-barcode');
-            const lostBarcodeCount = document.getElementById('lost-barcode-count');
-            const checkbox2pcs = document.getElementById('generate-costume-2pcs');
-            const checkbox3pcs = document.getElementById('generate-costume-3pcs');
-            const rangeFrom = document.getElementById('range-from');
-            const rangeTo = document.getElementById('range-to');
-            
-            if (lostBarcodeCheckbox) {
-                lostBarcodeCheckbox.addEventListener('change', function() {
-                    lostBarcodeCount.disabled = !this.checked;
-                    checkbox2pcs.disabled = this.checked;
-                    checkbox3pcs.disabled = this.checked;
-                    rangeFrom.disabled = this.checked;
-                    rangeTo.disabled = this.checked;
-                });
-            }
-            
-            if (checkbox2pcs && checkbox3pcs) {
-                checkbox2pcs.addEventListener('change', function() {
-                    checkbox3pcs.disabled = this.checked;
-                });
-                
-                checkbox3pcs.addEventListener('change', function() {
-                    checkbox2pcs.disabled = this.checked;
-                });
-            }
-            
-            const clearFiltersBtn = document.getElementById('clear-filters');
-            if (clearFiltersBtn) {
-                clearFiltersBtn.addEventListener('click', function() {
-                    const filterForm = document.getElementById('filter-form');
-                    const inputs = filterForm.querySelectorAll('input[type="text"], input[type="number"]');
-                    inputs.forEach(input => {
-                        input.value = '';
-                    });
-                    filterForm.submit();
-                });
-            }
-            
-            const barcodeForm = document.querySelector('#barcode-modal form');
-            const generateButton = document.getElementById('generate-button');
-            const generateSpinner = document.getElementById('generate-spinner');
-            
-            if (barcodeForm) {
-                barcodeForm.addEventListener('submit', function(e) {
-                    // Show the spinner when form is submitted
-                    if (generateSpinner) {
-                        generateSpinner.classList.remove('d-none');
-                    }
-                    
-                    // Disable the button to prevent multiple submissions
-                    if (generateButton) {
-                        generateButton.setAttribute('disabled', 'disabled');
-                    }
-                    
-                    const formInputs = this.querySelectorAll('input:not([type="hidden"]), select');
-                    formInputs.forEach(input => {
-                        sessionStorage.setItem(input.name, input.value);
-                    });
-                });
-                
-                if (window.sessionStorage) {
-                    const formInputs = barcodeForm.querySelectorAll('input:not([type="hidden"]), select');
-                    formInputs.forEach(input => {
-                        const savedValue = sessionStorage.getItem(input.name);
-                        if (savedValue !== null) {
-                            input.value = savedValue;
-                        }
-                    });
-                }
-            }
+document.addEventListener('DOMContentLoaded', function() {
+    // Get elements
+    const els = {
+        lostBarcode: document.getElementById('lost-barcode'),
+        lostBarcodeCount: document.getElementById('lost-barcode-count'),
+        userName: document.getElementById('name'),
+        checkbox2pcs: document.getElementById('generate-costume-2pcs'),
+        checkbox3pcs: document.getElementById('generate-costume-3pcs'),
+        rangeFrom: document.getElementById('range-from'),
+        rangeTo: document.getElementById('range-to'),
+        clearFiltersBtn: document.getElementById('clear-filters'),
+        barcodeForm: document.querySelector('#barcode-modal form'),
+        generateButton: document.getElementById('generate-button'),
+        generateSpinner: document.getElementById('generate-spinner'),
+        openPathBtn: document.getElementById('open-path-btn'),
+        pdfModal: document.getElementById('pdf-modal')
+    };
 
-            const openPathBtn = document.getElementById('open-path-btn');
-            const pdfModal = document.getElementById('pdf-modal');
-            
-            if (openPathBtn && pdfModal) {
-                openPathBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    pdfModal.style.display = 'block';
-                    
-                    fetch('pdf.php')
-                        .then(response => response.text())
-                        .then(data => {
-                            document.getElementById('pdf-modal-content').innerHTML = data;
-                            
-                            initPdfModalEvents();
-                        })
-                        .catch(error => {
-                            document.getElementById('pdf-modal-content').innerHTML = 
-                                '<div class="alert alert-danger">Error loading PDF content: ' + error.message + '</div>';
-                        });
-                });
-            }
-            
-            window.addEventListener('click', function(event) {
-                if (event.target === pdfModal) {
-                    pdfModal.style.display = 'none';
-                }
-            });
-        });
+    // Lost barcode handler
+    function handleLostBarcodeChange() {
+        const isChecked = els.lostBarcode.checked;
+        els.lostBarcodeCount.disabled = !isChecked;
+        els.userName.disabled = !isChecked;
+        els.userName.required = isChecked;
         
-        function initPdfModalEvents() {
-            const searchForm = document.getElementById('pdf-search-form');
-            if (searchForm) {
-                searchForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    
-                    const formData = new FormData(this);
-                    const searchParams = new URLSearchParams(formData);
-                    
-                    document.getElementById('pdf-modal-content').innerHTML = `
-                        <div id="pdf-modal-loader">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                            <p class="mt-2">Searching...</p>
-                        </div>
-                    `;
-                    
-                    fetch('pdf.php?' + searchParams.toString())
-                        .then(response => response.text())
-                        .then(data => {
-                            document.getElementById('pdf-modal-content').innerHTML = data;
-                            initPdfModalEvents(); // Re-initialize events
-                        })
-                        .catch(error => {
-                            document.getElementById('pdf-modal-content').innerHTML = 
-                                '<div class="alert alert-danger">Error loading PDF content: ' + error.message + '</div>';
-                        });
-                });
-            }
-            const clearFilterBtn = document.getElementById('clear-pdf-filters');
-            if (clearFilterBtn) {
-                clearFilterBtn.addEventListener('click', function() {
-                    document.getElementById('pdf-modal-content').innerHTML = `
-                        <div id="pdf-modal-loader">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                            <p class="mt-2">Loading PDF files...</p>
-                        </div>
-                    `;
-                    fetch('pdf.php')
-                        .then(response => response.text())
-                        .then(data => {
-                            document.getElementById('pdf-modal-content').innerHTML = data;
-                            initPdfModalEvents();
-                        })
-                        .catch(error => {
-                            document.getElementById('pdf-modal-content').innerHTML = 
-                                '<div class="alert alert-danger">Error loading PDF content: ' + error.message + '</div>';
-                        });
-                });
+        // Disable other fields when lost barcode is checked
+        els.rangeFrom.disabled = isChecked;
+        els.rangeTo.disabled = isChecked;
+        els.checkbox2pcs.disabled = isChecked;
+        els.checkbox3pcs.disabled = isChecked;
+    }
+
+    // Costume checkboxes handler
+    function handleCostumeCheckboxes() {
+        if (!els.lostBarcode.checked) {
+            if (els.checkbox2pcs.checked) {
+                els.checkbox3pcs.disabled = true;
+            } else if (els.checkbox3pcs.checked) {
+                els.checkbox2pcs.disabled = true;
+            } else {
+                els.checkbox2pcs.disabled = false;
+                els.checkbox3pcs.disabled = false;
             }
         }
-        
+    }
+
+    // Set up event listeners
+    if (els.lostBarcode) {
+        els.lostBarcode.addEventListener('change', handleLostBarcodeChange);
+        // Initialize form state
+        handleLostBarcodeChange();
+    }
+
+    if (els.checkbox2pcs && els.checkbox3pcs) {
+        els.checkbox2pcs.addEventListener('change', handleCostumeCheckboxes);
+        els.checkbox3pcs.addEventListener('change', handleCostumeCheckboxes);
+    }
+
+    // Clear filters button
+    if (els.clearFiltersBtn) {
+        els.clearFiltersBtn.addEventListener('click', function() {
+            const filterForm = document.getElementById('filter-form');
+            filterForm.querySelectorAll('input[type="text"], input[type="number"]')
+                .forEach(input => { input.value = ''; });
+            filterForm.submit();
+        });
+    }
+
+    // Form submission handler
+    if (els.barcodeForm) {
+        els.barcodeForm.addEventListener('submit', function() {
+            // Show spinner, disable button
+            if (els.generateSpinner) els.generateSpinner.classList.remove('d-none');
+            if (els.generateButton) els.generateButton.setAttribute('disabled', 'disabled');
+            
+            // Save form inputs to session storage
+            this.querySelectorAll('input:not([type="hidden"]), select').forEach(input => {
+                sessionStorage.setItem(input.name, input.value);
+            });
+        });
+
+        // Restore form values from session storage
+        if (window.sessionStorage) {
+            els.barcodeForm.querySelectorAll('input:not([type="hidden"]), select').forEach(input => {
+                const savedValue = sessionStorage.getItem(input.name);
+                if (savedValue !== null) input.value = savedValue;
+            });
+        }
+    }
+
+    // PDF modal handling
+    if (els.openPathBtn && els.pdfModal) {
+        els.openPathBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            els.pdfModal.style.display = 'block';
+            
+            fetch('pdf.php')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('pdf-modal-content').innerHTML = data;
+                    initPdfModalEvents();
+                })
+                .catch(error => {
+                    document.getElementById('pdf-modal-content').innerHTML = 
+                        '<div class="alert alert-danger">Error loading PDF content: ' + error.message + '</div>';
+                });
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === els.pdfModal) {
+                els.pdfModal.style.display = 'none';
+            }
+        });
+    }
+});
+
+// PDF modal events initialization
+function initPdfModalEvents() {
+    const searchForm = document.getElementById('pdf-search-form');
+    const clearFilterBtn = document.getElementById('clear-pdf-filters');
+    const modalContent = document.getElementById('pdf-modal-content');
+    
+    function showLoader(message) {
+        modalContent.innerHTML = `
+            <div id="pdf-modal-loader">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">${message}</p>
+            </div>
+        `;
+    }
+    
+    function loadPdfContent(url = 'pdf.php') {
+        fetch(url)
+            .then(response => response.text())
+            .then(data => {
+                modalContent.innerHTML = data;
+                initPdfModalEvents();
+            })
+            .catch(error => {
+                modalContent.innerHTML = 
+                    '<div class="alert alert-danger">Error loading PDF content: ' + error.message + '</div>';
+            });
+    }
+    
+    // Search form handler
+    if (searchForm) {
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const searchParams = new URLSearchParams(formData);
+            
+            showLoader('Searching...');
+            loadPdfContent('pdf.php?' + searchParams.toString());
+        });
+    }
+    
+    // Clear filters button
+    if (clearFilterBtn) {
+        clearFilterBtn.addEventListener('click', function() {
+            showLoader('Loading PDF files...');
+            loadPdfContent();
+        });
+    }
+}
     </script>
     
 </body>

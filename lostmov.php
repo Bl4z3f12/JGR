@@ -47,9 +47,101 @@ require_once 'lostmovset.php';
             </form>
         </div>
     </div>
-    
+                <!-- Barcode List -->
+            <div class="col-lg-9 mb-4">
+                <!-- Desktop Table -->
+                <div class="d-none d-md-block">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>OF #</th><th>Size</th><th>Category</th><th>Piece</th>
+                                <th>Order</th><th>Status</th><th>Stage</th><th>Chef</th>
+                                <th>User</th><th>Full Barcode</th><th>Last Update</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($lost_barcodes)): ?>
+                                <tr><td colspan="11" class="text-center">No matching orders</td></tr>
+                            <?php else: ?>
+                                <?php foreach ($lost_barcodes as $b): ?>
+                                    <?php
+                                        $st = strtolower($b['status'] ?? '');
+                                        switch ($st) {
+                                            case 'completed':   $cls='bg-success'; $ico='fa-check'; break;
+                                            case 'in progress': $cls='bg-warning'; $ico='fa-clock'; break;
+                                            case 'pending':     $cls='bg-secondary'; $ico='fa-hourglass'; break;
+                                            case 'error':       $cls='bg-danger'; $ico='fa-exclamation-circle'; break;
+                                            default:            $cls='bg-info'; $ico='fa-info-circle';
+                                        }
+                                    ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($b['of_number']); ?></td>
+                                        <td><?php echo htmlspecialchars($b['size']); ?></td>
+                                        <td><?php echo htmlspecialchars($b['category']); ?></td>
+                                        <td><?php echo htmlspecialchars($b['piece_name']); ?></td>
+                                        <td><?php echo htmlspecialchars($b['order_str']); ?></td>
+                                        <td><span class="badge <?php echo $cls; ?>">
+                                              <i class="fas <?php echo $ico; ?> me-1"></i><?php echo htmlspecialchars($b['status'] ?? ''); ?>
+                                            </span></td>
+                                        <td><?php echo htmlspecialchars($b['current_stage']); ?></td>
+                                        <td><?php echo htmlspecialchars($b['chef']); ?></td>
+                                        <td><?php echo htmlspecialchars($b['name']); ?></td>
+                                        <td><?php echo htmlspecialchars($b['full_barcode_name']); ?></td>
+                                        <td><?php echo htmlspecialchars($b['last_seen']); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Cards -->
+                <div class="d-md-none">
+                    <?php if (empty($lost_barcodes)): ?>
+                        <div class="alert alert-info text-center">No matching orders</div>
+                    <?php else: ?>
+                        <?php foreach ($lost_barcodes as $b): ?>
+                            <?php
+                                $st = strtolower($b['status'] ?? '');
+                                switch ($st) {
+                                    case 'completed':   $cls='bg-success'; $ico='fa-check'; break;
+                                    case 'in progress': $cls='bg-warning'; $ico='fa-clock'; break;
+                                    case 'pending':     $cls='bg-secondary'; $ico='fa-hourglass'; break;
+                                    case 'error':       $cls='bg-danger'; $ico='fa-exclamation-circle'; break;
+                                    default:            $cls='bg-info'; $ico='fa-info-circle';
+                                }
+                            ?>
+                            <div class="card mb-3">
+                                <div class="card-header d-flex justify-content-between">
+                                    <strong><?php echo htmlspecialchars($b['piece_name']); ?></strong>
+                                    <span class="badge <?php echo $cls; ?>"><i class="fas <?php echo $ico; ?>"></i></span>
+                                </div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>OF:</span><span><?php echo htmlspecialchars($b['of_number']); ?></span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Size:</span><span><?php echo htmlspecialchars($b['size']); ?></span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Order:</span><span><?php echo htmlspecialchars($b['order_str']); ?></span>
+                                    </li>
+                                    
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Piece:</span><span><?php echo htmlspecialchars($b['piece_name']); ?></span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Last Update:</span><span><?php echo htmlspecialchars($b['last_seen']); ?></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+        
     <div class="row">
-        <!-- Stages Overview -->
+        <!-- Stages Overview 
         <div class="col-md-3 mb-4">
             <div class="card">
                 <div class="card-header bg-info text-white">
@@ -73,8 +165,8 @@ require_once 'lostmovset.php';
                 </div>
             </div>
         </div>
-        
-        <!-- Barcodes List -->
+        -->
+        <!-- Barcodes List
         <div class="col-md-9 mb-4">
             <div class="card">
                 <div class="card-header bg-warning text-dark">
@@ -128,8 +220,8 @@ require_once 'lostmovset.php';
     <?php endif; ?>
     </div>
 </div>
-
-<!-- Modal for Barcode History -->
+ -->
+<!-- Modal for Barcode History 
 <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -156,7 +248,7 @@ require_once 'lostmovset.php';
         </div>
     </div>
 </div>
-
+-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
 <script>
 $(document).ready(function() {

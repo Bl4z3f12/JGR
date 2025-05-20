@@ -12,10 +12,12 @@ $filter_size = $_GET['filter_size'] ?? '';
 $filter_category = $_GET['filter_category'] ?? '';
 $filter_piece_name = $_GET['filter_piece_name'] ?? '';
 $filter_date = $_GET['filter_date'] ?? '';
+
 function connectDB() {
     $conn = new mysqli("localhost", "root", "", "jgr");
     return $conn->connect_error ? false : $conn;
 }
+
 function getBarcodes($view, $page, $items_per_page, $filter_of = '', $filter_size = '', $filter_category = '', $filter_piece_name = '', $filter_date = '') {
     $conn = connectDB();
     if (!$conn) return [];
@@ -91,6 +93,7 @@ function getBarcodes($view, $page, $items_per_page, $filter_of = '', $filter_siz
     $conn->close();
     return $barcodes;
 }
+
 function getTotalBarcodes($view, $filter_of = '', $filter_size = '', $filter_category = '', $filter_piece_name = '', $filter_date = '') {
     $conn = connectDB();
     if (!$conn) return 100;
@@ -159,6 +162,7 @@ function getTotalBarcodes($view, $filter_of = '', $filter_size = '', $filter_cat
     $conn->close();
     return $total ?: 100;
 }
+
 function getViewTitle($view) {
     return match ($view) {
         'dashboard' => 'Barcodes Overview',
@@ -169,6 +173,7 @@ function getViewTitle($view) {
         default => 'Barcodes Overview',
     };
 }
+
 function placeBarcodeInPdf($generator, $pdf, $full_barcode_name, $col, $row, $cellWidth, $cellHeight, $barcodeWidth, $barcodeHeight, $topSpacing, $fontSize, $pageWidth, $colsPerPage, $rowsPerPage) {
     $barcodeImage = $generator->getBarcode($full_barcode_name, $generator::TYPE_CODE_128);
     $barcodePath = __DIR__ . "/barcodes/tmp_$full_barcode_name.png";
@@ -198,18 +203,21 @@ function placeBarcodeInPdf($generator, $pdf, $full_barcode_name, $col, $row, $ce
     }
     return ['col' => $col, 'row' => $row];
 }
+
 function createNewPdf() {
     $pdf = new FPDF('P', 'mm', 'A4');
     $pdf->AddPage();
     $pdf->SetAutoPageBreak(false);
     return $pdf;
 }
+
 function removeEmptyPages($filePath) {
     $fileSize = filesize($filePath);
     $estimatedPageCount = ceil($fileSize / 40000);
     $pageCount = max(1, $estimatedPageCount);
     return $pageCount;
 }
+
 function getRandomButtonScript() {
     return <<<SCRIPT
     <script>
@@ -237,6 +245,7 @@ function getRandomButtonScript() {
     </script>
     SCRIPT;
 }
+
 function formatBarcodeString($of_number, $size, $category, $piece_name, $number) {
     if (empty($category)) {
         return "$of_number-$size-$piece_name-$number";
@@ -244,6 +253,7 @@ function formatBarcodeString($of_number, $size, $category, $piece_name, $number)
         return "$of_number-$size$category-$piece_name-$number";
     }
 }
+
 function barcodeExists($conn, $full_barcode_name) {
     $stmt = $conn->prepare("SELECT COUNT(*) as count FROM barcodes WHERE full_barcode_name = ?");
     $stmt->bind_param("s", $full_barcode_name);
@@ -253,6 +263,7 @@ function barcodeExists($conn, $full_barcode_name) {
     $stmt->close();
     return $row['count'] > 0;
 }
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'create_barcode') {
     $of_number = $_POST['barcode_prefix'] ?? '';
     $size = $_POST['barcode_size'] ?? '';
@@ -263,12 +274,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
     $generate_costume_2pcs = isset($_POST['generate_costume_2pcs']);
     $generate_costume_3pcs = isset($_POST['generate_costume_3pcs']);
     $generate_pdf_only = isset($_POST['generate_pdf_only']);
+    // Get the user_name for lost barcodes
+    $user_name = $is_lost_barcode ? ($_POST['name'] ?? '') : '';
+    
     $errors = [];
     $duplicates = [];
+    
     if (!$of_number) $errors[] = "OF number is required";
     if (!$generate_costume_2pcs && !$generate_costume_3pcs && !$piece_name) {
         $errors[] = "Piece name is required";
     }
+    
+    // Add validation for user_name field for lost barcodes
+    if ($is_lost_barcode && empty($user_name)) {
+        $errors[] = "Name is required for lost barcodes";
+    }
+    
     if ($is_lost_barcode) {
         $lost_barcode_count = (int)($_POST['lost_barcode_count'] ?? 1);
         if ($lost_barcode_count <= 0 || $lost_barcode_count > 100) $errors[] = "Lost barcode quantity must be between 1 and 100";
@@ -277,6 +298,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
         $range_to = (int)($_POST['range_to'] ?? 0);
         if ($range_from <= 0 || $range_to <= 0 || $range_from > $range_to) $errors[] = "Invalid range";
     }
+    
     if (empty($errors)) {
         $conn = connectDB();
         if ($conn) {
@@ -313,11 +335,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
                             $lost_barcode_number++;
                             continue;
                         }
-                        $stmt = $conn->prepare("INSERT INTO barcodes (of_number, size, category, piece_name, order_str, full_barcode_name, status, stage) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL)");
-                        $stmt->bind_param("ssssss", $of_number, $size, $category, $piece_name, $formatted_number, $full_barcode_name);
+                        
+                        // Include user_name in the insert for lost barcodes
+                        $stmt = $conn->prepare("INSERT INTO barcodes (of_number, size, category, piece_name, order_str, full_barcode_name, status, stage, name) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, ?)");
+                        $stmt->bind_param("sssssss", $of_number, $size, $category, $piece_name, $formatted_number, $full_barcode_name, $user_name);
                         $stmt->execute();
                         $successCount++;
                     }
+                    
                     $result = placeBarcodeInPdf($generator, $pdf, $full_barcode_name, $col, $row, $cellWidth, $cellHeight, $barcodeWidth, $barcodeHeight, $topSpacing, $fontSize, $pageWidth, $colsPerPage, $rowsPerPage);
                     $col = $result['col'];
                     $row = $result['row'];
@@ -499,6 +524,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
         exit;
     }
 }
+
 $barcodes = getBarcodes($current_view, $page, $items_per_page, $filter_of_number, $filter_size, $filter_category, $filter_piece_name, $filter_date);
 $total_barcodes = getTotalBarcodes($current_view, $filter_of_number, $filter_size, $filter_category, $filter_piece_name, $filter_date);
 $total_pages = ceil($total_barcodes / $items_per_page);
