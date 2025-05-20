@@ -56,6 +56,9 @@
                                     <a href="RTCpublic.php" class="list-group-item list-group-item-action">
                                         <i class="fa-solid fa-circle-plus"></i> RTC [PUBLIC]
                                     </a>
+                                    <a href="start.php" class="list-group-item list-group-item-action">
+                                    <i class="fa-solid fa-plane-departure"></i> Lancement
+                                    </a>
                                 </div>
                             </div>
                         </div>
