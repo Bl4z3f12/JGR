@@ -404,8 +404,16 @@ $_SESSION['production_summary'] = $production_summary;
                                         Stage: <?= htmlspecialchars($filter_stage) ?>
                                     </span>
                                 <?php endif; ?>
+                                <?php
+                                $total_current = 0;
+                                if (isset($daily_stage_stats) && is_array($daily_stage_stats)) {
+                                    foreach ($daily_stage_stats as $stats) {
+                                        $total_current += $stats['current'];
+                                    }
+                                }
+                                ?>
                                 <span class="badge bg-light text-dark">
-                                    Total Stage Qty: <?= number_format($grand_totals['total_count']) ?>
+                                    Total Stage Qty: <?= number_format($total_current) ?>
                                 </span>
                                 <?php if (isset($production_summary) && !empty($production_summary)): ?>
                                     <a href="export_excel.php?export=excel<?= 
