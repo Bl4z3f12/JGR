@@ -35,10 +35,8 @@ function is_mobile() {
         <?php endif; ?>
       </span>
       
-      <!-- Notification Bell - Hidden on mobile -->
       <?php if (!is_mobile()): ?>
         <div class="d-flex align-items-center">
-          <!-- Notification Bell Link -->
           <a href="notifications.php" class="text-white me-3 position-relative">
             <i class="bi bi-bell-fill"></i>
             <span id="notificationBadge" class="badge position-absolute top-0 start-100 translate-middle bg-success">0</span>
@@ -47,8 +45,12 @@ function is_mobile() {
       <?php endif; ?>
       
       <?php if (!is_mobile()): ?>
-          <a href="logout.php" class="btn btn-outline-light btn-sm">Logout 
-          <i class="fas fa-sign-out-alt"></i>
+          <!-- Added Tracker Button -->
+          <a href="tracker.php" class="btn btn-outline-light btn-sm me-2">
+            Tracker <i class="bi bi-geo-alt-fill"></i>
+          </a>
+          <a href="logout.php" class="btn btn-outline-light btn-sm">
+            Logout <i class="fas fa-sign-out-alt"></i>
           </a>
       <?php endif; ?>
     </div>
