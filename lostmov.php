@@ -239,9 +239,14 @@ require_once 'lostmovset.php';
                                         <td><?php echo htmlspecialchars($b['full_barcode_name']); ?></td>
                                         <td><?php echo htmlspecialchars($b['last_seen']); ?></td>
                                         <td>
-                                            <button type="button" class="btn btn-sm btn-danger delete-btn" data-barcode="<?php echo htmlspecialchars($b['full_barcode_name']); ?>">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-sm btn-primary edit-btn" data-barcode="<?php echo htmlspecialchars($b['full_barcode_name']); ?>" data-user="<?php echo htmlspecialchars($b['name']); ?>">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-danger delete-btn" data-barcode="<?php echo htmlspecialchars($b['full_barcode_name']); ?>">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -290,9 +295,14 @@ require_once 'lostmovset.php';
                                     </li>
                                     <li class="list-group-item d-flex justify-content-between">
                                         <span>Actions:</span>
-                                        <button type="button" class="btn btn-sm btn-danger delete-btn" data-barcode="<?php echo htmlspecialchars($b['full_barcode_name']); ?>">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-primary edit-btn" data-barcode="<?php echo htmlspecialchars($b['full_barcode_name']); ?>" data-user="<?php echo htmlspecialchars($b['name']); ?>">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-danger delete-btn" data-barcode="<?php echo htmlspecialchars($b['full_barcode_name']); ?>">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
                                     </li>
                                 </ul>
                             </div>
@@ -301,7 +311,40 @@ require_once 'lostmovset.php';
                 </div>
             </div>
         
-            
+            <!-- Edit Modal -->
+            <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title" id="editModalLabel">
+                                <i class="fas fa-edit"></i> Edit User
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p><strong>Barcode: </strong><span id="editBarcodeName"></span></p>
+                            
+                            <div class="mb-3">
+                                <label for="editUserSelect" class="form-label">Used by <span class="text-danger">*</span></label>
+                                <select class="form-select" id="editUserSelect" name="editUserSelect">
+                                    <option value="">Select</option>
+                                    <option value="Othmane">Othmane</option>
+                                    <option value="Othmane Jebar">Othmane Jebar</option>
+                                    <option value="Brahim Akikab">Brahim Akikab</option>
+                                    <option value="Mohamed Errhioui">Mohamed Errhioui</option>
+                                    <option value="Toujaj Malika">Toujaj Malika</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" id="confirmEdit">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!-- Add this Modal for Delete Confirmation -->
             <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
@@ -333,156 +376,7 @@ require_once 'lostmovset.php';
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
-<script>
-$(document).ready(function() {
-    // Initialize modal
-    var historyModal = new bootstrap.Modal(document.getElementById('historyModal'));
-    
-    // Handle click on barcode history button
-    $('.history-btn').on('click', function() {
-        var barcode = $(this).data('barcode');
-        $('#modalBarcodeTitle').text(barcode);
-        
-        // Show loader and hide content
-        $('#historyLoader').show();
-        $('#historyContent').hide();
-        $('#noHistoryAlert').hide();
-        $('#errorAlert').hide();
-        
-        // Show the modal
-        historyModal.show();
-        
-        // Fetch barcode history via AJAX
-        $.ajax({
-            url: window.location.pathname,
-            data: {
-                ajax: 'getHistory',
-                barcode: barcode
-            },
-            method: 'GET',
-            dataType: 'json',
-            success: function(data) {
-                // Hide loader
-                $('#historyLoader').hide();
-                
-                // Check for error in response
-                if (data.error) {
-                    $('#errorAlert').text(data.error).show();
-                    return;
-                }
-                
-                if (data.length === 0) {
-                    // Show no history alert
-                    $('#noHistoryAlert').show();
-                } else {
-                    // Populate and show history content
-                    var historyHtml = '<div class="table-responsive">';
-                    historyHtml += '<table class="table table-striped">';
-                    historyHtml += '<thead><tr><th>Action</th><th>Stage</th><th>Date/Time</th></tr></thead>';
-                    historyHtml += '<tbody>';
-                    
-                    $.each(data, function(index, history) {
-                        var actionBadge = '';
-                        switch(history.action_type) {
-                            case 'INSERT':
-                                actionBadge = '<span class="badge bg-success">Created</span>';
-                                break;
-                            case 'UPDATE':
-                                actionBadge = '<span class="badge bg-primary">Updated</span>';
-                                break;
-                            case 'DELETE':
-                                actionBadge = '<span class="badge bg-danger">Deleted</span>';
-                                break;
-                            default:
-                                actionBadge = '<span class="badge bg-secondary">' + history.action_type + '</span>';
-                        }
-                        
-                        historyHtml += '<tr>';
-                        historyHtml += '<td>' + actionBadge + '</td>';
-                        historyHtml += '<td><span class="badge bg-info text-white">' + (history.stage || 'No Stage') + '</span></td>';
-                        historyHtml += '<td><i class="fas fa-calendar-alt"></i> ' + new Date(history.last_update).toLocaleString() + '</td>';
-                        historyHtml += '</tr>';
-                    });
-                    
-                    historyHtml += '</tbody></table></div>';
-                    $('#historyContent').html(historyHtml).show();
-                }
-            },
-            error: function(xhr, status, error) {
-                $('#historyLoader').hide();
-                console.error('AJAX Error:', status, error);
-                $('#errorAlert').html('<i class="fas fa-exclamation-triangle"></i> Error loading barcode history. Please try again. Error: ' + error).show();
-            }
-        });
-    });
-});
-</script>
-<!-- Add this JavaScript for Delete functionality -->
-<script>
-$(document).ready(function() {
-    // Initialize delete modal
-    var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-    var barcodeToDelete = '';
-    
-    // Handle click on delete button
-    $('.delete-btn').on('click', function() {
-        barcodeToDelete = $(this).data('barcode');
-        $('#deleteBarcodeName').text(barcodeToDelete);
-        deleteModal.show();
-    });
-    
-    // Handle confirmation of delete
-    $('#confirmDelete').on('click', function() {
-        // Show loading state
-        $(this).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Deleting...');
-        $(this).prop('disabled', true);
-        
-        // Send delete request
-        $.ajax({
-            url: window.location.pathname,
-            data: {
-                ajax: 'deleteBarcode',
-                barcode: barcodeToDelete
-            },
-            method: 'POST',
-            dataType: 'json',
-            success: function(response) {
-                deleteModal.hide();
-                
-                if (response.error) {
-                    // Show error message
-                    alert('Error: ' + response.error);
-                } else {
-                    // Remove the deleted row and show success message
-                    $('tr, div.card').filter(function() {
-                        return $(this).find('.delete-btn').data('barcode') === barcodeToDelete;
-                    }).fadeOut(400, function() {
-                        $(this).remove();
-                    });
-                    
-                    // Show success toast
-                    alert('Barcode successfully deleted');
-                    
-                    // Reload the page if no items left
-                    if ($('tr').length <= 2) { // Header row + the deleted one
-                        location.reload();
-                    }
-                }
-            },
-            error: function(xhr, status, error) {
-                deleteModal.hide();
-                console.error('AJAX Error:', status, error);
-                alert('Error deleting barcode. Please try again.');
-            },
-            complete: function() {
-                // Reset button state
-                $('#confirmDelete').html('<i class="fas fa-trash"></i> Delete');
-                $('#confirmDelete').prop('disabled', false);
-            }
-        });
-    });
-});
-</script>
 
+<script src="assets/lostmov.js"></script>
 </body>
 </html>

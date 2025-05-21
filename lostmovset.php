@@ -244,4 +244,38 @@ if (isset($_POST['ajax'], $_POST['barcode']) && $_POST['ajax'] === 'deleteBarcod
     }
     exit;
 }
+
+// AJAX: Update User
+if (isset($_POST['ajax'], $_POST['barcode'], $_POST['user']) && $_POST['ajax'] === 'updateUser') {
+    header('Content-Type: application/json');
+    
+    if (empty($_POST['barcode'])) {
+        echo json_encode(['error' => 'Barcode not provided']);
+        exit;
+    }
+    
+    if (empty($_POST['user'])) {
+        echo json_encode(['error' => 'User not provided']);
+        exit;
+    }
+    
+    try {
+        // Update the user name for the barcode
+        $sql = "UPDATE barcodes SET name = :user WHERE full_barcode_name = :barcode";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            ':user' => $_POST['user'],
+            ':barcode' => $_POST['barcode']
+        ]);
+        
+        if ($stmt->rowCount() > 0) {
+            echo json_encode(['success' => true, 'message' => 'User successfully updated']);
+        } else {
+            echo json_encode(['error' => 'Barcode not found or no changes made']);
+        }
+    } catch (PDOException $e) {
+        echo json_encode(['error' => 'Database error: ' . $e->getMessage()]);
+    }
+    exit;
+}
 ?>

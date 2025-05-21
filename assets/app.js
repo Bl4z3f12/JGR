@@ -1,7 +1,6 @@
-    flatpickr("#filter-date", {
-        dateFormat: "d-m-Y",
-        locale: {
-            firstDayOfWeek: 1
-        }
-    });
-    
+flatpickr("#filter-date", {
+    dateFormat: "d-m-Y",
+    locale: {
+        firstDayOfWeek: 1
+    }
+});
