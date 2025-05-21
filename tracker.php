@@ -44,26 +44,55 @@ class BarcodePDF extends FPDF
         $itemsPerPage = $colsPerPage * $rowsPerPage;
         $currentPage = 1;
         $itemsOnCurrentPage = 0;
-        for ($i = 0; $i < $totalItems; $i++) {
-            if ($itemsOnCurrentPage >= $itemsPerPage) {
-                $this->AddPage();
-                $currentPage++;
-                $itemsOnCurrentPage = 0;
+        
+        // Calculate how many full columns we need
+        $fullColumns = floor($totalItems / $rowsPerPage);
+        $remainingItems = $totalItems % $rowsPerPage;
+        
+        // Process full columns
+        for ($col = 0; $col < $fullColumns; $col++) {
+            for ($row = 0; $row < $rowsPerPage; $row++) {
+                $itemIndex = $col * $rowsPerPage + $row;
+                $x = $leftMargin + ($col * $cellWidth);
+                $y = $topMargin + ($row * $cellHeight);
+                
+                $this->Rect($x, $y, $cellWidth, $cellHeight);
+                $checkboxSize = 3;
+                $checkboxX = $x + $cellWidth - $checkboxSize - 3; // Position checkbox with some padding from right
+                $checkboxY = $y + ($cellHeight/2) - ($checkboxSize/2);
+                $this->Checkbox($checkboxX, $checkboxY, $checkboxSize);
+                $textX = $x + 3; // Position text with some padding from left
+                $this->SetXY($textX, $y + ($cellHeight/2) - 1.5);
+                $textWidth = $cellWidth - ($checkboxSize + 8);
+                $this->Cell($textWidth, 3, $data[$itemIndex], 0, 0, 'C');
+                
+                $itemsOnCurrentPage++;
+                if ($itemsOnCurrentPage >= $itemsPerPage) {
+                    $this->AddPage();
+                    $currentPage++;
+                    $itemsOnCurrentPage = 0;
+                }
             }
-            $row = floor($itemsOnCurrentPage / $colsPerPage);
-            $col = $itemsOnCurrentPage % $colsPerPage;
-            $x = $leftMargin + ($col * $cellWidth);
-            $y = $topMargin + ($row * $cellHeight);
-            $this->Rect($x, $y, $cellWidth, $cellHeight);
-            $checkboxSize = 3;
-            $checkboxX = $x + $cellWidth - $checkboxSize - 3; // Position checkbox with some padding from right
-            $checkboxY = $y + ($cellHeight/2) - ($checkboxSize/2);
-            $this->Checkbox($checkboxX, $checkboxY, $checkboxSize);
-            $textX = $x + 3; // Position text with some padding from left
-            $this->SetXY($textX, $y + ($cellHeight/2) - 1.5);
-            $textWidth = $cellWidth - ($checkboxSize + 8);
-            $this->Cell($textWidth, 3, $data[$i], 0, 0, 'C');
-            $itemsOnCurrentPage++;
+        }
+        
+        // Process remaining items in the last partial column
+        if ($remainingItems > 0) {
+            $lastCol = $fullColumns;
+            for ($row = 0; $row < $remainingItems; $row++) {
+                $itemIndex = $fullColumns * $rowsPerPage + $row;
+                $x = $leftMargin + ($lastCol * $cellWidth);
+                $y = $topMargin + ($row * $cellHeight);
+                
+                $this->Rect($x, $y, $cellWidth, $cellHeight);
+                $checkboxSize = 3;
+                $checkboxX = $x + $cellWidth - $checkboxSize - 3;
+                $checkboxY = $y + ($cellHeight/2) - ($checkboxSize/2);
+                $this->Checkbox($checkboxX, $checkboxY, $checkboxSize);
+                $textX = $x + 3;
+                $this->SetXY($textX, $y + ($cellHeight/2) - 1.5);
+                $textWidth = $cellWidth - ($checkboxSize + 8);
+                $this->Cell($textWidth, 3, $data[$itemIndex], 0, 0, 'C');
+            }
         }
     }
 }
