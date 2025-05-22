@@ -75,84 +75,95 @@ require_once 'barcode_system.php';
                 </div>
             </div>  
 
-           <form id="filter-form" class="filter-form card p-3 shadow-sm" action="" method="GET">
+<form id="filter-form" class="filter-form card p-3 shadow-sm" action="" method="GET">
     <input type="hidden" name="view" value="<?php echo $current_view; ?>">
     <h5 class="mb-3"><i class="fa-solid fa-arrow-up-wide-short"></i> Filter Options</h5>
-    <div class="row mb-3 align-items-end">
-        <div class="col-md-2">
-            <label for="filter-of" class="form-label mb-2">OF Number</label>
+
+    <div class="row g-2 align-items-end flex-wrap">
+           <!-- OF Number -->
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+            <label for="filter-of" class="form-label">OF Number</label>
             <div class="input-group">
                 <span class="input-group-text"><i class="fa-solid fa-hashtag"></i></span>
                 <input type="number" class="form-control" id="filter-of" name="filter_of"
-                    value="<?php echo htmlspecialchars($filter_of_number); ?>" placeholder="Enter OF number">
+                    value="<?php echo htmlspecialchars($filter_of_number); ?>" placeholder="OF #">
             </div>
         </div>
-        <div class="col-md-2">
-            <label for="filter-order" class="form-label mb-2">Order Number</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="fa-solid fa-receipt"></i></span>
-                <input type="text" class="form-control" id="filter-order" name="filter_order"
-                    value="<?php echo htmlspecialchars($filter_order ?? ''); ?>" placeholder="Enter order number">
-            </div>
-        </div>
-        <div class="col-md-2">
-            <label for="filter-size" class="form-label mb-2">Size</label>
+
+        <!-- Size -->
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+            <label for="filter-size" class="form-label">Size</label>
             <div class="input-group">
                 <span class="input-group-text"><i class="fa-solid fa-ruler"></i></span>
                 <input type="text" class="form-control" id="filter-size" name="filter_size"
-                    value="<?php echo htmlspecialchars($filter_size); ?>" placeholder="Enter size">
+                    value="<?php echo htmlspecialchars($filter_size); ?>" placeholder="Size">
             </div>
         </div>
-        <div class="col-md-2">
-            <label for="filter-category" class="form-label mb-2">Category</label>
+
+        <div class="col-md-auto">
+            <label for="filter-category" class="form-label">Category</label>
             <div class="input-group">
                 <span class="input-group-text"><i class="fa-solid fa-tags"></i></span>
                 <select class="form-select" id="filter-category" name="filter_category">
                     <option value="">Category</option>
-                    <option value="R" <?php echo ($filter_category ?? '') === 'R' ? 'selected' : ''; ?>>R</option>
-                    <option value="C" <?php echo ($filter_category ?? '') === 'C' ? 'selected' : ''; ?>>C</option>
-                    <option value="L" <?php echo ($filter_category ?? '') === 'L' ? 'selected' : ''; ?>>L</option>
-                    <option value="LL" <?php echo ($filter_category ?? '') === 'LL' ? 'selected' : ''; ?>>LL</option>
-                    <option value="CC" <?php echo ($filter_category ?? '') === 'CC' ? 'selected' : ''; ?>>CC</option>
-                    <option value="N" <?php echo ($filter_category ?? '') === 'N' ? 'selected' : ''; ?>>N</option>
+                    <?php
+                    $categories = ['R', 'C', 'L', 'LL', 'CC', 'N'];
+                    foreach ($categories as $cat) {
+                        $selected = ($filter_category ?? '') === $cat ? 'selected' : '';
+                        echo "<option value=\"$cat\" $selected>$cat</option>";
+                    }
+                    ?>
                 </select>
             </div>
         </div>
-        <div class="col-md-2">
-            <label for="filter-piece-name" class="form-label mb-2">Piece Name</label>
+
+        <div class="col-md-auto">
+            <label for="filter-piece-name" class="form-label">Piece</label>
             <div class="input-group">
                 <span class="input-group-text"><i class="fa-solid fa-puzzle-piece"></i></span>
                 <select class="form-select" id="filter-piece-name" name="filter_piece_name">
-                    <option value="">Piece Name</option>
-                    <option value="P" <?php echo ($filter_piece_name ?? '') === 'P' ? 'selected' : ''; ?>>P</option>
-                    <option value="V" <?php echo ($filter_piece_name ?? '') === 'V' ? 'selected' : ''; ?>>V</option>
-                    <option value="G" <?php echo ($filter_piece_name ?? '') === 'G' ? 'selected' : ''; ?>>G</option>
-                    <option value="M" <?php echo ($filter_piece_name ?? '') === 'M' ? 'selected' : ''; ?>>M</option>
+                    <option value="">Piece</option>
+                    <?php
+                    $pieces = ['P', 'V', 'G', 'M'];
+                    foreach ($pieces as $piece) {
+                        $selected = ($filter_piece_name ?? '') === $piece ? 'selected' : '';
+                        echo "<option value=\"$piece\" $selected>$piece</option>";
+                    }
+                    ?>
                 </select>
             </div>
         </div>
-        <div class="col-md-2">
-            <label for="filter-date" class="form-label mb-2">Date</label>
+
+          <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+            <label for="filter-order" class="form-label">Order #</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="fa-solid fa-receipt"></i></span>
+                <input type="text" class="form-control" id="filter-order" name="filter_order"
+                    value="<?php echo htmlspecialchars($filter_order ?? ''); ?>" placeholder="Order #">
+            </div>
+        </div>
+
+
+        <div class="col-md-auto">
+            <label for="filter-date" class="form-label">Date</label>
             <div class="input-group">
                 <span class="input-group-text"><i class="fa-solid fa-calendar"></i></span>
                 <input type="date" class="form-control" id="filter-date" name="filter_date"
-                    value="<?php echo htmlspecialchars($filter_date ?? ''); ?>" placeholder="Select date">
+                    value="<?php echo htmlspecialchars($filter_date ?? ''); ?>">
             </div>
         </div>
-    </div>
-    <div class="row align-items-end">
-        <div class="col-md-12">
-            <div class="d-flex gap-2 justify-content-center">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fa-solid fa-filter me-1"></i> Filter
-                </button>
-                <button type="button" id="clear-filters" class="btn btn-outline-dark">
-                    <i class="fa-solid fa-broom"></i> Clear
-                </button>
-            </div>
+
+        <div class="col-md-auto d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-filter me-1"></i> Filter
+            </button>
+            <button type="button" id="clear-filters" class="btn btn-outline-dark">
+                <i class="fa-solid fa-broom"></i> Clear
+            </button>
         </div>
     </div>
 </form>
+
         <div class="container-fluid py-3">
 
         <div class="d-none d-md-block">
