@@ -47,7 +47,12 @@ try {
                 b.chef,
                 b.name,
                 b.last_update  AS last_seen,
-                b.status
+                b.status,
+                -- Get the earliest creation date for this barcode
+                (SELECT MIN(h.action_time) 
+                 FROM jgr_barcodes_history h 
+                 WHERE h.full_barcode_name = b.full_barcode_name 
+                 AND h.action_type = 'INSERT') AS creation_date
             FROM barcodes b
             WHERE 
                 b.order_str LIKE '%X%'

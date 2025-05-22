@@ -200,18 +200,19 @@ require_once 'lostmovset.php';
                 <!-- Barcode List -->
             <div class="col mb-4">
                 <!-- Desktop Table -->
+                <!-- Desktop Table -->
                 <div class="d-none d-md-block">
                     <table class="table table-bordered table-hover align-middle">
                         <thead class="table-primary">
                             <tr>
                                 <th>OF Number</th><th>Size</th><th>Category</th><th>Piece</th>
                                 <th>Order</th><th>Status</th><th>Stage</th><th>Chef</th>
-                                <th>Used by</th><th>Full Barcode</th><th>Last Update</th><th>Tools</th>
+                                <th>Used by</th><th>Full Barcode</th><th>Creation Date</th><th>Last Update</th><th>Tools</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (empty($lost_barcodes)): ?>
-                                <tr><td colspan="11" class="text-center">No matching orders</td></tr>
+                                <tr><td colspan="13" class="text-center">No matching orders</td></tr>
                             <?php else: ?>
                                 <?php foreach ($lost_barcodes as $b): ?>
                                     <?php
@@ -222,6 +223,14 @@ require_once 'lostmovset.php';
                                             case 'pending':     $cls='bg-secondary'; $ico='fa-hourglass'; break;
                                             case 'error':       $cls='bg-danger'; $ico='fa-exclamation-circle'; break;
                                             default:            $cls='bg-info'; $ico='fa-info-circle';
+                                        }
+                                        
+                                        // Format creation date
+                                        $creation_date_formatted = '';
+                                        if (!empty($b['creation_date'])) {
+                                            $creation_date_formatted = date('Y-m-d H:i:s', strtotime($b['creation_date']));
+                                        } else {
+                                            $creation_date_formatted = 'N/A';
                                         }
                                     ?>
                                     <tr>
@@ -237,6 +246,12 @@ require_once 'lostmovset.php';
                                         <td><?php echo htmlspecialchars($b['chef']); ?></td>
                                         <td><?php echo htmlspecialchars($b['name']); ?></td>
                                         <td><?php echo htmlspecialchars($b['full_barcode_name']); ?></td>
+                                        <td>
+                                            <span class="text-muted" title="Initial creation time">
+                                                <i class="fas fa-calendar-plus me-1"></i>
+                                                <?php echo htmlspecialchars($creation_date_formatted); ?>
+                                            </span>
+                                        </td>
                                         <td><?php echo htmlspecialchars($b['last_seen']); ?></td>
                                         <td>
                                             <div class="btn-group">
@@ -253,6 +268,72 @@ require_once 'lostmovset.php';
                             <?php endif; ?>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Mobile Cards -->
+                <div class="d-md-none">
+                    <?php if (empty($lost_barcodes)): ?>
+                        <div class="alert alert-info text-center">No matching orders</div>
+                    <?php else: ?>
+                        <?php foreach ($lost_barcodes as $b): ?>
+                            <?php
+                                $st = strtolower($b['status'] ?? '');
+                                switch ($st) {
+                                    case 'completed':   $cls='bg-success'; $ico='fa-check'; break;
+                                    case 'in progress': $cls='bg-warning'; $ico='fa-clock'; break;
+                                    case 'pending':     $cls='bg-secondary'; $ico='fa-hourglass'; break;
+                                    case 'error':       $cls='bg-danger'; $ico='fa-exclamation-circle'; break;
+                                    default:            $cls='bg-info'; $ico='fa-info-circle';
+                                }
+                                
+                                // Format creation date for mobile
+                                $creation_date_formatted = '';
+                                if (!empty($b['creation_date'])) {
+                                    $creation_date_formatted = date('Y-m-d H:i:s', strtotime($b['creation_date']));
+                                } else {
+                                    $creation_date_formatted = 'N/A';
+                                }
+                            ?>
+                            <div class="card mb-3">
+                                <div class="card-header d-flex justify-content-between">
+                                    <strong><?php echo htmlspecialchars($b['piece_name']); ?></strong>
+                                    <span class="badge <?php echo $cls; ?>"><i class="fas <?php echo $ico; ?>"></i></span>
+                                </div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>OF:</span><span><?php echo htmlspecialchars($b['of_number']); ?></span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Size:</span><span><?php echo htmlspecialchars($b['size']); ?></span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Order:</span><span><?php echo htmlspecialchars($b['order_str']); ?></span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Piece:</span><span><?php echo htmlspecialchars($b['piece_name']); ?></span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span><i class="fas fa-calendar-plus me-1"></i>Created:</span>
+                                        <span class="text-muted"><?php echo htmlspecialchars($creation_date_formatted); ?></span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Last Update:</span><span><?php echo htmlspecialchars($b['last_seen']); ?></span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Actions:</span>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-primary edit-btn" data-barcode="<?php echo htmlspecialchars($b['full_barcode_name']); ?>" data-user="<?php echo htmlspecialchars($b['name']); ?>">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-danger delete-btn" data-barcode="<?php echo htmlspecialchars($b['full_barcode_name']); ?>">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
 
                 <!-- Mobile Cards -->
