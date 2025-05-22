@@ -222,13 +222,39 @@ function getRandomButtonScript() {
     return <<<SCRIPT
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const randomIcon = document.querySelector('.fa-arrows-rotate');
-        if (randomIcon) {
-            randomIcon.parentElement.style.cursor = 'pointer';
-            randomIcon.parentElement.addEventListener('click', function() {
-                alert('A random number will be generated for the lost barcode when you submit the form.');
+        const lostBarcodeCheckbox = document.getElementById('lost-barcode');
+        const lostBarcodeCount = document.getElementById('lost-barcode-count');
+        const lostBarcodeOrderNumber = document.getElementById('lost-barcode-order-number');
+        const nameSelect = document.getElementById('name');
+        const pieceNameSelect = document.getElementById('barcode-piece-name');
+        const rangeFromInput = document.getElementById('range-from');
+        const rangeToInput = document.getElementById('range-to');
+        
+        // Handle lost barcode checkbox
+        if (lostBarcodeCheckbox) {
+            lostBarcodeCheckbox.addEventListener('change', function() {
+                const isChecked = this.checked;
+                
+                // Enable/disable lost barcode specific fields
+                lostBarcodeCount.disabled = !isChecked;
+                lostBarcodeOrderNumber.disabled = !isChecked;
+                nameSelect.disabled = !isChecked;
+                
+                // Handle piece name and range requirements
+                if (isChecked) {
+                    pieceNameSelect.required = true;
+                    rangeFromInput.required = false;
+                    rangeToInput.required = false;
+                    lostBarcodeOrderNumber.required = true;
+                } else {
+                    pieceNameSelect.required = true;
+                    rangeFromInput.required = true;
+                    rangeToInput.required = true;
+                    lostBarcodeOrderNumber.required = false;
+                }
             });
         }
+        
         const clearFiltersBtn = document.getElementById('clear-filters');
         if (clearFiltersBtn) {
             clearFiltersBtn.addEventListener('click', function(e) {
@@ -292,7 +318,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
     
     if ($is_lost_barcode) {
         $lost_barcode_count = (int)($_POST['lost_barcode_count'] ?? 1);
-        if ($lost_barcode_count <= 0 || $lost_barcode_count > 100) $errors[] = "Lost barcode quantity must be between 1 and 100";
+        $lost_barcode_order_number = $_POST['lost_barcode_order_number'] ?? ''; // New field for order number
+        
+        if ($lost_barcode_count <= 0 || $lost_barcode_count > 100) {
+            $errors[] = "Lost barcode quantity must be between 1 and 100";
+        }
+        
+        // Validate that order number is provided for lost barcodes
+        if (empty($lost_barcode_order_number)) {
+            $errors[] = "Order number is required for lost barcodes";
+        } elseif (!is_numeric($lost_barcode_order_number) || (int)$lost_barcode_order_number <= 0) {
+            $errors[] = "Order number must be a positive number";
+        }
     } else {
         $range_from = (int)($_POST['range_from'] ?? 0);
         $range_to = (int)($_POST['range_to'] ?? 0);
@@ -319,20 +356,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
             $fontSize = 14;
 
             if ($is_lost_barcode) {
-                // Lost barcode handling - single PDF as before
+                // Lost barcode handling - use specified order number instead of random
                 $pdf = createNewPdf();
                 $col = 0;
                 $row = 0;
                 
                 $lost_barcode_count = (int)($_POST['lost_barcode_count'] ?? 1);
-                $lost_barcode_number = rand(1, 1000);
+                $base_order_number = (int)$lost_barcode_order_number; // Use the specified order number
+                
                 for ($i = 0; $i < $lost_barcode_count; $i++) {
-                    $formatted_number = "X" . $lost_barcode_number;
+                    $current_order_number = $base_order_number + $i; // Increment for multiple lost barcodes
+                    $formatted_number = "X" . $current_order_number;
                     $full_barcode_name = formatBarcodeString($of_number, $size, $category, $piece_name, $formatted_number);
+                    
                     if (!$generate_pdf_only) {
                         if (barcodeExists($conn, $full_barcode_name)) {
                             $duplicates[] = $full_barcode_name;
-                            $lost_barcode_number++;
                             continue;
                         }
                         
@@ -350,7 +389,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
                         $row = 0;
                         $pdf->AddPage();
                     }
-                    $lost_barcode_number++;
                 }
                 
                 $pdfFilename = "{$of_number}-{$size}{$category}-RTC.pdf";

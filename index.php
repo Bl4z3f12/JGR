@@ -23,12 +23,40 @@ require_once 'barcode_system.php';
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
+    
     <?php include 'includes/sidebar.php'; ?>
 
     <div class="main-content">
+
         <?php include 'includes/header.php'; ?>
         
         <div class="content">
+            <div class="container-fluid mt-3">
+    <?php if ($show_success && !empty($info_message)): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fa-solid fa-circle-check me-2"></i>
+            <strong>Success!</strong> <?php echo htmlspecialchars($info_message); ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
+    <?php if (!empty($warning_message)): ?>
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+            <strong>Warning!</strong> <?php echo htmlspecialchars($warning_message); ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
+    <?php if (!empty($error_message)): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fa-solid fa-circle-exclamation me-2"></i>
+            <strong>Error!</strong> <?php echo htmlspecialchars($error_message); ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+</div>
+
             
             <div class="content-header">
                 <h2 class="content-title"><?php echo getViewTitle($current_view); ?></h2>
@@ -300,7 +328,7 @@ require_once 'barcode_system.php';
         </div>
     </div>
     
-    <div class="modal <?php echo $show_modal ? 'show' : ''; ?>" id="barcode-modal">
+   <div class="modal <?php echo $show_modal ? 'show' : ''; ?>" id="barcode-modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Create New Barcodes</h5>
@@ -370,6 +398,13 @@ require_once 'barcode_system.php';
                                 class="form-control form-control-sm me-3" 
                                 style="width: 60px;"
                                 value="1" min="1" max="100" 
+                                disabled>
+                            <label class="form-check-label me-2" for="lost-barcode-order-number">Order #:</label>
+                            <input type="number" id="lost-barcode-order-number" name="lost_barcode_order_number"
+                                class="form-control form-control-sm" 
+                                style="width: 80px;"
+                                placeholder="123"
+                                min="1"
                                 disabled>
                         </div>
                     </div>
@@ -473,7 +508,6 @@ require_once 'barcode_system.php';
             </form>
         </div>
     </div>
-    
     <div id="pdf-modal">
         <div class="modal-content">
             <div class="modal-header d-flex justify-content-between align-items-center">
