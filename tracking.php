@@ -11,7 +11,6 @@ try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     $filter_of = isset($_GET['of_number']) ? trim($_GET['of_number']) : '';
-    $filter_date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
     $search_performed = !empty($filter_of);
     
     // Display stages configuration
@@ -59,7 +58,7 @@ try {
     $total_barcodes = 0;
     
     if ($search_performed) {
-        // Get barcode details for the OF with previous stage information and date filter
+        // Get barcode details for the OF with previous stage information (all dates)
         $query = "
         SELECT 
             b.full_barcode_name,
@@ -70,7 +69,7 @@ try {
             b.chef,
             IFNULL(b.stage, 'No Stage') as current_stage,
             b.last_update,
-            IFNULL(prev_h.stage, 'Initial') as previous_stage,
+            prev_h.stage as previous_stage,
             prev_h.action_time as previous_stage_time
         FROM barcodes b 
         LEFT JOIN jgr_barcodes_history h ON h.full_barcode_name = b.full_barcode_name
@@ -93,26 +92,22 @@ try {
                 SELECT MAX(h2.action_time)
                 FROM jgr_barcodes_history h2
                 WHERE h2.full_barcode_name = h1.full_barcode_name
-                AND DATE(h2.last_update) <= :date
             )
         ) prev_h ON prev_h.full_barcode_name = b.full_barcode_name AND prev_h.rn = 1
         WHERE b.of_number = :of_number
-        AND h.full_barcode_name IS NOT NULL
-        AND DATE(h.last_update) = :date
-        AND h.action_type IN ('INSERT', 'UPDATE')
-        AND h.last_update = (
+        AND (h.full_barcode_name IS NOT NULL OR b.full_barcode_name IS NOT NULL)
+        AND (h.action_type IN ('INSERT', 'UPDATE') OR h.action_type IS NULL)
+        AND (h.last_update = (
             SELECT MAX(h2.last_update)
             FROM jgr_barcodes_history h2
             WHERE h2.full_barcode_name = h.full_barcode_name
-            AND DATE(h2.last_update) <= :date
-        )
-        ORDER BY b.stage, b.piece_name, b.size, b.category
+        ) OR h.last_update IS NULL)
+        ORDER BY b.last_update DESC, b.stage, b.piece_name, b.size, b.category
         ";
         
         $stmt = $pdo->prepare($query);
         $stmt->execute([
-            ':of_number' => $filter_of,
-            ':date' => $filter_date
+            ':of_number' => $filter_of
         ]);
         $of_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
@@ -153,7 +148,7 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OF Barcode Analyzer</title>
+    <title>OF Number Progress Path</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <?php include 'includes/head.php'; ?>
@@ -168,15 +163,15 @@ try {
             <div class="container-fluid">
         
     <!-- Search Section -->
-    <div class="bg-gradient bg-primary text-white py-5 mb-4 mt-5">
+    <div class="bg-gradient bg-primary text-white py-2">
         <div class="container-fluid">
             <div class="row justify-content-center">
                 <div class="col-md-10">
                     <h1 class="text-center mb-4">
-                        <i class="fas fa-barcode"></i> OF Barcode Analyzer
+                        OF Number Progress Path
                     </h1>
-                    <form method="GET" class="row g-3">
-                        <div class="col-md-5">
+                    <form method="GET" class="row g-3 justify-content-center">
+                        <div class="col-md-6">
                             <input 
                                 type="text" 
                                 name="of_number" 
@@ -186,18 +181,14 @@ try {
                                 required
                             >
                         </div>
-                        <div class="col-md-4">
-                            <input 
-                                type="date" 
-                                name="date" 
-                                class="form-control form-control-lg" 
-                                value="<?php echo htmlspecialchars($filter_date); ?>"
-                                required
-                            >
-                        </div>
                         <div class="col-md-3">
                             <button type="submit" class="btn btn-light btn-lg w-100">
                                 <i class="fas fa-search"></i> Analyze
+                            </button>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" id="clearSearch" class="btn btn-outline-light btn-lg w-100">
+                                <i class="fas fa-times"></i> Clear
                             </button>
                         </div>
                     </form>
@@ -217,6 +208,9 @@ try {
                                 <div class="card-body text-center">
                                     <h3 class="text-primary">OF Number: <?php echo htmlspecialchars($filter_of); ?></h3>
                                     <h4 class="text-muted">Total Barcodes: <span class="badge bg-primary fs-5"><?php echo $total_barcodes; ?></span></h4>
+                                    <p class="text-muted mb-0">
+                                        <i class="fas fa-calendar-alt"></i> Showing all historical data
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -249,10 +243,69 @@ try {
                     </div>
                 </div>
 
+                <!-- Filter Tool -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-filter"></i> Filter Options</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-lg-3 col-md-6">
+                                <label for="stageFilter" class="form-label">Filter by Current Stage:</label>
+                                <select id="stageFilter" class="form-select">
+                                    <option value="">All Stages</option>
+                                    <?php foreach ($stage_totals as $stage => $count): ?>
+                                        <option value="<?php echo htmlspecialchars($stage); ?>">
+                                            <?php echo htmlspecialchars($stage); ?> (<?php echo $count; ?>)
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-lg-3 col-md-6">
+                                <label for="barcodeFilter" class="form-label">Filter by Barcode Type:</label>
+                                <select id="barcodeFilter" class="form-select">
+                                    <option value="">All Barcodes</option>
+                                    <option value="x-ending">Barcodes ending with X</option>
+                                    <option value="non-x-ending">Barcodes not ending with X</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-3 col-md-6">
+                                <label for="searchBarcode" class="form-label">Search Barcode:</label>
+                                <input type="text" id="searchBarcode" class="form-control" placeholder="Search barcode...">
+                            </div>
+                            <div class="col-lg-3 col-md-6">
+                                <label for="dateRangeFilter" class="form-label">Date Range Filter:</label>
+                                <select id="dateRangeFilter" class="form-select">
+                                    <option value="">All Dates</option>
+                                    <option value="today">Today</option>
+                                    <option value="yesterday">Yesterday</option>
+                                    <option value="last7days">Last 7 Days</option>
+                                    <option value="last30days">Last 30 Days</option>
+                                    <option value="thismonth">This Month</option>
+                                    <option value="lastmonth">Last Month</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-3 col-md-6">
+                                <label for="specificDate" class="form-label">Specific Date:</label>
+                                <input type="date" id="specificDate" class="form-control">
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <button id="clearFilters" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times"></i> Clear All Filters
+                                </button>
+                                <span id="filterStatus" class="ms-3 text-muted"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Detailed Table -->
                 <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
                         <h5 class="mb-0"><i class="fas fa-list"></i> Detailed Barcode Information</h5>
+                        <span id="visibleCount" class="badge bg-primary">Showing <?php echo $total_barcodes; ?> of <?php echo $total_barcodes; ?> records</span>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -269,26 +322,41 @@ try {
                                         <th>Last Update</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="barcodeTableBody">
                                     <?php foreach ($of_data as $row): ?>
                                         <?php 
                                             $current_stage = $row['current_stage'];
                                             $previous_stage = $row['previous_stage'];
+                                            $barcode = $row['full_barcode_name'];
+                                            $ends_with_x = preg_match('/-X\d+$/', $barcode);
                                             
-                                            // Fix the "No Stage" issue - show null for previous stage when current is "No Stage"
-                                            if ($current_stage === 'No Stage') {
-                                                $previous_stage = null;
+                                            // Determine previous stage display
+                                            $previous_stage_display = '';
+                                            if ($previous_stage) {
+                                                $previous_stage_display = $previous_stage;
+                                            } else if ($current_stage === 'No Stage') {
+                                                $previous_stage_display = ''; // Leave blank for "No Stage"
+                                            } else {
+                                                $previous_stage_display = 'Not present'; // Default for other cases
                                             }
                                             
                                             $current_stage_props = isset($display_stages[$current_stage]) ? $display_stages[$current_stage] : ['color' => 'secondary'];
                                             $previous_stage_props = isset($display_stages[$previous_stage]) ? $display_stages[$previous_stage] : ['color' => 'light'];
                                             $current_badge_color = $current_stage_props['color'];
                                             $previous_badge_color = $previous_stage_props['color'];
-                                            if ($previous_stage === 'Initial') $previous_badge_color = 'success';
+                                            if ($previous_stage_display === 'Not present') $previous_badge_color = 'warning';
                                         ?>
-                                        <tr class="barcode-row" data-current-stage="<?php echo htmlspecialchars($current_stage); ?>">
+                                        <tr class="barcode-row" 
+                                            data-current-stage="<?php echo htmlspecialchars($current_stage); ?>"
+                                            data-barcode="<?php echo htmlspecialchars($barcode); ?>"
+                                            data-last-update="<?php echo $row['last_update'] ? date('Y-m-d', strtotime($row['last_update'])) : ''; ?>">
                                             <td>
-                                                <code><?php echo htmlspecialchars($row['full_barcode_name']); ?></code>
+                                                <code class="barcode-text">
+                                                    <?php echo htmlspecialchars($barcode); ?>
+                                                    <?php if ($ends_with_x): ?>
+                                                        <i class="fas fa-times-circle text-warning ms-1" title="Ends with X"></i>
+                                                    <?php endif; ?>
+                                                </code>
                                             </td>
                                             <td>
                                                 <span class="badge bg-<?php echo $current_badge_color; ?>">
@@ -296,9 +364,9 @@ try {
                                                 </span>
                                             </td>
                                             <td>
-                                                <?php if ($previous_stage): ?>
+                                                <?php if ($previous_stage_display): ?>
                                                     <span class="badge bg-<?php echo $previous_badge_color; ?>">
-                                                        <?php echo htmlspecialchars($previous_stage); ?>
+                                                        <?php echo htmlspecialchars($previous_stage_display); ?>
                                                     </span>
                                                     <?php if ($row['previous_stage_time']): ?>
                                                         <br><small class="text-muted">
@@ -306,7 +374,7 @@ try {
                                                         </small>
                                                     <?php endif; ?>
                                                 <?php else: ?>
-                                                    <span class="badge bg-light text-dark">null</span>
+                                                    <!-- Leave blank -->
                                                 <?php endif; ?>
                                             </td>
                                             <td><?php echo htmlspecialchars($row['piece_name'] ?? '-'); ?></td>
@@ -332,7 +400,7 @@ try {
                         <div class="card-body">
                             <i class="fas fa-search fa-3x text-muted mb-3"></i>
                             <h4 class="text-muted">No Results Found</h4>
-                            <p class="text-muted">No barcodes found for OF Number: <strong><?php echo htmlspecialchars($filter_of); ?></strong> on date: <strong><?php echo htmlspecialchars($filter_date); ?></strong></p>
+                            <p class="text-muted">No barcodes found for OF Number: <strong><?php echo htmlspecialchars($filter_of); ?></strong></p>
                             <a href="?" class="btn btn-primary">
                                 <i class="fas fa-arrow-left"></i> Search Again
                             </a>
@@ -342,12 +410,10 @@ try {
             <?php endif; ?>
         <?php else: ?>
             <!-- Welcome Message -->
-            <div class="text-center py-5">
+            <div class="text-center">
                 <div class="card border-0 shadow-sm">
                     <div class="card-body">
-                        <i class="fas fa-barcode fa-4x text-primary mb-3"></i>
-                        <h4>Welcome to OF Barcode Analyzer</h4>
-                        <p class="text-muted">Enter an OF number and select a date above to analyze barcode distribution and stages for that specific day.</p>
+                        <p class="text-muted">Enter an OF number above to analyze barcode distribution and stages across all historical data.</p>
                     </div>
                 </div>
             </div>
@@ -361,6 +427,16 @@ try {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         $(document).ready(function() {
+            const totalBarcodes = <?php echo $total_barcodes; ?>;
+            
+            // Clear search functionality
+            $('#clearSearch').click(function() {
+                // Clear the OF input field
+                $('input[name="of_number"]').val('');
+                // Submit the form to reset the page
+                window.location.href = 'tracking.php';
+            });
+            
             // Add hover effects using jQuery
             $('.stage-card').hover(
                 function() {
@@ -375,19 +451,217 @@ try {
             $('.stage-card').click(function() {
                 var stageName = $(this).data('stage');
                 
-                // Toggle visibility of table rows based on stage
-                if ($(this).hasClass('active-filter')) {
-                    // Remove filter - show all rows
-                    $('.barcode-row').show();
-                    $('.stage-card').removeClass('active-filter bg-secondary').addClass('bg-white');
-                } else {
-                    // Apply filter - show only rows with matching stage
-                    $('.stage-card').removeClass('active-filter bg-secondary').addClass('bg-white');
-                    $(this).addClass('active-filter bg-secondary').removeClass('bg-white');
-                    
-                    $('.barcode-row').hide();
-                    $('.barcode-row[data-current-stage="' + stageName + '"]').show();
+                // Update the stage filter dropdown
+                $('#stageFilter').val(stageName);
+                applyFilters();
+            });
+            
+            // Date helper functions
+            function getDateRange(rangeType) {
+                const today = new Date();
+                const todayStr = today.toISOString().split('T')[0];
+                
+                switch(rangeType) {
+                    case 'today':
+                        return { from: todayStr, to: todayStr };
+                    case 'yesterday':
+                        const yesterday = new Date(today);
+                        yesterday.setDate(yesterday.getDate() - 1);
+                        const yesterdayStr = yesterday.toISOString().split('T')[0];
+                        return { from: yesterdayStr, to: yesterdayStr };
+                    case 'last7days':
+                        const last7days = new Date(today);
+                        last7days.setDate(last7days.getDate() - 7);
+                        return { from: last7days.toISOString().split('T')[0], to: todayStr };
+                    case 'last30days':
+                        const last30days = new Date(today);
+                        last30days.setDate(last30days.getDate() - 30);
+                        return { from: last30days.toISOString().split('T')[0], to: todayStr };
+                    case 'thismonth':
+                        const thisMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+                        return { from: thisMonthStart.toISOString().split('T')[0], to: todayStr };
+                    case 'lastmonth':
+                        const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                        const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
+                        return { 
+                            from: lastMonthStart.toISOString().split('T')[0], 
+                            to: lastMonthEnd.toISOString().split('T')[0] 
+                        };
+                    default:
+                        return null;
                 }
+            }
+            
+            function isDateInRange(dateStr, fromDate, toDate) {
+                if (!dateStr) return false;
+                const date = new Date(dateStr);
+                const from = new Date(fromDate);
+                const to = new Date(toDate);
+                to.setHours(23, 59, 59, 999); // Include the entire end date
+                return date >= from && date <= to;
+            }
+
+            // Filter functionality
+            function applyFilters() {
+                const stageFilter = $('#stageFilter').val();
+                const barcodeFilter = $('#barcodeFilter').val();
+                const searchText = $('#searchBarcode').val().toLowerCase();
+                const dateRangeFilter = $('#dateRangeFilter').val();
+                const specificDate = $('#specificDate').val();
+                
+                let visibleCount = 0;
+                let activeFilters = [];
+                
+                // Get date range
+                let dateRange = null;
+                if (specificDate) {
+                    // If specific date is selected, use it
+                    dateRange = { from: specificDate, to: specificDate };
+                } else if (dateRangeFilter) {
+                    dateRange = getDateRange(dateRangeFilter);
+                }
+                
+                $('.barcode-row').each(function() {
+                    const row = $(this);
+                    const currentStage = row.data('current-stage');
+                    const barcode = row.data('barcode');
+                    const barcodeSearch = barcode.toLowerCase();
+                    const lastUpdate = row.data('last-update');
+                    
+                    // Check if barcode contains -X followed by numbers
+                    const endsWithX = /-X\d+$/.test(barcode);
+                    
+                    let showRow = true;
+                    
+                    // Stage filter
+                    if (stageFilter && currentStage !== stageFilter) {
+                        showRow = false;
+                    }
+                    
+                    // Barcode type filter
+                    if (barcodeFilter === 'x-ending' && !endsWithX) {
+                        showRow = false;
+                    } else if (barcodeFilter === 'non-x-ending' && endsWithX) {
+                        showRow = false;
+                    }
+                    
+                    // Search filter
+                    if (searchText && !barcodeSearch.includes(searchText)) {
+                        showRow = false;
+                    }
+                    
+                    // Date filter
+                    if (dateRange && !isDateInRange(lastUpdate, dateRange.from, dateRange.to)) {
+                        showRow = false;
+                    }
+                    
+                    if (showRow) {
+                        row.show();
+                        visibleCount++;
+                    } else {
+                        row.hide();
+                    }
+                });
+                
+                // Update visible count
+                $('#visibleCount').text(`Showing ${visibleCount} of ${totalBarcodes} records`);
+                
+                // Update filter status
+                if (stageFilter) activeFilters.push(`Stage: ${stageFilter}`);
+                if (barcodeFilter === 'x-ending') activeFilters.push('Barcodes ending with X');
+                if (barcodeFilter === 'non-x-ending') activeFilters.push('Barcodes not ending with X');
+                if (searchText) activeFilters.push(`Search: "${searchText}"`);
+                if (specificDate) {
+                    activeFilters.push(`Specific Date: ${specificDate}`);
+                } else if (dateRange) {
+                    const rangeLabels = {
+                        'today': 'Today',
+                        'yesterday': 'Yesterday',
+                        'last7days': 'Last 7 Days',
+                        'last30days': 'Last 30 Days',
+                        'thismonth': 'This Month',
+                        'lastmonth': 'Last Month'
+                    };
+                    activeFilters.push(`Date: ${rangeLabels[dateRangeFilter]}`);
+                }
+                
+                if (activeFilters.length > 0) {
+                    $('#filterStatus').html(`<i class="fas fa-filter"></i> Active filters: ${activeFilters.join(', ')}`);
+                } else {
+                    $('#filterStatus').text('');
+                }
+                
+                // Update stage cards highlighting
+                $('.stage-card').removeClass('active-filter bg-secondary text-white').addClass('bg-white');
+                if (stageFilter) {
+                    $(`.stage-card[data-stage="${stageFilter}"]`).addClass('active-filter bg-secondary text-white').removeClass('bg-white');
+                }
+            }
+            
+            // Event listeners for filters
+            $('#stageFilter, #barcodeFilter, #dateRangeFilter').change(function() {
+                // Clear specific date when date range is selected
+                if ($(this).attr('id') === 'dateRangeFilter' && $(this).val()) {
+                    $('#specificDate').val('');
+                }
+                applyFilters();
+            });
+            
+            $('#searchBarcode').on('input', function() {
+                applyFilters();
+            });
+            
+            $('#specificDate').change(function() {
+                // Clear date range when specific date is selected
+                if ($(this).val()) {
+                    $('#dateRangeFilter').val('');
+                }
+                applyFilters();
+            });
+            
+            // Clear all filters
+            $('#clearFilters').click(function() {
+                $('#stageFilter').val('');
+                $('#barcodeFilter').val('');
+                $('#searchBarcode').val('');
+                $('#dateRangeFilter').val('');
+                $('#specificDate').val('');
+                applyFilters();
+            });
+            
+            // Event listeners for filters
+            $('#stageFilter, #barcodeFilter, #dateRangeFilter').change(function() {
+                if ($(this).attr('id') === 'dateRangeFilter') {
+                    const selectedValue = $(this).val();
+                    if (selectedValue === 'custom') {
+                        $('#customDateRow').show();
+                    } else {
+                        $('#customDateRow').hide();
+                        $('#dateFrom').val('');
+                        $('#dateTo').val('');
+                    }
+                }
+                applyFilters();
+            });
+            
+            $('#searchBarcode').on('input', function() {
+                applyFilters();
+            });
+            
+            $('#dateFrom, #dateTo').change(function() {
+                applyFilters();
+            });
+            
+            // Clear all filters
+            $('#clearFilters').click(function() {
+                $('#stageFilter').val('');
+                $('#barcodeFilter').val('');
+                $('#searchBarcode').val('');
+                $('#dateRangeFilter').val('');
+                $('#dateFrom').val('');
+                $('#dateTo').val('');
+                $('#customDateRow').hide();
+                applyFilters();
             });
             
             // Add transition effects

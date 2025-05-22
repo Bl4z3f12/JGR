@@ -13,6 +13,29 @@ if (!is_dir($pdf_directory)) {
     mkdir($pdf_directory, 0755, true);
 }
 
+// Handle file deletion if requested
+$delete_message = '';
+$delete_success = false;
+if (isset($_POST['delete_file']) && !empty($_POST['delete_file'])) {
+    $file_name = $_POST['delete_file'];
+    // Security check - only allow PDF files with specific format
+    if (preg_match('/^barcodes-\d+\.pdf$/', $file_name)) {
+        $file_path = $pdf_directory . $file_name;
+        if (file_exists($file_path)) {
+            if (unlink($file_path)) {
+                $delete_message = "File '$file_name' has been successfully deleted.";
+                $delete_success = true;
+            } else {
+                $delete_message = "Error: Unable to delete file '$file_name'.";
+            }
+        } else {
+            $delete_message = "Error: File '$file_name' not found.";
+        }
+    } else {
+        $delete_message = "Error: Invalid file format.";
+    }
+}
+
 // Function to get all PDF files from the directory
 function getPdfFiles($directory) {
     $pdf_files = [];
@@ -156,6 +179,14 @@ if ($open_explorer) {
             <div class="container-fluid">
                 <h4 class="mb-4" style="font-size: 18px;">Barcode PDF Files</h4>
                 
+                <!-- Delete Message Alert -->
+                <?php if (!empty($delete_message)): ?>
+                    <div class="alert <?php echo $delete_success ? 'alert-success' : 'alert-danger'; ?> alert-dismissible fade show">
+                        <?php echo htmlspecialchars($delete_message); ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <?php endif; ?>
+                
                 <!-- Search and Filter Form -->
                 <form id="pdf-search-form" method="GET" action="" class="mb-4">
                     <div class="row g-3">
@@ -208,10 +239,16 @@ if ($open_explorer) {
                                                 Time: <?php echo date("H:i", $pdf['modified']); ?>
                                             </small>
                                         </p>
-                                        <div class="btn-group">
+                                        <div class="btn-group d-flex flex-wrap gap-1">
                                             <a href="track files/<?php echo urlencode($pdf['name']); ?>" target="_blank" class="btn btn-sm btn-secondary">
                                                 <i class="fas fa-eye"></i> View
                                             </a>
+                                            <button type="button" class="btn btn-sm btn-danger delete-btn" 
+                                                    data-filename="<?php echo htmlspecialchars($pdf['name']); ?>"
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#deleteModal">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -229,6 +266,34 @@ if ($open_explorer) {
         </div>
     </div>
 
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this PDF file?</p>
+                    <p><strong id="fileToDelete"></strong></p>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> This action cannot be undone!
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form method="POST" style="display: inline;">
+                        <input type="hidden" name="delete_file" id="deleteFileName" value="">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Delete File
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
@@ -237,8 +302,19 @@ if ($open_explorer) {
             $('#clear-pdf-filters').click(function() {
                 window.location.href = 'tracker_open_path.php';
             });
+
+            // Handle delete button click
+            $('.delete-btn').click(function() {
+                var filename = $(this).data('filename');
+                $('#fileToDelete').text(filename);
+                $('#deleteFileName').val(filename);
+            });
+
+            // Auto-hide success/error alerts after 5 seconds
+            setTimeout(function() {
+                $('.alert-success, .alert-danger').fadeOut('slow');
+            }, 5000);
         });
     </script>
 </body>
 </html>
-?>

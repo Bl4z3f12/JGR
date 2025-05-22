@@ -86,7 +86,7 @@ require_once 'barcode_system.php';
             <div class="input-group input-group-sm">
                 <span class="input-group-text"><i class="fa-solid fa-hashtag"></i></span>
                 <input type="number" class="form-control" id="filter-of" name="filter_of"
-                    value="" placeholder="OF #">
+                    value="" placeholder="OF">
             </div>
         </div>
 
@@ -134,11 +134,11 @@ require_once 'barcode_system.php';
 
         <!-- Order -->
         <div class="flex-fill">
-            <label for="filter-order" class="form-label small">Order #</label>
+            <label for="filter-order" class="form-label small">Order</label>
             <div class="input-group input-group-sm">
-                <span class="input-group-text"><i class="fa-solid fa-receipt"></i></span>
+                <span class="input-group-text"><i class="fas fa-sort"></i></span>
                 <input type="text" class="form-control" id="filter-order" name="filter_order"
-                    value="" placeholder="Order #">
+                    value="" placeholder="Order">
             </div>
         </div>
 

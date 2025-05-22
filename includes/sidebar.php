@@ -11,6 +11,14 @@
                 <div class="sidebar-item-icon"><i class="fa-solid fa-house-chimney"></i></div>
                 Dashboard
             </a>
+            <a href="production.php" id="productionNavLink" class="sidebar-item text-white <?php echo $current_view === 'production.php' ? 'active' : ''; ?>">
+                <div class="sidebar-item-icon"><i class="fa-solid fa-chart-pie"></i></div>
+                Production 
+            </a>
+             <a href="tracking.php" class="sidebar-item text-white <?php echo $current_view === 'tracking.php' ? 'active' : ''; ?>">
+                <div class="sidebar-item-icon"><i class="fa-solid fa-location-crosshairs"></i></div>
+                OF_ Progress Path
+            </a>
             <a href="RTCpublic.php" class="sidebar-item text-white <?php echo $current_view === 'RTCpublic.php' ? 'active' : ''; ?>" tabindex="0">
                 <div class="sidebar-item-icon"><i class="fa-solid fa-circle-plus"></i></div>
                 RTC [PUBLIC]
@@ -18,14 +26,6 @@
             <a href="ofsizedetails.php" class="sidebar-item text-white <?php echo $current_view === 'ofsizedetails.php' ? 'active' : ''; ?>" onclick="document.getElementById('loadingOverlay').style.display = 'flex'">
                 <div class="sidebar-item-icon"><i class="fa-solid fa-ruler-combined"></i></div>
                 OF_ Size Details
-            </a>
-            <a href="production.php" id="productionNavLink" class="sidebar-item text-white <?php echo $current_view === 'production.php' ? 'active' : ''; ?>">
-                <div class="sidebar-item-icon"><i class="fa-solid fa-chart-pie"></i></div>
-                Production 
-            </a>
-             <a href="tracking.php" class="sidebar-item text-white <?php echo $current_view === 'tracking.php' ? 'active' : ''; ?>">
-                <div class="sidebar-item-icon"><i class="fa-solid fa-chart-line"></i></div>
-                OF_Track
             </a>
              <a href="lostmov.php" class="sidebar-item text-white <?php echo $current_view === 'lostmov.php' ? 'active' : ''; ?>">
                 <div class="sidebar-item-icon"><i class="fa-solid fa-question"></i></div>
@@ -44,10 +44,8 @@
                     <div class="sidebar-item-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
                     History (logs)
                 </a>
-                <a href="scanner_system_download.php" class="sidebar-item text-white <?php echo $current_view === 'scanner_system_download.php' ? 'active' : ''; ?>">
-                    <div class="sidebar-item-icon"><i class="fas fa-download me-2"></i></div>
-                    Scanner System Download
-                </a>
+                -->
+                <!--
                 <a href="onlinewebsite.php" class="sidebar-item text-white <?php echo $current_view === 'onlinewebsite.php' ? 'active' : ''; ?>">
                     <div class="sidebar-item-icon"><i class="fa-solid fa-earth-africa"></i></div>
                     Online Website
@@ -57,6 +55,11 @@
                 <div class="sidebar-item-icon"><i class="fa-solid fa-plane-departure"></i></div>
                 Lancement [Realisation soon]
             </a>
+            
+            <a href="scanner_system_download.php" class="sidebar-item text-white <?php echo $current_view === 'scanner_system_download.php' ? 'active' : ''; ?>">
+                    <div class="sidebar-item-icon"><i class="fas fa-download me-2"></i></div>
+                    Scanner System Download
+                </a>
         </div>
         
         <!-- Footer note positioned at the bottom -->
@@ -98,6 +101,10 @@
                     <div class="sidebar-item-icon"><i class="fa-solid fa-chart-pie"></i></div>
                     Production
                 </a>
+                <a href="tracking.php" class="sidebar-item text-white <?php echo $current_view === 'tracking.php' ? 'active' : ''; ?>">
+                    <div class="sidebar-item-icon"><i class="fa-solid fa-location-crosshairs"></i></div>
+                    OF_ Progress Path
+                </a>
                 <a href="lostmov.php" class="sidebar-item text-white <?php echo $current_view === 'lostmov.php' ? 'active' : ''; ?>">
                     <div class="sidebar-item-icon"><i class="fa-solid fa-question"></i></div>
                     Lost Barcodes
@@ -115,18 +122,21 @@
                     <div class="sidebar-item-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
                     History (logs)
                 </a>
-                <a href="scanner_system_download.php" class="sidebar-item text-white <?php echo $current_view === 'scanner_system_download.php' ? 'active' : ''; ?>">
-                    <div class="sidebar-item-icon"><i class="fas fa-download me-2"></i></div>
-                    Scanner System Download
-                </a>
+                -->
+                <!--
                 <a href="onlinewebsite.php" class="sidebar-item text-white <?php echo $current_view === 'onlinewebsite.php' ? 'active' : ''; ?>">
                     <div class="sidebar-item-icon"><i class="fa-solid fa-earth-africa"></i></div>
                     Online Website
                 </a>
--->
+                --> 
                 <a href="start.php" class="sidebar-item text-white <?php echo $current_view === 'start.php' ? 'active' : ''; ?>">
                     <div class="sidebar-item-icon"><i class="fa-solid fa-plane-departure"></i></div>
                     Lancement
+                </a>
+                
+                <a href="scanner_system_download.php" class="sidebar-item text-white <?php echo $current_view === 'scanner_system_download.php' ? 'active' : ''; ?>">
+                    <div class="sidebar-item-icon"><i class="fas fa-download me-2"></i></div>
+                    Scanner System Download
                 </a>
                 <a href="logout.php" class="sidebar-item text-white">
                     <div class="sidebar-item-icon"><i class="fas fa-sign-out-alt"></i></div>

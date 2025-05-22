@@ -248,7 +248,6 @@ require_once 'lostmovset.php';
                                         <td><?php echo htmlspecialchars($b['full_barcode_name']); ?></td>
                                         <td>
                                             <span class="text-muted" title="Initial creation time">
-                                                <i class="fas fa-calendar-plus me-1"></i>
                                                 <?php echo htmlspecialchars($creation_date_formatted); ?>
                                             </span>
                                         </td>
@@ -313,7 +312,7 @@ require_once 'lostmovset.php';
                                         <span>Piece:</span><span><?php echo htmlspecialchars($b['piece_name']); ?></span>
                                     </li>
                                     <li class="list-group-item d-flex justify-content-between">
-                                        <span><i class="fas fa-calendar-plus me-1"></i>Created:</span>
+                                        <span>Created:</span>
                                         <span class="text-muted"><?php echo htmlspecialchars($creation_date_formatted); ?></span>
                                     </li>
                                     <li class="list-group-item d-flex justify-content-between">

@@ -91,6 +91,23 @@ if (!isset($pdf_files['error'])) {
 }
 ?>
 
+<!-- Display success/error messages -->
+<?php if (isset($_GET['success'])): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <?php echo htmlspecialchars(urldecode($_GET['success'])); ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+<?php endif; ?>
+
+<?php if (isset($_GET['error'])): ?>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <?php echo htmlspecialchars(urldecode($_GET['error'])); ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+<?php endif; ?>
+
 <!-- Search and Filter Form -->
 <form id="pdf-search-form" method="GET" action="" class="mb-4">
     <div class="row g-3">
@@ -111,7 +128,7 @@ if (!isset($pdf_files['error'])) {
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-filter me-1"></i> Apply Filters
                 </button>
-                <button type="button" id="clear-pdf-filters" class="btn btn-outline-secondary">
+                <button type="button" id="clear-pdf-filters" class="btn btn-outline-secondary" onclick="clearFilters()">
                     <i class="fa-solid fa-broom me-1"></i> Clear
                 </button>
             </div>
@@ -140,11 +157,8 @@ if (!isset($pdf_files['error'])) {
                                 Time: <?php echo date("H:i", $pdf['modified']); ?>
                             </small>
                         </p>
-                        <div class="btn-group">
-                            <a href="pdf.php?download=<?php echo urlencode($pdf['name']); ?>" class="btn btn-sm btn-primary">
-                                <i class="fas fa-download"></i> Download
-                            </a>
-                            <a href="barcodes/<?php echo urlencode($pdf['name']); ?>" target="_blank" class="btn btn-sm btn-secondary">
+                        <div class="btn-group d-flex gap-1">
+                            <a href="barcodes/<?php echo urlencode($pdf['name']); ?>" target="_blank" class="btn btn-sm btn-secondary flex-fill">
                                 <i class="fas fa-eye"></i> View
                             </a>
                         </div>
@@ -160,3 +174,19 @@ if (!isset($pdf_files['error'])) {
     </div>
     <?php endif; ?>
 <?php endif; ?>
+
+<!-- Hidden form for deletion -->
+<script>
+// Simple clear filters functionality
+function clearFilters() {
+    window.location.href = window.location.pathname;
+}
+
+// Auto-hide alerts
+setTimeout(function() {
+    var alerts = document.querySelectorAll('.alert-success, .alert-danger');
+    for (var i = 0; i < alerts.length; i++) {
+        alerts[i].style.display = 'none';
+    }
+}, 5000);
+</script>
