@@ -75,94 +75,179 @@ require_once 'barcode_system.php';
                 </div>
             </div>  
 
-<form id="filter-form" class="filter-form card p-3 shadow-sm" action="" method="GET">
-    <input type="hidden" name="view" value="<?php echo $current_view; ?>">
-    <h5 class="mb-3"><i class="fa-solid fa-arrow-up-wide-short"></i> Filter Options</h5>
+ <form id="filter-form" class="filter-form card p-3 shadow-sm" action="" method="GET">
+            <input type="hidden" name="view" value="list">
+            <h5 class="mb-3"><i class="fa-solid fa-arrow-up-wide-short"></i> Filter Options</h5>
 
-    <div class="row g-2 align-items-end flex-wrap">
-           <!-- OF Number -->
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-            <label for="filter-of" class="form-label">OF Number</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="fa-solid fa-hashtag"></i></span>
-                <input type="number" class="form-control" id="filter-of" name="filter_of"
-                    value="<?php echo htmlspecialchars($filter_of_number); ?>" placeholder="OF #">
+            <!-- Desktop Layout (lg and up) -->
+            <div class="d-none d-lg-flex flex-nowrap gap-2 align-items-end">
+                <!-- OF Number -->
+                <div class="flex-fill">
+                    <label for="filter-of" class="form-label small">OF Number</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"><i class="fa-solid fa-hashtag"></i></span>
+                        <input type="number" class="form-control" id="filter-of" name="filter_of"
+                            value="" placeholder="OF #">
+                    </div>
+                </div>
+
+                <!-- Size -->
+                <div class="flex-fill">
+                    <label for="filter-size" class="form-label small">Size</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"><i class="fa-solid fa-ruler"></i></span>
+                        <input type="text" class="form-control" id="filter-size" name="filter_size"
+                            value="" placeholder="Size">
+                    </div>
+                </div>
+
+                <!-- Category -->
+                <div class="flex-fill">
+                    <label for="filter-category" class="form-label small">Category</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"><i class="fa-solid fa-tags"></i></span>
+                        <select class="form-select" id="filter-category" name="filter_category">
+                            <option value="">Category</option>
+                            <option value="R">R</option>
+                            <option value="C">C</option>
+                            <option value="L">L</option>
+                            <option value="LL">LL</option>
+                            <option value="CC">CC</option>
+                            <option value="N">N</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Piece -->
+                <div class="flex-fill">
+                    <label for="filter-piece-name" class="form-label small">Piece</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"><i class="fa-solid fa-puzzle-piece"></i></span>
+                        <select class="form-select" id="filter-piece-name" name="filter_piece_name">
+                            <option value="">Piece</option>
+                            <option value="P">P</option>
+                            <option value="V">V</option>
+                            <option value="G">G</option>
+                            <option value="M">M</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Order -->
+                <div class="flex-fill">
+                    <label for="filter-order" class="form-label small">Order #</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"><i class="fa-solid fa-receipt"></i></span>
+                        <input type="text" class="form-control" id="filter-order" name="filter_order"
+                            value="" placeholder="Order #">
+                    </div>
+                </div>
+
+                <!-- Date -->
+                <div class="flex-fill">
+                    <label for="filter-date" class="form-label small">Date</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"><i class="fa-solid fa-calendar"></i></span>
+                        <input type="date" class="form-control" id="filter-date" name="filter_date"
+                            value="">
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex-shrink-0 d-flex gap-1">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fa-solid fa-filter me-1"></i> Filter
+                    </button>
+                    <button type="button" id="clear-filters" class="btn btn-outline-dark btn-sm">
+                        <i class="fa-solid fa-broom"></i> Clear
+                    </button>
+                </div>
             </div>
-        </div>
 
-        <!-- Size -->
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-            <label for="filter-size" class="form-label">Size</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="fa-solid fa-ruler"></i></span>
-                <input type="text" class="form-control" id="filter-size" name="filter_size"
-                    value="<?php echo htmlspecialchars($filter_size); ?>" placeholder="Size">
+            <!-- Mobile Layout (md and below) -->
+            <div class="d-lg-none">
+                <div class="row g-3">
+                    <!-- First Row -->
+                    <div class="col-6">
+                        <label for="filter-of-mobile" class="form-label small">OF Number</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text"><i class="fa-solid fa-hashtag"></i></span>
+                            <input type="number" class="form-control" id="filter-of-mobile" name="filter_of"
+                                value="" placeholder="OF #">
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <label for="filter-size-mobile" class="form-label small">Size</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text"><i class="fa-solid fa-ruler"></i></span>
+                            <input type="text" class="form-control" id="filter-size-mobile" name="filter_size"
+                                value="" placeholder="Size">
+                        </div>
+                    </div>
+
+                    <!-- Second Row -->
+                    <div class="col-6">
+                        <label for="filter-category-mobile" class="form-label small">Category</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text"><i class="fa-solid fa-tags"></i></span>
+                            <select class="form-select" id="filter-category-mobile" name="filter_category">
+                                <option value="">Category</option>
+                                <option value="R">R</option>
+                                <option value="C">C</option>
+                                <option value="L">L</option>
+                                <option value="LL">LL</option>
+                                <option value="CC">CC</option>
+                                <option value="N">N</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <label for="filter-piece-name-mobile" class="form-label small">Piece</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text"><i class="fa-solid fa-puzzle-piece"></i></span>
+                            <select class="form-select" id="filter-piece-name-mobile" name="filter_piece_name">
+                                <option value="">Piece</option>
+                                <option value="P">P</option>
+                                <option value="V">V</option>
+                                <option value="G">G</option>
+                                <option value="M">M</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Third Row -->
+                    <div class="col-6">
+                        <label for="filter-order-mobile" class="form-label small">Order #</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text"><i class="fa-solid fa-receipt"></i></span>
+                            <input type="text" class="form-control" id="filter-order-mobile" name="filter_order"
+                                value="" placeholder="Order #">
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <label for="filter-date-mobile" class="form-label small">Date</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text"><i class="fa-solid fa-calendar"></i></span>
+                            <input type="date" class="form-control" id="filter-date-mobile" name="filter_date"
+                                value="">
+                        </div>
+                    </div>
+
+                    <!-- Buttons Row -->
+                    <div class="col-12">
+                        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="fa-solid fa-filter me-1"></i> Filter
+                            </button>
+                            <button type="button" id="clear-filters-mobile" class="btn btn-outline-dark btn-sm">
+                                <i class="fa-solid fa-broom me-1"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
+        </form>
 
-        <div class="col-md-auto">
-            <label for="filter-category" class="form-label">Category</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="fa-solid fa-tags"></i></span>
-                <select class="form-select" id="filter-category" name="filter_category">
-                    <option value="">Category</option>
-                    <?php
-                    $categories = ['R', 'C', 'L', 'LL', 'CC', 'N'];
-                    foreach ($categories as $cat) {
-                        $selected = ($filter_category ?? '') === $cat ? 'selected' : '';
-                        echo "<option value=\"$cat\" $selected>$cat</option>";
-                    }
-                    ?>
-                </select>
-            </div>
-        </div>
-
-        <div class="col-md-auto">
-            <label for="filter-piece-name" class="form-label">Piece</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="fa-solid fa-puzzle-piece"></i></span>
-                <select class="form-select" id="filter-piece-name" name="filter_piece_name">
-                    <option value="">Piece</option>
-                    <?php
-                    $pieces = ['P', 'V', 'G', 'M'];
-                    foreach ($pieces as $piece) {
-                        $selected = ($filter_piece_name ?? '') === $piece ? 'selected' : '';
-                        echo "<option value=\"$piece\" $selected>$piece</option>";
-                    }
-                    ?>
-                </select>
-            </div>
-        </div>
-
-          <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-            <label for="filter-order" class="form-label">Order #</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="fa-solid fa-receipt"></i></span>
-                <input type="text" class="form-control" id="filter-order" name="filter_order"
-                    value="<?php echo htmlspecialchars($filter_order ?? ''); ?>" placeholder="Order #">
-            </div>
-        </div>
-
-
-        <div class="col-md-auto">
-            <label for="filter-date" class="form-label">Date</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="fa-solid fa-calendar"></i></span>
-                <input type="date" class="form-control" id="filter-date" name="filter_date"
-                    value="<?php echo htmlspecialchars($filter_date ?? ''); ?>">
-            </div>
-        </div>
-
-        <div class="col-md-auto d-flex gap-2">
-            <button type="submit" class="btn btn-primary">
-                <i class="fa-solid fa-filter me-1"></i> Filter
-            </button>
-            <button type="button" id="clear-filters" class="btn btn-outline-dark">
-                <i class="fa-solid fa-broom"></i> Clear
-            </button>
-        </div>
-    </div>
-</form>
 
         <div class="container-fluid py-3">
 
