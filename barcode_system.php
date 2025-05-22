@@ -245,7 +245,7 @@ function getRandomButtonScript() {
                     pieceNameSelect.required = true;
                     rangeFromInput.required = false;
                     rangeToInput.required = false;
-                    lostBarcodeOrderNumber.required = true;
+                    lostBarcodeOrderNumber.required = false; // Changed to false since it's now optional
                 } else {
                     pieceNameSelect.required = true;
                     rangeFromInput.required = true;
@@ -290,6 +290,22 @@ function barcodeExists($conn, $full_barcode_name) {
     return $row['count'] > 0;
 }
 
+// Function to generate a random order number that doesn't exist in the database
+function generateRandomOrderNumber($conn) {
+    do {
+        $random_number = rand(100, 999); // Generate a 3-digit random number
+        $stmt = $conn->prepare("SELECT COUNT(*) as count FROM barcodes WHERE order_str LIKE ?");
+        $search_pattern = "X" . $random_number . "%";
+        $stmt->bind_param("s", $search_pattern);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        $stmt->close();
+    } while ($row['count'] > 0); // Keep generating until we find a unique number
+    
+    return $random_number;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'create_barcode') {
     $of_number = $_POST['barcode_prefix'] ?? '';
     $size = $_POST['barcode_size'] ?? '';
@@ -318,17 +334,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
     
     if ($is_lost_barcode) {
         $lost_barcode_count = (int)($_POST['lost_barcode_count'] ?? 1);
-        $lost_barcode_order_number = $_POST['lost_barcode_order_number'] ?? ''; // New field for order number
+        $lost_barcode_order_number = trim($_POST['lost_barcode_order_number'] ?? ''); // Trim whitespace
         
         if ($lost_barcode_count <= 0 || $lost_barcode_count > 100) {
             $errors[] = "Lost barcode quantity must be between 1 and 100";
         }
         
-        // Validate that order number is provided for lost barcodes
-        if (empty($lost_barcode_order_number)) {
-            $errors[] = "Order number is required for lost barcodes";
-        } elseif (!is_numeric($lost_barcode_order_number) || (int)$lost_barcode_order_number <= 0) {
-            $errors[] = "Order number must be a positive number";
+        // Modified validation - order number is now optional
+        if (!empty($lost_barcode_order_number) && (!is_numeric($lost_barcode_order_number) || (int)$lost_barcode_order_number <= 0)) {
+            $errors[] = "Order number must be a positive number or left empty for random generation";
         }
     } else {
         $range_from = (int)($_POST['range_from'] ?? 0);
@@ -356,13 +370,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
             $fontSize = 14;
 
             if ($is_lost_barcode) {
-                // Lost barcode handling - use specified order number instead of random
+                // Lost barcode handling - use specified order number or generate random
                 $pdf = createNewPdf();
                 $col = 0;
                 $row = 0;
                 
                 $lost_barcode_count = (int)($_POST['lost_barcode_count'] ?? 1);
-                $base_order_number = (int)$lost_barcode_order_number; // Use the specified order number
+                
+                // Generate or use provided order number
+                if (empty($lost_barcode_order_number)) {
+                    $base_order_number = generateRandomOrderNumber($conn);
+                    $order_generated = true;
+                } else {
+                    $base_order_number = (int)$lost_barcode_order_number;
+                    $order_generated = false;
+                }
                 
                 for ($i = 0; $i < $lost_barcode_count; $i++) {
                     $current_order_number = $base_order_number + $i; // Increment for multiple lost barcodes
@@ -539,20 +561,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
             // Use the first PDF filename for the redirect
             $first_pdf = $pdfFiles[0]['filename'] ?? '';
             
+            // Enhanced success message for lost barcodes with random order number
+            $success_message = "Created PDFs: $pdf_list";
+            if ($is_lost_barcode && isset($order_generated) && $order_generated) {
+                $success_message .= " (Random order number generated: $base_order_number)";
+            }
+            
             if (!empty($duplicates)) {
                 $duplicate_message = "The following barcodes already exist: " . implode(", ", array_slice($duplicates, 0, 5));
                 if (count($duplicates) > 5) {
                     $duplicate_message .= " and " . (count($duplicates) - 5) . " more";
                 }
                 if ($successCount > 0) {
-                    $message = "$successCount barcodes created successfully. Generated PDFs: $pdf_list. $duplicate_message";
+                    $message = "$successCount barcodes created successfully. $success_message. $duplicate_message";
                     header("Location: index.php?view=dashboard&modal=create&warning=" . urlencode($message) . "&pdf=$first_pdf");
                 } else {
                     header("Location: index.php?view=$form_view&modal=create&error=" . urlencode($duplicate_message));
                 }
                 exit;
             } else {
-                $success_message = "Created PDFs: $pdf_list";
                 header("Location: index.php?view=dashboard&modal=create&success=1&pdf=$first_pdf&info=" . urlencode($success_message));
                 exit;
             }
