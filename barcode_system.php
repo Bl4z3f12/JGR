@@ -7,6 +7,7 @@ $current_date = date("F j, Y");
 $page = $_GET['page'] ?? 1;
 $items_per_page = 250;
 $date = $_GET['date'] ?? $current_date;
+$filter_order = $_GET['filter_order'] ?? '';
 $filter_of_number = $_GET['filter_of'] ?? '';
 $filter_size = $_GET['filter_size'] ?? '';
 $filter_category = $_GET['filter_category'] ?? '';
@@ -18,16 +19,18 @@ function connectDB() {
     return $conn->connect_error ? false : $conn;
 }
 
-function getBarcodes($view, $page, $items_per_page, $filter_of = '', $filter_size = '', $filter_category = '', $filter_piece_name = '', $filter_date = '') {
+function getBarcodes($view, $page, $items_per_page, $filter_of = '', $filter_size = '', $filter_category = '', $filter_piece_name = '', $filter_date = '', $filter_order = '') {
     $conn = connectDB();
     if (!$conn) return [];
     $offset = ($page - 1) * $items_per_page;
     $conditions = [];
+    
     if ($view === 'today') {
         $conditions[] = "DATE(last_update) = CURDATE()";
     } elseif ($view === 'manufactured') {
         $conditions[] = "status = 'Completed'";
     }
+    
     if (!empty($filter_of)) {
         $conditions[] = "of_number LIKE ?";
     }
@@ -43,21 +46,28 @@ function getBarcodes($view, $page, $items_per_page, $filter_of = '', $filter_siz
     if (!empty($filter_date)) {
         $conditions[] = "DATE(last_update) = ?";
     }
+    if (!empty($filter_order)) {
+        $conditions[] = "order_str LIKE ?";
+    }
+    
     $where = '';
     if (!empty($conditions)) {
         $where = "WHERE " . implode(" AND ", $conditions);
     }
+    
     $sql = "SELECT * FROM barcodes $where ORDER BY id DESC LIMIT ?, ?";
     $stmt = $conn->prepare($sql);
+    
     $types = "";
     $params = [];
+    
     if (!empty($filter_of)) {
         $filter_of_param = "%$filter_of%";
         $types .= "s";
         $params[] = $filter_of_param;
     }
     if (!empty($filter_size)) {
-        $types .= "s"; // Changed from 'i' to 's' to handle string sizes
+        $types .= "s";
         $params[] = $filter_size;
     }
     if (!empty($filter_category)) {
@@ -72,9 +82,16 @@ function getBarcodes($view, $page, $items_per_page, $filter_of = '', $filter_siz
         $types .= "s";
         $params[] = $filter_date;
     }
+    if (!empty($filter_order)) {
+        $filter_order_param = "%$filter_order%";
+        $types .= "s";
+        $params[] = $filter_order_param;
+    }
+    
     $types .= "ii";
     $params[] = $offset;
     $params[] = $items_per_page;
+    
     if (!empty($params)) {
         $refs = [];
         foreach ($params as $key => $value) {
@@ -83,26 +100,31 @@ function getBarcodes($view, $page, $items_per_page, $filter_of = '', $filter_siz
         array_unshift($refs, $types);
         call_user_func_array([$stmt, 'bind_param'], $refs);
     }
+    
     $stmt->execute();
     $result = $stmt->get_result();
     $barcodes = [];
     while ($row = $result->fetch_assoc()) {
         $barcodes[] = $row;
     }
+    
     $stmt->close();
     $conn->close();
     return $barcodes;
 }
 
-function getTotalBarcodes($view, $filter_of = '', $filter_size = '', $filter_category = '', $filter_piece_name = '', $filter_date = '') {
+function getTotalBarcodes($view, $filter_of = '', $filter_size = '', $filter_category = '', $filter_piece_name = '', $filter_date = '', $filter_order = '') {
     $conn = connectDB();
     if (!$conn) return 100;
+    
     $conditions = [];
+    
     if ($view === 'today') {
         $conditions[] = "DATE(last_update) = CURDATE()";
     } elseif ($view === 'manufactured') {
         $conditions[] = "status = 'Completed'";
     }
+    
     if (!empty($filter_of)) {
         $conditions[] = "of_number LIKE ?";
     }
@@ -118,21 +140,28 @@ function getTotalBarcodes($view, $filter_of = '', $filter_size = '', $filter_cat
     if (!empty($filter_date)) {
         $conditions[] = "DATE(last_update) = ?";
     }
+    if (!empty($filter_order)) {
+        $conditions[] = "order_str LIKE ?";
+    }
+    
     $where = '';
     if (!empty($conditions)) {
         $where = "WHERE " . implode(" AND ", $conditions);
     }
+    
     $sql = "SELECT COUNT(*) as total FROM barcodes $where";
     $stmt = $conn->prepare($sql);
+    
     $types = "";
     $params = [];
+    
     if (!empty($filter_of)) {
         $filter_of_param = "%$filter_of%";
         $types .= "s";
         $params[] = $filter_of_param;
     }
     if (!empty($filter_size)) {
-        $types .= "s"; // Changed from 'i' to 's' to handle string sizes
+        $types .= "s";
         $params[] = $filter_size;
     }
     if (!empty($filter_category)) {
@@ -147,6 +176,12 @@ function getTotalBarcodes($view, $filter_of = '', $filter_size = '', $filter_cat
         $types .= "s";
         $params[] = $filter_date;
     }
+    if (!empty($filter_order)) {
+        $filter_order_param = "%$filter_order%";
+        $types .= "s";
+        $params[] = $filter_order_param;
+    }
+    
     if (!empty($params)) {
         $refs = [];
         foreach ($params as $key => $value) {
@@ -155,9 +190,11 @@ function getTotalBarcodes($view, $filter_of = '', $filter_size = '', $filter_cat
         array_unshift($refs, $types);
         call_user_func_array([$stmt, 'bind_param'], $refs);
     }
+    
     $stmt->execute();
     $result = $stmt->get_result();
     $total = $result ? $result->fetch_assoc()['total'] : 0;
+    
     $stmt->close();
     $conn->close();
     return $total ?: 100;
@@ -173,7 +210,6 @@ function getViewTitle($view) {
         default => 'Barcodes Overview',
     };
 }
-
 function placeBarcodeInPdf($generator, $pdf, $full_barcode_name, $col, $row, $cellWidth, $cellHeight, $barcodeWidth, $barcodeHeight, $topSpacing, $fontSize, $pageWidth, $colsPerPage, $rowsPerPage) {
     $barcodeImage = $generator->getBarcode($full_barcode_name, $generator::TYPE_CODE_128);
     $barcodePath = __DIR__ . "/barcodes/tmp_$full_barcode_name.png";
@@ -264,6 +300,7 @@ function getRandomButtonScript() {
                 document.getElementById('filter-category').value = '';
                 document.getElementById('filter-piece-name').value = '';
                 document.getElementById('filter-date').value = '';
+                document.getElementById('filter-order').value = '';  // Added this line
                 document.getElementById('filter-form').submit();
             });
         }
@@ -590,8 +627,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
     }
 }
 
-$barcodes = getBarcodes($current_view, $page, $items_per_page, $filter_of_number, $filter_size, $filter_category, $filter_piece_name, $filter_date);
-$total_barcodes = getTotalBarcodes($current_view, $filter_of_number, $filter_size, $filter_category, $filter_piece_name, $filter_date);
+// Fixed the function call to pass the filter_order parameter
+$barcodes = getBarcodes($current_view, $page, $items_per_page, $filter_of_number, $filter_size, $filter_category, $filter_piece_name, $filter_date, $filter_order);
+$total_barcodes = getTotalBarcodes($current_view, $filter_of_number, $filter_size, $filter_category, $filter_piece_name, $filter_date, $filter_order);
 $total_pages = ceil($total_barcodes / $items_per_page);
 $show_success = isset($_GET['success']) && $_GET['success'] == 1;
 $error_message = $_GET['error'] ?? '';
