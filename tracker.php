@@ -256,7 +256,7 @@ if (!$is_localhost && !in_array($client_ip, $allowed_ips)) {
                                 <label for="prefix" class="form-label">OF Number:</label>
                                 <input type="number" class="form-control" id="prefix" name="prefix" value="<?php echo htmlspecialchars($prefix); ?>" required>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-3 mt-2">
                                 <label for="size" class="form-label mb-0">Size:</label>
                                 <div class="size-container">
                                     <?php 
