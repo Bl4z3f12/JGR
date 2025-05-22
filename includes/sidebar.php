@@ -23,6 +23,10 @@
                 <div class="sidebar-item-icon"><i class="fa-solid fa-chart-pie"></i></div>
                 Production 
             </a>
+             <a href="tracking.php" class="sidebar-item text-white <?php echo $current_view === 'tracking.php' ? 'active' : ''; ?>">
+                <div class="sidebar-item-icon"><i class="fa-solid fa-chart-line"></i></div>
+                OF_Track
+            </a>
              <a href="lostmov.php" class="sidebar-item text-white <?php echo $current_view === 'lostmov.php' ? 'active' : ''; ?>">
                 <div class="sidebar-item-icon"><i class="fa-solid fa-question"></i></div>
                 Lost Barcodes

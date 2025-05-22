@@ -1,6 +1,6 @@
 <?php
 session_start();
-$current_view = 'of_analyzer.php';
+$current_view = 'tracking.php';
 $host = "localhost";
 $dbname = "jgr";
 $username = "root";
