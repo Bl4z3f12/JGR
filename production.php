@@ -251,7 +251,7 @@ $_SESSION['production_summary'] = $production_summary;
                                             <div class="card-body">
                                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                                     <h5 class="card-title mb-0">
-                                                        <span class="me-2"><?php echo $properties['emoji']; ?></span>
+                                                    <span class="me-2"><?php echo $properties['emoji']; ?></span>
                                                         <?php echo htmlspecialchars($stage); ?>
                                                     </h5>
                                                     <div>
