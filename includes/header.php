@@ -47,7 +47,7 @@ function is_mobile() {
       <?php if (!is_mobile()): ?>
           <!-- Added Tracker Button -->
           <a href="tracker.php" class="btn btn-outline-light btn-sm me-2">
-            Tracker <i class="bi bi-geo-alt-fill"></i>
+            Tracker List  <i class="fa-solid fa-clipboard-list"></i>
           </a>
           <a href="logout.php" class="btn btn-outline-light btn-sm">
             Logout <i class="fas fa-sign-out-alt"></i>
